@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Tally - Split Layout</title>
+    <style>
+        :root {
+            --bg: #0f172a; 
+            --card: #1e293b;
+            --text: #f1f5f9;
+            --accent: #3b82f6; 
+            --accent-glow: rgba(59, 130, 246, 0.4);
+            --danger: #ef4444;
+            --success: #22c55e;
+        }
+
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 15px;
+            padding-bottom: 50px;
+            user-select: none;
+        }
+
+        .top-bar {
+            width: 100%;
+            max-width: 450px;
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 10px;
+        }
+
+        .btn-mute {
+            background: none;
+            border: 1px solid #334155;
+            color: #64748b;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+        }
+        .btn-mute.active { color: var(--accent); border-color: var(--accent); background: rgba(59, 130, 246, 0.1); }
+
+        .grand-display {
+            text-align: center;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+        .grand-display small { color: #94a3b8; letter-spacing: 2px; text-transform: uppercase; font-size: 0.7rem; }
+        .grand-display h1 {
+            margin: 0;
+            font-size: 5rem;
+            font-variant-numeric: tabular-nums;
+            line-height: 1;
+            text-shadow: 0 0 20px var(--accent-glow);
+            transition: color 0.2s;
+        }
+
+        /* --- CARD STYLES --- */
+        .card {
+            background-color: var(--card);
+            border-radius: 20px;
+            padding: 20px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            border: 1px solid #334155;
+            margin-bottom: 15px; /* Separation between boxes */
+        }
+
+        /* --- BOX 1: THE CLICKER --- */
+        .batch-screen {
+            background: #000;
+            border-radius: 12px;
+            padding: 10px 15px;
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .batch-count { font-size: 2.5rem; font-weight: bold; color: var(--success); font-family: monospace; transition: transform 0.1s; }
+        .batch-label { color: #64748b; font-size: 0.9rem; }
+
+        .clicker-zone {
+            display: grid;
+            grid-template-columns: 1fr 3fr; 
+            gap: 10px;
+            height: 120px;
+        }
+
+        .btn-tap {
+            border: none;
+            border-radius: 12px;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: all 0.05s;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-tap:active { transform: scale(0.96); }
+
+        .btn-minus { background-color: #334155; color: #94a3b8; }
+        .btn-plus { 
+            background: linear-gradient(135deg, var(--accent), #2563eb); 
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        /* --- BOX 2: THE LABELING --- */
+        .save-zone { display: flex; gap: 10px; margin-bottom: 15px; }
+        
+        input {
+            flex-grow: 1;
+            background: #0f172a;
+            border: 1px solid #334155;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        
+        .btn-save {
+            background-color: var(--success);
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            padding: 0 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .btn-save:active { transform: scale(0.95); }
+        .btn-save:disabled { background-color: #334155; color: #64748b; cursor: not-allowed; }
+
+        /* --- HISTORY LOG --- */
+        .history-section {
+            width: 100%;
+            max-width: 450px;
+            margin-top: 15px;
+        }
+
+        .history-list { list-style: none; padding: 0; margin: 0; }
+
+        .history-item {
+            background-color: var(--card);
+            border-bottom: 1px solid #334155;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .history-item:first-child { border-top-left-radius: 12px; border-top-right-radius: 12px; }
+        .history-item:last-child { border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; border-bottom: none; }
+
+        .h-info { display: flex; flex-direction: column; }
+        .h-name { font-weight: bold; font-size: 1rem; }
+        .h-time { font-size: 0.75rem; color: #64748b; margin-top: 2px; }
+
+        .h-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #0f172a;
+            padding: 5px;
+            border-radius: 8px;
+        }
+
+        .h-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 6px;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+        .h-btn:active { opacity: 0.7; }
+        
+        .h-val { min-width: 30px; text-align: center; font-weight: bold; font-family: monospace; font-size: 1.1rem; }
+        .h-dec { background: #334155; color: white; }
+        .h-inc { background: #334155; color: white; }
+        .h-del { background: transparent; color: var(--danger); margin-left: 10px; font-size: 1.5rem; }
+
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <button id="muteBtn" class="btn-mute" onclick="toggleMute()">
+            <svg id="icon-sound" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+            <svg id="icon-mute" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
+        </button>
+    </div>
+
+    <div class="grand-display">
+        <small>GRAND TOTAL</small>
+        <h1 id="grandTotal">0000</h1>
+    </div>
+
+    <div class="card">
+        <div class="batch-screen">
+            <span class="batch-label">Current Batch</span>
+            <span id="batchCount" class="batch-count">0</span>
+        </div>
+
+        <div class="clicker-zone">
+            <button class="btn-tap btn-minus" onclick="adjustBatch(-1)">−</button>
+            <button class="btn-tap btn-plus" onclick="adjustBatch(1)">+</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="save-zone">
+            <input type="text" id="batchName" placeholder="Label (e.g. Pushups)">
+            <button id="saveBtn" class="btn-save" onclick="saveBatch()" disabled>SAVE</button>
+        </div>
+        
+        <div id="chips" style="display:flex; gap:8px; overflow-x:auto; padding-bottom:5px;"></div>
+    </div>
+
+    <div class="history-section">
+        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:10px;">
+            <h3 style="margin:0;">History Log</h3>
+            <button onclick="clearAll()" style="background:none; border:none; color:#64748b; font-size:0.8rem;">Reset All</button>
+        </div>
+        <ul id="historyList" class="history-list">
+            </ul>
+    </div>
+
+    <script>
+        // --- PRO AUDIO ENGINE ---
+        let audioCtx = null;
+        let isMuted = false;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(type) {
+            if (isMuted) return;
+            initAudio(); 
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            const now = audioCtx.currentTime;
+
+            // --- THE SATISFYING CLICK (Multi-layered) ---
+            if (type === 'click') {
+                const oscBody = audioCtx.createOscillator();
+                const gainBody = audioCtx.createGain();
+                oscBody.type = 'triangle';
+                oscBody.connect(gainBody);
+                gainBody.connect(audioCtx.destination);
+
+                oscBody.frequency.setValueAtTime(220, now);
+                oscBody.frequency.exponentialRampToValueAtTime(50, now + 0.1); 
+                gainBody.gain.setValueAtTime(0.8, now);
+                gainBody.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+
+                const oscClick = audioCtx.createOscillator();
+                const gainClick = audioCtx.createGain();
+                oscClick.type = 'sine';
+                oscClick.connect(gainClick);
+                gainClick.connect(audioCtx.destination);
+
+                oscClick.frequency.setValueAtTime(1200, now);
+                oscClick.frequency.exponentialRampToValueAtTime(600, now + 0.05);
+                gainClick.gain.setValueAtTime(0.3, now);
+                gainClick.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+
+                oscBody.start(now); oscBody.stop(now + 0.1);
+                oscClick.start(now); oscClick.stop(now + 0.05);
+            } 
+            else if (type === 'thud') {
+                const osc = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                osc.type = 'square'; 
+                osc.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.linearRampToValueAtTime(100, now + 0.05);
+                
+                gainNode.gain.setValueAtTime(0.1, now); 
+                gainNode.gain.linearRampToValueAtTime(0.01, now + 0.05);
+                
+                osc.start(now);
+                osc.stop(now + 0.05);
+            }
+            else if (type === 'success') {
+                const osc = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                osc.frequency.setValueAtTime(500, now);
+                osc.frequency.setValueAtTime(1000, now + 0.1); 
+                
+                gainNode.gain.setValueAtTime(0.3, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                
+                osc.start(now);
+                osc.stop(now + 0.4);
+            }
+            else if (type === 'pop') {
+                const osc = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                osc.frequency.setValueAtTime(800, now);
+                gainNode.gain.setValueAtTime(0.1, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.03);
+                osc.start(now);
+                osc.stop(now + 0.03);
+            }
+        }
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            const muteBtn = document.getElementById('muteBtn');
+            const iconSound = document.getElementById('icon-sound');
+            const iconMute = document.getElementById('icon-mute');
+            
+            if (isMuted) {
+                muteBtn.classList.remove('active');
+                iconSound.style.display = 'none';
+                iconMute.style.display = 'block';
+            } else {
+                initAudio();
+                playSound('pop'); 
+                muteBtn.classList.add('active');
+                iconSound.style.display = 'block';
+                iconMute.style.display = 'none';
+            }
+        }
+
+        // --- APP LOGIC ---
+        let total = 0;
+        let batch = 0;
+        let history = [];
+        const suggestions = ['Reps', 'Sets', 'Water', 'Coffee', 'Items'];
+
+        const grandEl = document.getElementById('grandTotal');
+        const batchEl = document.getElementById('batchCount');
+        const saveBtn = document.getElementById('saveBtn');
+        const nameInput = document.getElementById('batchName');
+        const listEl = document.getElementById('historyList');
+        const chipsEl = document.getElementById('chips');
+
+        loadData();
+        renderChips();
+
+        isMuted = true; toggleMute(); 
+
+        function adjustBatch(amount) {
+            batch += amount;
+            playSound(amount > 0 ? 'click' : 'thud');
+            
+            // Visual feedback
+            batchEl.style.transform = amount > 0 ? 'scale(1.2)' : 'scale(0.9)';
+            setTimeout(() => batchEl.style.transform = 'scale(1)', 100);
+
+            updateBatchUI();
+        }
+
+        function updateBatchUI() {
+            batchEl.innerText = batch > 0 ? `+${batch}` : batch;
+            batchEl.style.color = batch === 0 ? '#64748b' : (batch > 0 ? '#22c55e' : '#ef4444');
+            saveBtn.disabled = (batch === 0);
+            saveBtn.style.opacity = (batch === 0) ? '0.5' : '1';
+        }
+
+        function saveBatch() {
+            if (batch === 0) return;
+            playSound('success');
+
+            const name = nameInput.value.trim() || 'Batch';
+            const newItem = {
+                id: Date.now(),
+                amount: batch,
+                name: name,
+                time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+            };
+
+            history.unshift(newItem);
+            total += batch;
+            batch = 0;
+            nameInput.value = '';
+            
+            grandEl.style.color = '#22c55e';
+            setTimeout(() => grandEl.style.color = 'var(--text)', 300);
+
+            saveData();
+            updateUI();
+            updateBatchUI();
+        }
+
+        function editHistoryItem(id, change) {
+            playSound('pop');
+            const index = history.findIndex(item => item.id === id);
+            if (index === -1) return;
+            history[index].amount += change;
+            total += change;
+            saveData();
+            updateUI();
+        }
+
+        function deleteItem(id) {
+            if(!confirm("Delete this entry?")) return;
+            const index = history.findIndex(item => item.id === id);
+            if (index > -1) {
+                total -= history[index].amount;
+                history.splice(index, 1);
+                saveData();
+                updateUI();
+            }
+        }
+
+        function updateUI() {
+            grandEl.innerText = total.toString().padStart(4, '0');
+            renderHistory();
+        }
+
+        function renderHistory() {
+            listEl.innerHTML = '';
+            history.forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'history-item';
+                const valColor = item.amount >= 0 ? 'var(--success)' : 'var(--danger)';
+                const displaySign = item.amount > 0 ? '+' : '';
+
+                li.innerHTML = `
+                    <div class="h-info">
+                        <span class="h-name">${item.name}</span>
+                        <span class="h-time">${item.time}</span>
+                    </div>
+                    <div class="h-controls">
+                        <button class="h-btn h-dec" onclick="editHistoryItem(${item.id}, -1)">−</button>
+                        <span class="h-val" style="color:${valColor}">${displaySign}${item.amount}</span>
+                        <button class="h-btn h-inc" onclick="editHistoryItem(${item.id}, 1)">+</button>
+                    </div>
+                    <button class="h-btn h-del" onclick="deleteItem(${item.id})">&times;</button>
+                `;
+                listEl.appendChild(li);
+            });
+        }
+
+        function renderChips() {
+            chipsEl.innerHTML = '';
+            suggestions.forEach(txt => {
+                const chip = document.createElement('div');
+                chip.innerText = txt;
+                chip.style.cssText = "background:#334155; padding:5px 12px; border-radius:15px; font-size:0.8rem; cursor:pointer; white-space:nowrap; border:1px solid #475569;";
+                chip.onclick = () => { 
+                    nameInput.value = txt; 
+                    playSound('pop'); 
+                };
+                chipsEl.appendChild(chip);
+            });
+        }
+
+        function clearAll() {
+            if(confirm("Reset everything to zero?")) {
+                total = 0;
+                history = [];
+                batch = 0;
+                saveData();
+                updateUI();
+                updateBatchUI();
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('proTallyTotal', total);
+            localStorage.setItem('proTallyHistory', JSON.stringify(history));
+        }
+
+        function loadData() {
+            const t = localStorage.getItem('proTallyTotal');
+            const h = localStorage.getItem('proTallyHistory');
+            if(t) total = parseInt(t);
+            if(h) history = JSON.parse(h);
+            updateUI();
+            updateBatchUI();
+        }
+    </script>
+</body>
+</html>
