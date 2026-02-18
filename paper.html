@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sidekick Digital Planner v3</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+
+        /* Remove default outline */
+        input:focus, textarea:focus {
+            outline: none;
+            background-color: rgba(243, 244, 246, 0.5);
+        }
+
+        /* Scrollbar styling */
+        .scroller::-webkit-scrollbar {
+            width: 6px;
+        }
+        .scroller::-webkit-scrollbar-thumb {
+            background-color: #d1d5db;
+            border-radius: 4px;
+        }
+
+        /* Drag and Drop Styling */
+        .dragging {
+            opacity: 0.5;
+            background-color: #e5e7eb;
+            border: 2px dashed #9ca3af;
+        }
+        
+        .drag-handle {
+            cursor: grab;
+        }
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4 sm:p-8">
+
+    <div class="bg-white w-full max-w-[1400px] border-4 border-gray-900 rounded-lg shadow-2xl overflow-hidden flex flex-col">
+        
+        <div class="bg-gray-800 border-b-4 border-gray-900 p-4 flex justify-between items-center">
+            <div class="text-gray-500 font-bold tracking-[0.2em] text-xl">
+                SIDEKICK
+            </div>
+            <button onclick="resetDay()" class="text-xs font-bold text-gray-600 hover:text-red-400 border border-gray-600 hover:border-red-400 px-3 py-1 rounded transition-colors uppercase tracking-widest">
+                Reset Day
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-0 divide-y-4 lg:divide-y-0 lg:divide-x-4 divide-gray-900 h-full">
+
+            <div class="lg:col-span-3 flex flex-col p-4 h-full min-h-[600px]">
+                <h2 class="font-bold text-xs uppercase tracking-wider mb-2 border-b-2 border-gray-900 pb-1">Schedule</h2>
+                <div class="flex-grow border-2 border-gray-900 rounded-sm p-2 relative">
+                    <div id="schedule-container" class="flex flex-col gap-1 h-full overflow-y-auto scroller">
+                        </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-5 flex flex-col">
+                
+                <div class="p-4 flex-grow-0">
+                    <h2 class="font-bold text-xs uppercase tracking-wider mb-2 border-b-2 border-gray-900 pb-1">Daily Priorities</h2>
+                    <div class="flex flex-col gap-4 mt-2">
+                        <div class="flex items-center gap-3">
+                            <div class="flex-shrink-0 w-8 h-8 rounded-full border-2 border-gray-900 flex items-center justify-center font-bold text-sm">1</div>
+                            <input type="text" id="prio-1" class="w-full border-b-2 border-gray-200 focus:border-gray-900 p-2 font-medium h-10 text-lg text-gray-800 transition-colors" placeholder="Priority One...">
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="flex-shrink-0 w-8 h-8 rounded-full border-2 border-gray-900 flex items-center justify-center font-bold text-sm">2</div>
+                            <input type="text" id="prio-2" class="w-full border-b-2 border-gray-200 focus:border-gray-900 p-2 font-medium h-10 text-lg text-gray-800 transition-colors" placeholder="Priority Two...">
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="flex-shrink-0 w-8 h-8 rounded-full border-2 border-gray-900 flex items-center justify-center font-bold text-sm">3</div>
+                            <input type="text" id="prio-3" class="w-full border-b-2 border-gray-200 focus:border-gray-900 p-2 font-medium h-10 text-lg text-gray-800 transition-colors" placeholder="Priority Three...">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border-t-4 border-gray-900"></div>
+
+                <div class="p-4 flex-grow flex flex-col h-full min-h-[300px]">
+                    <h2 class="font-bold text-xs uppercase tracking-wider mb-2 border-b-2 border-gray-900 pb-1">Notes</h2>
+                    <textarea id="notes-area" class="w-full h-full p-4 border-none resize-none text-gray-800 leading-6 text-lg" placeholder="Brain dump here..."></textarea>
+                </div>
+            </div>
+
+            <div class="lg:col-span-4 flex flex-col p-4 h-full min-h-[600px]">
+                <h2 class="font-bold text-xs uppercase tracking-wider mb-2 border-b-2 border-gray-900 pb-1">Tasks</h2>
+                <div id="tasks-container" class="flex flex-col gap-3 h-full overflow-y-auto scroller pb-2">
+                    </div>
+                <button onclick="addNewTask()" class="mt-4 text-xs font-bold text-gray-400 hover:text-gray-900 uppercase tracking-wide text-center w-full py-3 border-2 border-dashed border-gray-200 hover:border-gray-900 transition-colors">
+                    + Add Task Row
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // --- 1. INITIALIZATION & DATA LOADING ---
+        const DB_KEY = 'sidekickDataV3'; // Changed key to ensure fresh start for new version
+        const storedData = JSON.parse(localStorage.getItem(DB_KEY)) || {};
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderSchedule();
+            renderPriorities();
+            renderNotes();
+            renderTasks();
+        });
+
+        function saveData() {
+            const data = {
+                schedule: getScheduleData(),
+                priorities: getPrioritiesData(),
+                notes: document.getElementById('notes-area').value,
+                tasks: getTasksData()
+            };
+            localStorage.setItem(DB_KEY, JSON.stringify(data));
+        }
+
+        // --- RESET FUNCTIONALITY ---
+        function resetDay() {
+            if (confirm("Are you sure you want to clear the entire planner? This cannot be undone.")) {
+                localStorage.removeItem(DB_KEY);
+                location.reload(); // Reloading is the cleanest way to reset state
+            }
+        }
+
+        // --- 2. SCHEDULE SECTION (Sortable) ---
+
+        function renderSchedule() {
+            const container = document.getElementById('schedule-container');
+            const savedSchedule = storedData.schedule || Array(18).fill({ time: '', text: '' });
+
+            container.innerHTML = '';
+            savedSchedule.forEach((item) => createScheduleRow(container, item.time, item.text));
+        }
+
+        function createScheduleRow(container, timeVal, textVal) {
+            const row = document.createElement('div');
+            row.className = 'flex items-center gap-2 text-sm p-1 hover:bg-gray-50 transition-colors draggable-item';
+            row.setAttribute('draggable', 'true');
+            
+            row.innerHTML = `
+                <div class="drag-handle text-gray-300 hover:text-gray-600 p-1">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                        <circle cx="8" cy="4" r="2" />
+                        <circle cx="8" cy="12" r="2" />
+                        <circle cx="8" cy="20" r="2" />
+                        <circle cx="16" cy="4" r="2" />
+                        <circle cx="16" cy="12" r="2" />
+                        <circle cx="16" cy="20" r="2" />
+                    </svg>
+                </div>
+                <input type="text" 
+                    class="w-12 text-right bg-transparent text-gray-500 font-mono placeholder-gray-300 focus:text-black border-b border-transparent focus:border-gray-400" 
+                    placeholder="00:00" 
+                    value="${timeVal}"
+                    oninput="saveData()">
+                <span class="text-gray-300">|</span>
+                <input type="text" 
+                    class="flex-grow bg-transparent border-b border-gray-100 focus:border-gray-900 transition-colors" 
+                    value="${textVal}"
+                    oninput="saveData()">
+            `;
+
+            row.addEventListener('dragstart', handleDragStart);
+            row.addEventListener('dragover', handleDragOver);
+            row.addEventListener('drop', handleDrop);
+            row.addEventListener('dragend', handleDragEnd);
+
+            container.appendChild(row);
+        }
+
+        // Drag & Drop Logic
+        let dragSrcEl = null;
+
+        function handleDragStart(e) {
+            dragSrcEl = this;
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', this.innerHTML);
+            this.classList.add('dragging');
+        }
+
+        function handleDragOver(e) {
+            if (e.preventDefault) e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+        }
+
+        function handleDrop(e) {
+            if (e.stopPropagation) e.stopPropagation();
+            if (dragSrcEl !== this) {
+                const container = document.getElementById('schedule-container');
+                const items = [...container.children];
+                const srcIndex = items.indexOf(dragSrcEl);
+                const targetIndex = items.indexOf(this);
+
+                if (srcIndex < targetIndex) {
+                    this.after(dragSrcEl);
+                } else {
+                    this.before(dragSrcEl);
+                }
+                saveData();
+            }
+            return false;
+        }
+
+        function handleDragEnd() {
+            this.classList.remove('dragging');
+            saveData();
+        }
+
+        function getScheduleData() {
+            const rows = document.getElementById('schedule-container').children;
+            const data = [];
+            for (let row of rows) {
+                const inputs = row.querySelectorAll('input');
+                data.push({ time: inputs[0].value, text: inputs[1].value });
+            }
+            return data;
+        }
+
+        // --- 3. PRIORITIES SECTION ---
+        function renderPriorities() {
+            const p1 = document.getElementById('prio-1');
+            const p2 = document.getElementById('prio-2');
+            const p3 = document.getElementById('prio-3');
+            
+            if (storedData.priorities) {
+                p1.value = storedData.priorities[0] || '';
+                p2.value = storedData.priorities[1] || '';
+                p3.value = storedData.priorities[2] || '';
+            }
+            [p1, p2, p3].forEach(el => el.addEventListener('input', saveData));
+        }
+
+        function getPrioritiesData() {
+            return [
+                document.getElementById('prio-1').value,
+                document.getElementById('prio-2').value,
+                document.getElementById('prio-3').value
+            ];
+        }
+
+        // --- 4. NOTES SECTION ---
+        function renderNotes() {
+            const notes = document.getElementById('notes-area');
+            notes.value = storedData.notes || '';
+            notes.addEventListener('input', saveData);
+        }
+
+        // --- 5. TASKS SECTION (3-State Toggle) ---
+        function renderTasks() {
+            const container = document.getElementById('tasks-container');
+            const savedTasks = storedData.tasks || Array(15).fill({ state: 0, text: '' });
+            container.innerHTML = '';
+            savedTasks.forEach((task) => {
+                createTaskRow(container, task.text, task.state);
+            });
+        }
+
+        function createTaskRow(container, text = '', state = 0) {
+            const row = document.createElement('div');
+            row.className = 'flex items-center gap-3 group';
+            row.innerHTML = getTaskHTML(state, text);
+            container.appendChild(row);
+        }
+
+        function getTaskHTML(state, text) {
+            let iconSvg = '';
+            let textClass = 'bg-white text-gray-800';
+            
+            if (state === 0) { // Empty
+                iconSvg = `<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" class="fill-none"/>`;
+                textClass = 'text-gray-800';
+            } else if (state === 1) { // Half
+                iconSvg = `<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" class="fill-none"/><path d="M12 2 A10 10 0 0 1 12 22 Z" fill="currentColor"/>`;
+                textClass = 'text-gray-900 font-semibold';
+            } else { // Full
+                iconSvg = `<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" class="fill-gray-900"/><path d="M7 12L10 15L17 8" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
+                textClass = 'line-through text-gray-400 bg-gray-50';
+            }
+
+            return `
+                <button onclick="cycleTaskState(this)" data-state="${state}" class="flex-shrink-0 focus:outline-none transition-transform hover:scale-110 text-gray-900 w-6 h-6">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">${iconSvg}</svg>
+                </button>
+                <input type="text" class="w-full border-b border-gray-200 focus:border-gray-900 p-1 px-2 text-sm transition-all ${textClass}" value="${text}" oninput="saveData()">
+            `;
+        }
+
+        function addNewTask() {
+            const container = document.getElementById('tasks-container');
+            createTaskRow(container);
+            saveData();
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function cycleTaskState(btn) {
+            const currentState = parseInt(btn.getAttribute('data-state'));
+            const newState = (currentState + 1) % 3;
+            const row = btn.parentElement;
+            const input = row.querySelector('input');
+            row.innerHTML = getTaskHTML(newState, input.value);
+            saveData();
+        }
+
+        function getTasksData() {
+            const rows = document.getElementById('tasks-container').children;
+            const data = [];
+            for (let row of rows) {
+                const btn = row.querySelector('button');
+                const input = row.querySelector('input');
+                data.push({ 
+                    text: input.value, 
+                    state: parseInt(btn.getAttribute('data-state'))
+                });
+            }
+            return data;
+        }
+    </script>
+</body>
+</html>

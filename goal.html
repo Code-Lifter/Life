@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deep Goal Tracker: Sidekick Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #111827;
+        }
+
+        /* Sidekick Container Style */
+        .paper-panel {
+            background-color: white;
+            border: 2px solid #111827;
+            box-shadow: 4px 4px 0px 0px #111827;
+            transition: all 0.1s ease;
+        }
+
+        .selected-box {
+            background-color: #fff7ed;
+            border-color: #f97316 !important;
+            box-shadow: 4px 4px 0px 0px #f97316;
+        }
+
+        /* Scrollers */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f3f4f6; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+
+        /* Inputs & Interactive */
+        input:focus { outline: none; background-color: #f9fafb; }
+        
+        .tag-pill {
+            @apply px-3 py-1 rounded-none text-[10px] font-bold uppercase tracking-widest border-2 border-gray-900 transition-all;
+        }
+        .tag-pill.active { @apply bg-gray-900 text-white; }
+        .tag-pill.inactive { @apply bg-white text-gray-900 hover:bg-gray-100; }
+
+        .hashtag-highlight {
+            color: #f97316;
+            font-weight: 700;
+        }
+
+        .task-controls {
+            display: none;
+        }
+        .group:hover .task-controls {
+            display: flex;
+        }
+
+        .year-action-btn {
+            @apply w-10 flex items-center justify-center bg-white border-2 border-gray-900 font-bold hover:bg-gray-900 hover:text-white transition shadow-[2px_2px_0px_0px_rgba(0,0,0,1)];
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8 flex justify-center">
+
+    <div class="w-full max-w-[1400px] paper-panel overflow-hidden flex flex-col min-h-screen">
+        
+        <div class="bg-gray-800 border-b-4 border-gray-900 p-4 flex flex-col gap-4">
+            <div class="flex justify-between items-center">
+                <div class="text-white font-bold tracking-[0.2em] text-xl">GOAL TRACKER</div>
+                <div class="flex gap-2">
+                    <button onclick="initFileSave()" class="bg-white hover:bg-green-100 text-gray-900 text-xs font-bold px-3 py-1.5 border-2 border-gray-900 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] uppercase">Connect</button>
+                    <button onclick="downloadData()" class="bg-white hover:bg-gray-100 text-gray-900 text-xs font-bold px-3 py-1.5 border-2 border-gray-900 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] uppercase">Save</button>
+                    <button onclick="document.getElementById('file-input').click()" class="bg-white hover:bg-gray-100 text-gray-900 text-xs font-bold px-3 py-1.5 border-2 border-gray-900 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] uppercase">Load</button>
+                    <input type="file" id="file-input" class="hidden" accept=".json" onchange="loadData(this)">
+                </div>
+            </div>
+            <div id="tag-bar" class="flex gap-2 overflow-x-auto pb-1"></div>
+        </div>
+
+        <div class="p-6 flex flex-col gap-8">
+            
+            <section>
+                <div class="flex justify-between items-center border-b-4 border-gray-900 mb-4 pb-1">
+                    <h2 class="font-bold text-sm uppercase tracking-widest">Life Goals</h2>
+                    <button onclick="addItem('life')" class="text-[10px] font-bold border-2 border-gray-900 px-2 py-0.5 hover:bg-gray-900 hover:text-white uppercase transition">+ Add</button>
+                </div>
+                <div id="life-goals-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-1"></div>
+            </section>
+
+            <div class="flex gap-3 items-stretch h-64">
+                <button onclick="removeOldestYear()" class="year-action-btn" title="Remove Oldest Year">−</button>
+                <div id="years-container" class="flex-1 flex gap-4 overflow-x-auto pb-4"></div>
+                <button onclick="addNewYear()" class="year-action-btn" title="Add Next Year">+</button>
+            </div>
+
+            <section>
+                <h2 class="font-bold text-xs uppercase tracking-widest mb-3 border-b-2 border-gray-900">Monthly Focus</h2>
+                <div id="months-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4"></div>
+            </section>
+
+            <section>
+                <h2 class="font-bold text-xs uppercase tracking-widest mb-3 border-b-2 border-gray-900">Weekly Milestones</h2>
+                <div id="weeks-container" class="grid grid-cols-1 md:grid-cols-5 gap-4"></div>
+            </section>
+
+            <section class="paper-panel overflow-hidden flex flex-col">
+                <div class="grid grid-cols-[3rem_repeat(7,1fr)] border-b-2 border-gray-900 bg-gray-100 text-[10px] font-bold py-2 text-center">
+                    <div class="text-gray-400">#</div> <div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div>SAT</div><div>SUN</div>
+                </div>
+                <div id="calendar-header" class="text-center py-2 font-black uppercase tracking-widest border-b-2 border-gray-900 bg-white"></div>
+                <div id="calendar-grid" class="grid grid-cols-[3rem_repeat(7,1fr)] auto-rows-fr bg-gray-200 gap-[1px]"></div>
+            </section>
+
+        </div>
+    </div>
+
+<script>
+        // --- 1. STATE & DATA ---
+        const today = new Date();
+        let currentState = {
+            selectedYear: today.getFullYear(),
+            selectedMonth: today.getMonth(),
+            activeTag: null 
+        };
+
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const defaultData = { life: [], years: {}, months: {}, weeks: {}, days: {}, yearList: [2026, 2027, 2028] };
+        let appData = JSON.parse(localStorage.getItem('goalApp_PaperV1')) || defaultData;
+        let fileHandle = null;
+
+        // --- CORE FUNCTIONS ---
+        function saveData() {
+            localStorage.setItem('goalApp_PaperV1', JSON.stringify(appData));
+            renderAll();
+            if (fileHandle) writeToFile();
+        }
+
+        async function writeToFile() {
+            if (!fileHandle) return;
+            const writable = await fileHandle.createWritable();
+            await writable.write(JSON.stringify(appData, null, 2));
+            await writable.close();
+        }
+
+        async function initFileSave() {
+            try {
+                fileHandle = await window.showSaveFilePicker({
+                    suggestedName: 'my_goals.json',
+                    types: [{ description: 'JSON Files', accept: { 'application/json': ['.json'] } }]
+                });
+                saveData();
+            } catch (err) { console.error(err); }
+        }
+
+        function loadData(input) {
+            const file = input.files[0];
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                appData = JSON.parse(e.target.result);
+                saveData();
+            };
+            reader.readAsText(file);
+        }
+
+        function toggleTag(tag) {
+            currentState.activeTag = (currentState.activeTag === tag) ? null : tag;
+            renderAll();
+        }
+
+        // --- RENDERING LOGIC ---
+        function createItemHTML(item, type, key) {
+            if (currentState.activeTag && !item.text.includes(currentState.activeTag)) return '';
+
+            const indent = (item.indent || 0) * 12;
+            const highlightedText = item.text.replace(/(#[\w-]+)/g, '<span class="hashtag-highlight">$1</span>');
+
+            return `
+                <div class="group flex items-start gap-2 mb-1 relative" style="padding-left: ${indent}px">
+                    <input type="checkbox" ${item.done ? 'checked' : ''} 
+                        onchange="toggleTask('${type}', '${key}', ${item.id})"
+                        class="mt-1 w-3 h-3 border-2 border-gray-900 rounded-none appearance-none checked:bg-gray-900 cursor-pointer">
+                    <span class="text-[11px] leading-tight flex-1 ${item.done ? 'line-through text-gray-400' : 'text-gray-800'}">
+                        ${highlightedText}
+                    </span>
+                    <div class="task-controls absolute right-0 top-[-4px] bg-white border border-gray-900 flex shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] z-10">
+                        <button onclick="changeIndent('${type}', '${key}', ${item.id}, -1)" class="px-1 hover:bg-gray-100 border-r border-gray-900 text-[8px]">&lt;</button>
+                        <button onclick="changeIndent('${type}', '${key}', ${item.id}, 1)" class="px-1 hover:bg-gray-100 border-r border-gray-900 text-[8px]">&gt;</button>
+                        <button onclick="deleteTask('${type}', '${key}', ${item.id})" class="px-1 hover:bg-red-500 hover:text-white text-[8px]">×</button>
+                    </div>
+                </div>`;
+        }
+
+        function renderAll() {
+            renderTags();
+            renderLifeGoals();
+            renderYears();
+            renderMonths();
+            renderWeeks();
+            renderCalendar();
+        }
+
+        function renderTags() {
+            const tags = new Set();
+            const scan = (l) => l?.forEach(i => i.text.match(/#[\w-]+/g)?.forEach(t => tags.add(t)));
+            scan(appData.life);
+            Object.values(appData.years).forEach(scan);
+            Object.values(appData.months).forEach(scan);
+            Object.values(appData.weeks).forEach(scan);
+            Object.values(appData.days).forEach(scan);
+
+            const container = document.getElementById('tag-bar');
+            let html = currentState.activeTag ? `<button onclick="toggleTag('${currentState.activeTag}')" class="tag-pill bg-red-50 border-red-900 text-red-900">Clear</button>` : '';
+            container.innerHTML = html + Array.from(tags).map(t => `<button onclick="toggleTag('${t}')" class="tag-pill ${currentState.activeTag === t ? 'active' : 'inactive'}">${t}</button>`).join('');
+        }
+
+        function renderLifeGoals() {
+            document.getElementById('life-goals-container').innerHTML = appData.life.map(t => createItemHTML(t, 'life')).join('');
+        }
+
+        function renderYears() {
+            document.getElementById('years-container').innerHTML = appData.yearList.map(y => {
+                const isSel = currentState.selectedYear === y;
+                const tasks = appData.years[y] || [];
+                return `
+                <div onclick="selectYear(${y})" class="flex-1 min-w-[180px] paper-panel p-3 cursor-pointer ${isSel ? 'selected-box' : 'hover:bg-gray-50'}">
+                    <div class="flex justify-between border-b border-gray-900 mb-2">
+                        <span class="font-black text-xs">${y}</span>
+                        <button onclick="event.stopPropagation(); addItem('year', '${y}')" class="font-bold text-xs">+</button>
+                    </div>
+                    <div class="overflow-y-auto h-40">${tasks.map(t => createItemHTML(t, 'year', y)).join('')}</div>
+                </div>`;
+            }).join('');
+        }
+
+        function renderMonths() {
+            document.getElementById('months-container').innerHTML = monthNames.map((name, idx) => {
+                const key = `${currentState.selectedYear}-${idx}`;
+                const isSel = currentState.selectedMonth === idx;
+                return `
+                <div onclick="selectMonth(${idx})" class="paper-panel p-2 min-h-[120px] cursor-pointer ${isSel ? 'selected-box' : 'hover:bg-gray-50'}">
+                    <div class="flex justify-between border-b border-gray-200 mb-1">
+                        <span class="font-bold text-[10px] uppercase">${name}</span>
+                        <button onclick="event.stopPropagation(); addItem('month', '${key}')" class="text-[10px]">+</button>
+                    </div>
+                    <div>${(appData.months[key] || []).map(t => createItemHTML(t, 'month', key)).join('')}</div>
+                </div>`;
+            }).join('');
+        }
+
+        function renderWeeks() {
+            document.getElementById('weeks-container').innerHTML = [1,2,3,4,5].map(w => {
+                const key = `${currentState.selectedYear}-${currentState.selectedMonth}-W${w}`;
+                return `
+                <div class="paper-panel p-2 min-h-[100px]">
+                    <div class="flex justify-between border-b border-gray-200 mb-1">
+                        <span class="font-bold text-[10px] uppercase">Week ${w}</span>
+                        <button onclick="addItem('week', '${key}')" class="text-[10px]">+</button>
+                    </div>
+                    <div>${(appData.weeks[key] || []).map(t => createItemHTML(t, 'week', key)).join('')}</div>
+                </div>`;
+            }).join('');
+        }
+
+        function renderCalendar() {
+            const grid = document.getElementById('calendar-grid');
+            const header = document.getElementById('calendar-header');
+            const y = currentState.selectedYear, m = currentState.selectedMonth;
+            header.innerText = `${monthNames[m]} ${y}`;
+
+            const firstDay = (new Date(y, m, 1).getDay() || 7) - 1;
+            const daysInMonth = new Date(y, m + 1, 0).getDate();
+            
+            let html = '', day = 1;
+            for(let w=0; w<6; w++) {
+                if(day > daysInMonth) break;
+                let dForW = new Date(y, m, day);
+                let wNum = Math.ceil((((dForW - new Date(y,0,1)) / 86400000) + 1)/7);
+                html += `<div class="bg-gray-50 flex items-center justify-center text-[10px] font-mono border-r border-gray-300">W${wNum}</div>`;
+                
+                for(let d=0; d<7; d++) {
+                    if((w===0 && d < firstDay) || day > daysInMonth) {
+                        html += `<div class="bg-gray-100"></div>`;
+                    } else {
+                        const key = `${y}-${m}-${day}`;
+                        const isToday = day === today.getDate() && m === today.getMonth() && y === today.getFullYear();
+                        html += `
+                        <div class="bg-white p-1 min-h-[100px] group relative border-r border-b border-gray-200">
+                            <div class="flex justify-between items-start mb-1">
+                                <span class="text-[10px] font-bold ${isToday ? 'bg-orange-500 text-white px-1' : 'text-gray-400'}">${day}</span>
+                                <button onclick="addItem('day', '${key}')" class="opacity-0 group-hover:opacity-100 text-[10px]">+</button>
+                            </div>
+                            <div class="max-h-[80px] overflow-y-auto">${(appData.days[key] || []).map(t => createItemHTML(t, 'day', key)).join('')}</div>
+                        </div>`;
+                        day++;
+                    }
+                }
+            }
+            grid.innerHTML = html;
+        }
+
+        // --- DATA HELPERS ---
+        function addItem(type, key) {
+            const t = prompt("Task:");
+            if(!t) return;
+            const item = { id: Date.now(), text: t, done: false, indent: 0 };
+            if(type === 'life') appData.life.push(item);
+            else { if(!appData[type+'s'][key]) appData[type+'s'][key] = []; appData[type+'s'][key].push(item); }
+            saveData();
+        }
+
+        function deleteTask(type, key, id) {
+            if(type === 'life') appData.life = appData.life.filter(i => i.id !== id);
+            else appData[type+'s'][key] = appData[type+'s'][key].filter(i => i.id !== id);
+            saveData();
+        }
+
+        function toggleTask(type, key, id) {
+            const list = (type === 'life') ? appData.life : appData[type+'s'][key];
+            const item = list.find(i => i.id === id);
+            if(item) item.done = !item.done;
+            saveData();
+        }
+
+        function changeIndent(type, key, id, delta) {
+            const list = (type === 'life') ? appData.life : appData[type+'s'][key];
+            const item = list.find(i => i.id === id);
+            if(item) { item.indent = Math.max(0, (item.indent || 0) + delta); saveData(); }
+        }
+
+        function selectYear(y) { currentState.selectedYear = y; renderAll(); }
+        function selectMonth(m) { currentState.selectedMonth = m; renderAll(); }
+        function addNewYear() { const max = Math.max(...appData.yearList); appData.yearList.push(max + 1); saveData(); }
+        function removeOldestYear() { if(appData.yearList.length > 1) { appData.yearList.shift(); saveData(); } }
+
+        renderAll();
+    </script>
+</body>
+</html>

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>6 Hats Decision Partner (Copy Mode)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; transition: background-color 0.5s ease; }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        textarea::-webkit-scrollbar { width: 8px; }
+        textarea::-webkit-scrollbar-thumb { background-color: rgba(0,0,0,0.1); border-radius: 4px; }
+    </style>
+</head>
+<body id="main-body" class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <div id="card-container" class="w-full max-w-2xl bg-white shadow-2xl rounded-xl overflow-hidden border-t-8 border-gray-400 transition-all duration-500 relative min-h-[600px] flex flex-col">
+        
+        <div class="p-8 pb-4">
+            <div class="flex justify-between items-center mb-2">
+                <span id="hat-name" class="text-sm font-bold uppercase tracking-[0.2em] text-gray-500">PREPARATION</span>
+                <span id="step-counter" class="text-xs font-mono text-gray-400">0/6</span>
+            </div>
+            <h1 id="hat-title" class="text-3xl font-extrabold text-gray-900">Define the Problem</h1>
+            <p id="hat-desc" class="text-gray-500 mt-2 text-lg">What is the specific decision you are trying to make?</p>
+        </div>
+
+        <div class="flex-grow p-8 pt-2 flex flex-col relative">
+            
+            <div id="input-section" class="flex-grow flex flex-col fade-in">
+                <textarea id="user-input" class="w-full flex-grow bg-gray-50 border-2 border-gray-200 rounded-lg p-4 text-lg focus:outline-none focus:border-gray-900 transition-colors resize-none" placeholder="Type here..."></textarea>
+            </div>
+
+            <div id="summary-section" class="hidden h-full flex-col fade-in overflow-y-auto pr-2 pb-20">
+                <div id="summary-content" class="space-y-6"></div>
+                <div id="copy-toast" class="hidden mt-6 bg-green-100 border-l-4 border-green-500 p-4 rounded text-green-800 text-sm font-bold animate-pulse">
+                    ✓ Copied to clipboard! Now paste it into ChatGPT/Gemini.
+                </div>
+            </div>
+        </div>
+
+        <div class="p-8 border-t border-gray-100 flex justify-between items-center bg-white z-10">
+            <button id="btn-back" onclick="changeStep(-1)" class="text-gray-400 font-bold hover:text-gray-600 px-4 py-2 rounded hidden">Back</button>
+            
+            <button id="btn-next" onclick="changeStep(1)" class="bg-gray-900 text-white font-bold px-8 py-3 rounded-lg hover:bg-black transition-transform hover:scale-105 shadow-lg">
+                Next Step &rarr;
+            </button>
+
+            <button id="btn-copy" onclick="copyPrompt()" class="hidden bg-indigo-600 text-white font-bold px-6 py-3 rounded-lg hover:bg-indigo-700 transition-all shadow-indigo-200 shadow-lg flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                Copy for AI Review
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const steps = [
+            { id: 'problem', hat: 'The Setup', colorClass: 'border-gray-400', bgClass: 'bg-gray-100', title: 'The Decision', desc: 'In one sentence, what decision are you trying to make?', placeholder: 'e.g., Should I quit my job?', buttonText: 'Start Thinking' },
+            { id: 'white', hat: 'White Hat', colorClass: 'border-gray-200', bgClass: 'bg-white', title: 'Pure Facts', desc: 'List data only. Costs, dates, savings.', placeholder: '- $10k in savings\n- 3 months notice', buttonText: 'Next: Feelings' },
+            { id: 'red', hat: 'Red Hat', colorClass: 'border-red-400', bgClass: 'bg-red-50', title: 'Emotions', desc: 'How do you FEEL? Scared? Excited?', placeholder: 'Terrified of failing...', buttonText: 'Next: Risks' },
+            { id: 'black', hat: 'Black Hat', colorClass: 'border-gray-800', bgClass: 'bg-gray-900', title: 'The Pessimist', desc: 'What will go wrong? Be brutal.', placeholder: '- I could lose money\n- Economy might crash', buttonText: 'Next: Benefits' },
+            { id: 'yellow', hat: 'Yellow Hat', colorClass: 'border-yellow-400', bgClass: 'bg-yellow-50', title: 'The Optimist', desc: 'What are the benefits?', placeholder: '- Freedom\n- Creative control', buttonText: 'Next: Alternatives' },
+            { id: 'green', hat: 'Green Hat', colorClass: 'border-green-500', bgClass: 'bg-green-50', title: 'Creativity', desc: 'Is there a 3rd option? Alternatives?', placeholder: 'Maybe start part-time?', buttonText: 'Finish & Review' },
+            { id: 'blue', hat: 'Blue Hat', colorClass: 'border-blue-500', bgClass: 'bg-blue-50', title: 'Summary', desc: 'Here is your thinking process.', placeholder: '', buttonText: 'Restart' }
+        ];
+
+        let currentStepIndex = 0;
+        let userResponses = {};
+
+        const els = {
+            body: document.getElementById('main-body'),
+            card: document.getElementById('card-container'),
+            hatName: document.getElementById('hat-name'),
+            stepCounter: document.getElementById('step-counter'),
+            title: document.getElementById('hat-title'),
+            desc: document.getElementById('hat-desc'),
+            inputSection: document.getElementById('input-section'),
+            input: document.getElementById('user-input'),
+            summarySection: document.getElementById('summary-section'),
+            summaryContent: document.getElementById('summary-content'),
+            btnBack: document.getElementById('btn-back'),
+            btnNext: document.getElementById('btn-next'),
+            btnCopy: document.getElementById('btn-copy'),
+            copyToast: document.getElementById('copy-toast')
+        };
+
+        renderStep();
+
+        function changeStep(direction) {
+            if (currentStepIndex < steps.length - 1) {
+                userResponses[steps[currentStepIndex].id] = els.input.value;
+            }
+            currentStepIndex += direction;
+            
+            if (currentStepIndex < 0) currentStepIndex = 0;
+            if (currentStepIndex >= steps.length) {
+                if(confirm('Restart?')) { currentStepIndex = 0; userResponses = {}; els.input.value = ''; els.copyToast.classList.add('hidden'); } 
+                else { currentStepIndex = steps.length - 1; return; }
+            }
+            renderStep();
+        }
+
+        function renderStep() {
+            const step = steps[currentStepIndex];
+            const isSummary = step.id === 'blue';
+            const isBlackHat = step.id === 'black';
+
+            els.body.className = `flex items-center justify-center min-h-screen p-4 transition-colors duration-700 ${step.bgClass}`;
+            els.card.className = `w-full max-w-2xl bg-white shadow-2xl rounded-xl overflow-hidden border-t-8 transition-all duration-500 relative min-h-[600px] flex flex-col ${step.colorClass}`;
+
+            els.hatName.innerText = step.hat;
+            els.stepCounter.innerText = isSummary ? "DONE" : `${currentStepIndex}/${steps.length - 1}`;
+            els.title.innerText = step.title;
+            els.desc.innerText = step.desc;
+            els.btnNext.innerText = step.buttonText;
+
+            if (isBlackHat) {
+                els.title.classList.add('text-red-600');
+                els.input.classList.add('bg-gray-800', 'text-white', 'border-gray-700');
+                els.input.classList.remove('bg-gray-50', 'text-black', 'border-gray-200');
+            } else {
+                els.title.classList.remove('text-red-600');
+                els.input.classList.remove('bg-gray-800', 'text-white', 'border-gray-700');
+                els.input.classList.add('bg-gray-50', 'text-black', 'border-gray-200');
+            }
+
+            if (isSummary) {
+                els.inputSection.classList.add('hidden');
+                els.summarySection.classList.remove('hidden');
+                els.btnNext.classList.add('hidden');
+                els.btnCopy.classList.remove('hidden');
+                renderSummary();
+            } else {
+                els.inputSection.classList.remove('hidden');
+                els.summarySection.classList.add('hidden');
+                els.btnNext.classList.remove('hidden');
+                els.btnCopy.classList.add('hidden');
+                els.input.value = userResponses[step.id] || '';
+                els.input.placeholder = step.placeholder;
+                els.input.focus();
+            }
+            els.btnBack.classList.toggle('hidden', currentStepIndex === 0);
+        }
+
+        function renderSummary() {
+            els.summaryContent.innerHTML = '';
+            steps.forEach((step, index) => {
+                if (index === 0 || index === steps.length - 1) return;
+                const response = userResponses[step.id] || "No input.";
+                const card = document.createElement('div');
+                card.className = `p-4 border-l-4 ${step.colorClass} bg-gray-50 rounded shadow-sm`;
+                card.innerHTML = `<h4 class="font-bold text-xs uppercase tracking-wider text-gray-500 mb-1">${step.hat}</h4><p class="text-gray-800 whitespace-pre-wrap">${response}</p>`;
+                els.summaryContent.appendChild(card);
+            });
+        }
+
+        // --- THE MAGIC: GENERATING THE AI PROMPT ---
+        function copyPrompt() {
+            const r = userResponses;
+            // The Super-Prompt
+            const promptText = `
+I need you to act as a "Logic Auditor" and expert Strategist. I am using the Six Thinking Hats method to analyze a decision, and I need you to find my BLIND SPOTS.
+
+Here is the decision I am making: "${r.problem}"
+
+Here is my analysis so far:
+
+[WHITE HAT - FACTS]
+${r.white}
+
+[RED HAT - EMOTIONS]
+${r.red}
+
+[BLACK HAT - RISKS]
+${r.black}
+
+[YELLOW HAT - BENEFITS]
+${r.yellow}
+
+[GREEN HAT - ALTERNATIVES]
+${r.green}
+
+---
+YOUR INSTRUCTION:
+1. Review my inputs above.
+2. Identify 3 critical variables, risks, or perspectives that I have completely failed to mention.
+3. Do not solve the problem for me. Do not compliment me. 
+4. Only list the 3 missing "Blind Spots" and explain why they are dangerous to ignore.
+`;
+            
+            navigator.clipboard.writeText(promptText).then(() => {
+                els.copyToast.classList.remove('hidden');
+            });
+        }
+    </script>
+</body>
+</html>
