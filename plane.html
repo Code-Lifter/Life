@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual Bag Checker (Fixed)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        h1, h2, h3 { font-family: 'Fredoka', sans-serif; }
+        
+        /* Remove arrows from number inputs */
+        input[type="number"]::-webkit-inner-spin-button, 
+        input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        
+        .transition-all { transition: all 0.2s ease-in-out; }
+    </style>
+</head>
+<body class="text-gray-800 pb-24">
+
+    <div class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl">✈️</span>
+                <h1 class="text-xl font-semibold tracking-tight text-gray-900">BagChecker <span class="text-gray-400 text-sm font-normal">| No-Lag Version</span></h1>
+            </div>
+            <div class="text-xs font-semibold bg-gray-100 text-gray-500 px-3 py-1 rounded-full">Live Check Mode</div>
+        </div>
+    </div>
+
+    <div class="max-w-5xl mx-auto px-4 mt-8 space-y-12">
+
+        <div class="space-y-4">
+            <div class="flex justify-between items-end">
+                <div>
+                    <h2 class="text-2xl font-semibold text-gray-800">1. My Bags</h2>
+                    <p class="text-sm text-gray-500 mt-1">Add your luggage here.</p>
+                </div>
+                <button onclick="addBag()" class="bg-black text-white px-5 py-2.5 rounded-xl font-medium text-sm hover:bg-gray-800 transition shadow-lg shadow-gray-200/50 flex items-center gap-2">
+                    <span>+</span> Add Bag
+                </button>
+            </div>
+
+            <div id="bags-container" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                </div>
+        </div>
+
+        <div class="space-y-4">
+             <div class="flex justify-between items-end">
+                <div>
+                    <h2 class="text-2xl font-semibold text-gray-800">2. Flight Check</h2>
+                    <p class="text-sm text-gray-500 mt-1">See if your bags fit on each leg of your trip.</p>
+                </div>
+                <button onclick="addFlight()" class="bg-white border border-gray-300 text-gray-700 px-5 py-2.5 rounded-xl font-medium text-sm hover:bg-gray-50 transition flex items-center gap-2">
+                    <span>+</span> Add Flight
+                </button>
+            </div>
+
+            <div id="flights-container" class="space-y-8">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA ---
+        let myBags = [
+            { id: 1, name: "Blue Backpack", type: "carry", h: 50, w: 35, d: 20, kg: 8 },
+            { id: 2, name: "Big Samsonite", type: "check", h: 75, w: 50, d: 30, kg: 24 }
+        ];
+
+        let flights = [
+            {
+                id: 101,
+                name: "London to Bali",
+                limits: { carry: { h: 56, w: 36, d: 23, kg: 10 }, check: { h: 90, w: 75, d: 43, kg: 23 } }
+            },
+            {
+                id: 102,
+                name: "Bali to Auckland",
+                limits: { carry: { h: 48, w: 34, d: 23, kg: 7 }, check: { h: 158, w: 0, d: 0, kg: 20 } }
+            }
+        ];
+
+        // --- 1. RENDER STRUCTURE (Only called on Add/Delete) ---
+        function renderApp() {
+            renderBags();
+            renderFlights();
+            refreshResults(); // Calculate immediately
+        }
+
+        function renderBags() {
+            const container = document.getElementById('bags-container');
+            container.innerHTML = '';
+            
+            myBags.forEach((bag, idx) => {
+                const isCarry = bag.type === 'carry';
+                
+                container.innerHTML += `
+                    <div class="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm relative group">
+                        <button onclick="deleteBag(${idx})" class="absolute top-3 right-3 text-gray-300 hover:text-red-500 p-1">✕</button>
+                        
+                        <div class="mb-4">
+                            <input type="text" value="${bag.name}" oninput="updateBagData(${idx}, 'name', this.value)" 
+                                class="w-full text-lg font-bold text-gray-800 border-none focus:ring-0 p-0 placeholder-gray-300" placeholder="Bag Name">
+                            
+                            <div class="flex mt-2 gap-2">
+                                <button onclick="setBagType(${idx}, 'carry')" class="flex-1 py-1.5 text-xs font-bold rounded-lg border transition-all ${isCarry ? 'bg-sky-50 border-sky-200 text-sky-700' : 'bg-white border-gray-200 text-gray-400 grayscale'}">
+                                    🎒 Cabin
+                                </button>
+                                <button onclick="setBagType(${idx}, 'check')" class="flex-1 py-1.5 text-xs font-bold rounded-lg border transition-all ${!isCarry ? 'bg-amber-50 border-amber-200 text-amber-700' : 'bg-white border-gray-200 text-gray-400 grayscale'}">
+                                    🧳 Hold
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-4 gap-2">
+                            ${renderBigInput(idx, 'h', bag.h, 'Height')}
+                            ${renderBigInput(idx, 'w', bag.w, 'Width')}
+                            ${renderBigInput(idx, 'd', bag.d, 'Depth')}
+                            ${renderBigInput(idx, 'kg', bag.kg, 'Weight')}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderBigInput(idx, field, val, label) {
+            return `
+                <div class="bg-gray-50 rounded-xl p-2 text-center border border-gray-100 focus-within:border-blue-400 focus-within:bg-blue-50 transition-colors">
+                    <input type="number" value="${val}" oninput="updateBagData(${idx}, '${field}', this.value)" 
+                        class="w-full bg-transparent text-center font-bold text-gray-800 outline-none text-lg">
+                    <div class="text-[10px] text-gray-400 font-bold uppercase tracking-wide">${label}</div>
+                </div>
+            `;
+        }
+
+        function renderFlights() {
+            const container = document.getElementById('flights-container');
+            container.innerHTML = '';
+
+            flights.forEach((flight, fIdx) => {
+                container.innerHTML += `
+                    <div class="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
+                        <div class="bg-gray-900 text-white px-6 py-4 flex justify-between items-center">
+                            <input type="text" value="${flight.name}" oninput="updateFlightName(${fIdx}, this.value)" 
+                                class="bg-transparent text-white font-bold text-lg border-none focus:ring-0 w-full placeholder-gray-500">
+                            <button onclick="deleteFlight(${fIdx})" class="text-gray-500 hover:text-white transition">✕</button>
+                        </div>
+
+                        <div class="grid md:grid-cols-2">
+                            <div class="p-6 bg-sky-50/50 border-r border-gray-100">
+                                <div class="flex items-center gap-2 mb-6 text-sky-800">
+                                    <span class="text-2xl">🎒</span>
+                                    <div><h3 class="font-bold text-lg leading-tight">Cabin Bags</h3><p class="text-xs text-sky-600 font-medium">Overhead locker items</p></div>
+                                </div>
+                                
+                                <div class="bg-white rounded-xl border border-sky-100 p-3 mb-6 shadow-sm">
+                                    <div class="text-xs font-bold text-sky-400 uppercase tracking-widest mb-2 text-center">Max Allowed Dimensions</div>
+                                    <div class="grid grid-cols-4 gap-2">
+                                        ${renderLimitInput(fIdx, 'carry', 'h', flight.limits.carry)}
+                                        ${renderLimitInput(fIdx, 'carry', 'w', flight.limits.carry)}
+                                        ${renderLimitInput(fIdx, 'carry', 'd', flight.limits.carry)}
+                                        ${renderLimitInput(fIdx, 'carry', 'kg', flight.limits.carry)}
+                                    </div>
+                                </div>
+
+                                <div id="results-flight-${fIdx}-carry" class="space-y-3"></div>
+                            </div>
+
+                            <div class="p-6 bg-amber-50/50">
+                                <div class="flex items-center gap-2 mb-6 text-amber-800">
+                                    <span class="text-2xl">🧳</span>
+                                    <div><h3 class="font-bold text-lg leading-tight">Checked Bags</h3><p class="text-xs text-amber-600 font-medium">Goes under the plane</p></div>
+                                </div>
+
+                                <div class="bg-white rounded-xl border border-amber-100 p-3 mb-6 shadow-sm">
+                                    <div class="text-xs font-bold text-amber-400 uppercase tracking-widest mb-2 text-center">Max Allowed Dimensions</div>
+                                    <div class="grid grid-cols-4 gap-2">
+                                        ${renderLimitInput(fIdx, 'check', 'h', flight.limits.check)}
+                                        ${renderLimitInput(fIdx, 'check', 'w', flight.limits.check)}
+                                        ${renderLimitInput(fIdx, 'check', 'd', flight.limits.check)}
+                                        ${renderLimitInput(fIdx, 'check', 'kg', flight.limits.check)}
+                                    </div>
+                                </div>
+
+                                <div id="results-flight-${fIdx}-check" class="space-y-3"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderLimitInput(fIdx, type, dim, limits) {
+            const val = limits[dim];
+            return `
+                <div class="text-center">
+                    <input type="number" value="${val}" oninput="updateLimitData(${fIdx}, '${type}', '${dim}', this.value)" 
+                        class="w-full text-center text-sm font-bold text-gray-700 border-b border-gray-200 focus:border-black outline-none pb-1 bg-transparent">
+                    <label class="text-[9px] uppercase font-bold text-gray-400 mt-1 block">${dim}</label>
+                </div>
+            `;
+        }
+
+        // --- 2. CALCULATE & UPDATE VISUALS (Called on Input) ---
+        // This function updates ONLY the Result Boxes, not the Inputs
+        function refreshResults() {
+            flights.forEach((flight, fIdx) => {
+                // Filter Bags
+                const carryBags = myBags.filter(b => b.type === 'carry');
+                const checkBags = myBags.filter(b => b.type === 'check');
+
+                // Update Carry Section
+                const carryContainer = document.getElementById(`results-flight-${fIdx}-carry`);
+                if(carryBags.length === 0) {
+                    carryContainer.innerHTML = '<div class="text-center text-sm text-gray-400 py-4">No cabin bags added</div>';
+                } else {
+                    carryContainer.innerHTML = carryBags.map(b => getResultHTML(b, flight.limits.carry)).join('');
+                }
+
+                // Update Check Section
+                const checkContainer = document.getElementById(`results-flight-${fIdx}-check`);
+                if(checkBags.length === 0) {
+                    checkContainer.innerHTML = '<div class="text-center text-sm text-gray-400 py-4">No checked bags added</div>';
+                } else {
+                    checkContainer.innerHTML = checkBags.map(b => getResultHTML(b, flight.limits.check)).join('');
+                }
+            });
+        }
+
+        function getResultHTML(bag, limit) {
+            let errors = [];
+            if(limit.h > 0 && bag.h > limit.h) errors.push(`Too tall by: (+${bag.h - limit.h} cm)`);
+            if(limit.w > 0 && bag.w > limit.w) errors.push(`Too wide by: (+${bag.w - limit.w} cm)`);
+            if(limit.d > 0 && bag.d > limit.d) errors.push(`Too deep by: (+${bag.d - limit.d} cm)`);
+            if(limit.kg > 0 && bag.kg > limit.kg) errors.push(`Too heavy by: (+${bag.kg - limit.kg} kg)`);
+
+            if (errors.length === 0) {
+                return `
+                    <div class="bg-green-100 border border-green-200 rounded-xl p-3 flex items-center gap-3 shadow-sm">
+                        <div class="bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center shrink-0">✓</div>
+                        <div>
+                            <div class="font-bold text-green-900">${bag.name}</div>
+                            <div class="text-xs font-bold text-green-700 uppercase">Good to go</div>
+                        </div>
+                    </div>`;
+            } else {
+                return `
+                    <div class="bg-red-100 border border-red-200 rounded-xl p-3 flex items-start gap-3 shadow-sm">
+                        <div class="bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center shrink-0 font-bold">!</div>
+                        <div>
+                            <div class="font-bold text-red-900">${bag.name}</div>
+                            <div class="text-xs text-red-700 font-medium mt-1">
+                                ${errors.map(e => `<span class="block">• ${e}</span>`).join('')}
+                            </div>
+                        </div>
+                    </div>`;
+            }
+        }
+
+        // --- 3. DATA UPDATERS ---
+        // These update the JS data model and call the appropriate render function
+        
+        function updateBagData(idx, field, val) {
+            myBags[idx][field] = field === 'name' ? val : Number(val);
+            refreshResults(); // Light update (keeps focus)
+        }
+
+        function updateLimitData(fIdx, type, dim, val) {
+            flights[fIdx].limits[type][dim] = Number(val);
+            refreshResults(); // Light update (keeps focus)
+        }
+
+        function updateFlightName(fIdx, val) {
+            flights[fIdx].name = val;
+            // No render needed, input retains value
+        }
+
+        function setBagType(idx, type) {
+            myBags[idx].type = type;
+            renderApp(); // Heavy update (buttons don't need focus retention)
+        }
+
+        function addBag() {
+            myBags.push({ id: Date.now(), name: "New Bag", type: "carry", h: 50, w: 35, d: 20, kg: 7 });
+            renderApp(); // Heavy update
+        }
+
+        function deleteBag(idx) {
+            myBags.splice(idx, 1);
+            renderApp(); // Heavy update
+        }
+
+        function addFlight() {
+            flights.push({ id: Date.now(), name: "New Flight", limits: { carry: { h:56, w:36, d:23, kg:7 }, check: { h:90, w:75, d:43, kg:23 } } });
+            renderApp(); // Heavy update
+        }
+
+        function deleteFlight(fIdx) {
+            flights.splice(fIdx, 1);
+            renderApp(); // Heavy update
+        }
+
+        // Initialize
+        renderApp();
+
+    </script>
+</body>
+</html>
