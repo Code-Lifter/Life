@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sidekick Weekly Planner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            background-color: rgba(243, 244, 246, 0.3);
+            transition: background-color 0.2s ease;
+        }
+
+        .scroller::-webkit-scrollbar {
+            width: 6px;
+        }
+        .scroller::-webkit-scrollbar-thumb {
+            background-color: #d1d5db;
+            border-radius: 4px;
+        }
+        
+        /* Custom date input styling for dark mode header */
+        ::-webkit-calendar-picker-indicator {
+            filter: invert(0.8);
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4 sm:p-8">
+
+    <div class="bg-white w-full max-w-[1400px] min-h-[850px] border-4 border-gray-900 rounded-lg shadow-2xl overflow-hidden flex flex-col">
+        
+        <div class="bg-gray-800 border-b-4 border-gray-900 p-4 flex flex-wrap gap-4 justify-between items-center">
+            <div class="text-gray-500 font-bold tracking-[0.2em] text-xl">
+                SIDEKICK
+            </div>
+            
+            <div class="flex items-center gap-4 ml-auto">
+                <div class="flex items-center gap-2">
+                    <label for="week-start" class="text-xs font-bold text-gray-400 uppercase tracking-widest">Week of:</label>
+                    <input type="date" id="week-start" onchange="calculateDates()" class="bg-gray-700 text-gray-200 border border-gray-600 rounded px-2 py-1 text-sm font-medium focus:border-gray-400 transition-colors cursor-pointer">
+                </div>
+                
+                <button onclick="clearWeek()" class="text-xs font-bold text-gray-600 hover:text-red-400 border border-gray-600 hover:border-red-400 px-3 py-1 rounded transition-colors uppercase tracking-widest">
+                    Clear Week
+                </button>
+            </div>
+        </div>
+
+        <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-6 flex-grow">
+            
+            <div class="flex flex-col gap-6">
+                <div class="flex-1 flex flex-col border-2 border-gray-900 rounded-sm">
+                    <div class="border-b-2 border-gray-900 p-2 flex justify-between items-center bg-gray-50">
+                        <span class="font-bold text-xs uppercase tracking-wider text-gray-800">Monday</span>
+                        <span id="date-mon" class="text-xs font-medium text-gray-500 tracking-wide"></span>
+                    </div>
+                    <textarea id="day-mon" oninput="saveWeekData()" class="flex-grow w-full bg-transparent resize-none p-3 text-gray-800 leading-[24px] scroller"></textarea>
+                </div>
+                <div class="flex-1 flex flex-col border-2 border-gray-900 rounded-sm">
+                    <div class="border-b-2 border-gray-900 p-2 flex justify-between items-center bg-gray-50">
+                        <span class="font-bold text-xs uppercase tracking-wider text-gray-800">Thursday</span>
+                        <span id="date-thu" class="text-xs font-medium text-gray-500 tracking-wide"></span>
+                    </div>
+                    <textarea id="day-thu" oninput="saveWeekData()" class="flex-grow w-full bg-transparent resize-none p-3 text-gray-800 leading-[24px] scroller"></textarea>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="flex-1 flex flex-col border-2 border-gray-900 rounded-sm">
+                    <div class="border-b-2 border-gray-900 p-2 flex justify-between items-center bg-gray-50">
+                        <span class="font-bold text-xs uppercase tracking-wider text-gray-800">Tuesday</span>
+                        <span id="date-tue" class="text-xs font-medium text-gray-500 tracking-wide"></span>
+                    </div>
+                    <textarea id="day-tue" oninput="saveWeekData()" class="flex-grow w-full bg-transparent resize-none p-3 text-gray-800 leading-[24px] scroller"></textarea>
+                </div>
+                <div class="flex-1 flex flex-col border-2 border-gray-900 rounded-sm">
+                    <div class="border-b-2 border-gray-900 p-2 flex justify-between items-center bg-gray-50">
+                        <span class="font-bold text-xs uppercase tracking-wider text-gray-800">Friday</span>
+                        <span id="date-fri" class="text-xs font-medium text-gray-500 tracking-wide"></span>
+                    </div>
+                    <textarea id="day-fri" oninput="saveWeekData()" class="flex-grow w-full bg-transparent resize-none p-3 text-gray-800 leading-[24px] scroller"></textarea>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="flex-1 flex flex-col border-2 border-gray-900 rounded-sm">
+                    <div class="border-b-2 border-gray-900 p-2 flex justify-between items-center bg-gray-50">
+                        <span class="font-bold text-xs uppercase tracking-wider text-gray-800">Wednesday</span>
+                        <span id="date-wed" class="text-xs font-medium text-gray-500 tracking-wide"></span>
+                    </div>
+                    <textarea id="day-wed" oninput="saveWeekData()" class="flex-grow w-full bg-transparent resize-none p-3 text-gray-800 leading-[24px] scroller"></textarea>
+                </div>
+                
+                <div class="flex-1 flex flex-col gap-6">
+                    <div class="flex-1 flex flex-col border-2 border-gray-900 rounded-sm">
+                        <div class="border-b-2 border-gray-900 p-2 flex justify-between items-center bg-gray-50">
+                            <span class="font-bold text-xs uppercase tracking-wider text-gray-800">Saturday</span>
+                            <span id="date-sat" class="text-xs font-medium text-gray-500 tracking-wide"></span>
+                        </div>
+                        <textarea id="day-sat" oninput="saveWeekData()" class="flex-grow w-full bg-transparent resize-none p-3 text-gray-800 leading-[24px] scroller"></textarea>
+                    </div>
+                    <div class="flex-1 flex flex-col border-2 border-gray-900 rounded-sm">
+                        <div class="border-b-2 border-gray-900 p-2 flex justify-between items-center bg-gray-50">
+                            <span class="font-bold text-xs uppercase tracking-wider text-gray-800">Sunday</span>
+                            <span id="date-sun" class="text-xs font-medium text-gray-500 tracking-wide"></span>
+                        </div>
+                        <textarea id="day-sun" oninput="saveWeekData()" class="flex-grow w-full bg-transparent resize-none p-3 text-gray-800 leading-[24px] scroller"></textarea>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const WEEK_DB_KEY = 'sidekickWeeklyData';
+        const DATE_DB_KEY = 'sidekickWeekStart';
+        const days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadWeekData();
+        });
+
+        function calculateDates() {
+            const dateInput = document.getElementById('week-start').value;
+            if (!dateInput) return;
+
+            // Save the selected date so it persists on reload
+            localStorage.setItem(DATE_DB_KEY, dateInput);
+
+            // Split the input (YYYY-MM-DD) to build a local date object securely
+            // This prevents timezone offset bugs where Monday becomes Sunday night
+            const [year, month, day] = dateInput.split('-');
+            const startDate = new Date(year, month - 1, day);
+
+            days.forEach((id, index) => {
+                const currentDate = new Date(startDate);
+                currentDate.setDate(startDate.getDate() + index);
+
+                // Format as DD-Month-YYYY
+                const dayStr = String(currentDate.getDate()).padStart(2, '0');
+                const monthStr = currentDate.toLocaleString('default', { month: 'long' });
+                const yearStr = currentDate.getFullYear();
+
+                const formattedDate = `${dayStr}-${monthStr}-${yearStr}`;
+                
+                const dateSpan = document.getElementById(`date-${id}`);
+                if (dateSpan) {
+                    dateSpan.textContent = formattedDate;
+                }
+            });
+        }
+
+        function loadWeekData() {
+            // Load Text Data
+            const storedData = JSON.parse(localStorage.getItem(WEEK_DB_KEY)) || {};
+            days.forEach(day => {
+                const el = document.getElementById(`day-${day}`);
+                if (el) el.value = storedData[day] || '';
+            });
+
+            // Load Date Data
+            const savedDate = localStorage.getItem(DATE_DB_KEY);
+            if (savedDate) {
+                document.getElementById('week-start').value = savedDate;
+                calculateDates(); // Trigger the math to populate the headers
+            }
+        }
+
+        function saveWeekData() {
+            const data = {};
+            days.forEach(day => {
+                const el = document.getElementById(`day-${day}`);
+                if (el) data[day] = el.value;
+            });
+            localStorage.setItem(WEEK_DB_KEY, JSON.stringify(data));
+        }
+
+        function clearWeek() {
+            if (confirm("Are you sure you want to clear the entire week? This cannot be undone.")) {
+                localStorage.removeItem(WEEK_DB_KEY);
+                days.forEach(day => {
+                    const el = document.getElementById(`day-${day}`);
+                    if (el) el.value = '';
+                });
+            }
+        }
+    </script>
+</body>
+</html>
