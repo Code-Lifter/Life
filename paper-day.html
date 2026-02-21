@@ -49,11 +49,16 @@
         
         <div class="bg-gray-800 border-b-4 border-gray-900 p-4 flex justify-between items-center">
             <div class="text-gray-500 font-bold tracking-[0.2em] text-xl">
-                SIDEKICK
+                SIDEKICK <span class="text-gray-600 text-sm ml-2">DAILY</span>
             </div>
-            <button onclick="resetDay()" class="text-xs font-bold text-gray-600 hover:text-red-400 border border-gray-600 hover:border-red-400 px-3 py-1 rounded transition-colors uppercase tracking-widest">
-                Reset Day
-            </button>
+            <div class="flex gap-4">
+                <button id="copy-btn" onclick="copyToNotes()" class="text-xs font-bold text-gray-300 hover:text-white border border-gray-600 hover:border-gray-400 px-3 py-1 rounded transition-colors uppercase tracking-widest">
+                    Copy to Notes
+                </button>
+                <button onclick="resetDay()" class="text-xs font-bold text-gray-600 hover:text-red-400 border border-gray-600 hover:border-red-400 px-3 py-1 rounded transition-colors uppercase tracking-widest">
+                    Reset Day
+                </button>
+            </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-0 divide-y-4 lg:divide-y-0 lg:divide-x-4 divide-gray-900 h-full">
@@ -108,7 +113,7 @@
 
     <script>
         // --- 1. INITIALIZATION & DATA LOADING ---
-        const DB_KEY = 'sidekickDataV3'; // Changed key to ensure fresh start for new version
+        const DB_KEY = 'sidekickDataV3'; 
         const storedData = JSON.parse(localStorage.getItem(DB_KEY)) || {};
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -132,12 +137,11 @@
         function resetDay() {
             if (confirm("Are you sure you want to clear the entire planner? This cannot be undone.")) {
                 localStorage.removeItem(DB_KEY);
-                location.reload(); // Reloading is the cleanest way to reset state
+                location.reload(); 
             }
         }
 
         // --- 2. SCHEDULE SECTION (Sortable) ---
-
         function renderSchedule() {
             const container = document.getElementById('schedule-container');
             const savedSchedule = storedData.schedule || Array(18).fill({ time: '', text: '' });
@@ -260,7 +264,7 @@
             notes.addEventListener('input', saveData);
         }
 
-        // --- 5. TASKS SECTION (3-State Toggle) ---
+        // --- 5. TASKS SECTION ---
         function renderTasks() {
             const container = document.getElementById('tasks-container');
             const savedTasks = storedData.tasks || Array(15).fill({ state: 0, text: '' });
@@ -328,6 +332,95 @@
                 });
             }
             return data;
+        }
+
+        // --- 6. EXPORTER FUNCTION ---
+        async function copyToNotes() {
+            // Generate dynamic header date based on when they click copy
+            const today = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            let exportText = `# SIDEKICK Daily: ${today}\n\n`;
+            let hasData = false;
+
+            // 1. Compile Priorities
+            const p1 = document.getElementById('prio-1').value.trim();
+            const p2 = document.getElementById('prio-2').value.trim();
+            const p3 = document.getElementById('prio-3').value.trim();
+            if (p1 || p2 || p3) {
+                exportText += `### Daily Priorities\n`;
+                if (p1) exportText += `1. ${p1}\n`;
+                if (p2) exportText += `2. ${p2}\n`;
+                if (p3) exportText += `3. ${p3}\n`;
+                exportText += `\n`;
+                hasData = true;
+            }
+
+            // 2. Compile Schedule
+            const scheduleRows = document.getElementById('schedule-container').children;
+            let scheduleText = `### Schedule\n`;
+            let hasSchedule = false;
+            for (let row of scheduleRows) {
+                const inputs = row.querySelectorAll('input');
+                const time = inputs[0].value.trim();
+                const text = inputs[1].value.trim();
+                if (time || text) {
+                    scheduleText += `- **${time || '--:--'}**: ${text}\n`;
+                    hasSchedule = true;
+                    hasData = true;
+                }
+            }
+            if (hasSchedule) exportText += scheduleText + `\n`;
+
+            // 3. Compile Tasks (Mapping state to Obsidian Markdown)
+            const taskRows = document.getElementById('tasks-container').children;
+            let taskText = `### Tasks\n`;
+            let hasTasks = false;
+            for (let row of taskRows) {
+                const btn = row.querySelector('button');
+                const input = row.querySelector('input');
+                const state = parseInt(btn.getAttribute('data-state'));
+                const text = input.value.trim();
+                
+                if (text) {
+                    let checkbox = '[ ]'; // State 0
+                    if (state === 1) checkbox = '[/]'; // State 1: In Progress
+                    if (state === 2) checkbox = '[x]'; // State 2: Done
+                    
+                    taskText += `- ${checkbox} ${text}\n`;
+                    hasTasks = true;
+                    hasData = true;
+                }
+            }
+            if (hasTasks) exportText += taskText + `\n`;
+
+            // 4. Compile Notes
+            const notes = document.getElementById('notes-area').value.trim();
+            if (notes) {
+                exportText += `### Notes\n${notes}\n\n`;
+                hasData = true;
+            }
+
+            // Fallback if the page is completely empty
+            if (!hasData) {
+                exportText += "*No data logged for today.*";
+            }
+
+            // Copy to Clipboard UI Logic
+            try {
+                await navigator.clipboard.writeText(exportText.trim());
+                
+                const btn = document.getElementById('copy-btn');
+                btn.innerText = 'COPIED!';
+                btn.classList.replace('text-gray-300', 'text-green-400');
+                btn.classList.replace('border-gray-600', 'border-green-400');
+                
+                setTimeout(() => {
+                    btn.innerText = 'COPY TO NOTES';
+                    btn.classList.replace('text-green-400', 'text-gray-300');
+                    btn.classList.replace('border-green-400', 'border-gray-600');
+                }, 2000);
+            } catch (err) {
+                alert('Failed to copy to clipboard. Your browser might block this action.');
+            }
         }
     </script>
 </body>
