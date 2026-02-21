@@ -66,7 +66,25 @@
             </div>
         </div>
 
-        <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-6 flex-grow">
+        <div class="px-6 pt-6 pb-2">
+            <h2 class="font-bold text-xs uppercase tracking-wider mb-2 border-b-2 border-gray-900 pb-1">Weekly Priorities</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-2">
+                <div class="flex items-center gap-3">
+                    <div class="flex-shrink-0 w-8 h-8 rounded-full border-2 border-gray-900 flex items-center justify-center font-bold text-sm">1</div>
+                    <input type="text" id="prio-1" oninput="saveWeekData()" class="w-full border-b border-gray-200 focus:border-gray-900 p-2 font-medium text-gray-800 transition-colors bg-transparent" placeholder="Top priority...">
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="flex-shrink-0 w-8 h-8 rounded-full border-2 border-gray-900 flex items-center justify-center font-bold text-sm">2</div>
+                    <input type="text" id="prio-2" oninput="saveWeekData()" class="w-full border-b border-gray-200 focus:border-gray-900 p-2 font-medium text-gray-800 transition-colors bg-transparent" placeholder="Second priority...">
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="flex-shrink-0 w-8 h-8 rounded-full border-2 border-gray-900 flex items-center justify-center font-bold text-sm">3</div>
+                    <input type="text" id="prio-3" oninput="saveWeekData()" class="w-full border-b border-gray-200 focus:border-gray-900 p-2 font-medium text-gray-800 transition-colors bg-transparent" placeholder="Third priority...">
+                </div>
+            </div>
+        </div>
+
+        <div class="px-6 pb-6 pt-2 grid grid-cols-1 md:grid-cols-3 gap-6 flex-grow">
             
             <div class="flex flex-col gap-6">
                 <div id="container-mon" class="flex-1 flex flex-col border-2 border-gray-900 rounded-sm transition-all duration-300">
@@ -237,6 +255,12 @@
             const allData = JSON.parse(localStorage.getItem(WEEK_DB_KEY)) || {};
             const thisWeekData = allData[weekKey] || {};
 
+            // Load priorities
+            document.getElementById('prio-1').value = thisWeekData['p1'] || '';
+            document.getElementById('prio-2').value = thisWeekData['p2'] || '';
+            document.getElementById('prio-3').value = thisWeekData['p3'] || '';
+
+            // Load daily texts
             days.forEach(day => {
                 const el = document.getElementById(`day-${day}`);
                 if (el) el.value = thisWeekData[day] || '';
@@ -251,6 +275,12 @@
                 allData[weekKey] = {};
             }
 
+            // Save priorities
+            allData[weekKey]['p1'] = document.getElementById('prio-1').value;
+            allData[weekKey]['p2'] = document.getElementById('prio-2').value;
+            allData[weekKey]['p3'] = document.getElementById('prio-3').value;
+
+            // Save daily texts
             days.forEach(day => {
                 const el = document.getElementById(`day-${day}`);
                 if (el) allData[weekKey][day] = el.value;
@@ -266,6 +296,11 @@
                 delete allData[weekKey]; 
                 localStorage.setItem(WEEK_DB_KEY, JSON.stringify(allData));
                 
+                // Clear UI
+                document.getElementById('prio-1').value = '';
+                document.getElementById('prio-2').value = '';
+                document.getElementById('prio-3').value = '';
+
                 days.forEach(day => {
                     const el = document.getElementById(`day-${day}`);
                     if (el) el.value = '';
@@ -277,11 +312,25 @@
         async function copyToNotes() {
             const dateInput = document.getElementById('week-start').value;
             let exportText = `# SIDEKICK: Week of ${dateInput}\n\n`;
-            
-            const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-            let hasNotes = false;
+            let hasData = false;
 
-            // Loop through and extract only days that have text
+            // 1. Export Priorities
+            const p1 = document.getElementById('prio-1').value.trim();
+            const p2 = document.getElementById('prio-2').value.trim();
+            const p3 = document.getElementById('prio-3').value.trim();
+            
+            if (p1 || p2 || p3) {
+                exportText += `### Weekly Priorities\n`;
+                if (p1) exportText += `1. ${p1}\n`;
+                if (p2) exportText += `2. ${p2}\n`;
+                if (p3) exportText += `3. ${p3}\n`;
+                exportText += `\n`;
+                hasData = true;
+            }
+            
+            // 2. Export Daily Notes
+            const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+            
             days.forEach((id, index) => {
                 const text = document.getElementById(`day-${id}`).value.trim();
                 const dateSpan = document.getElementById(`date-${id}`).textContent;
@@ -289,19 +338,19 @@
                 if (text) {
                     exportText += `### ${dayNames[index]} (${dateSpan})\n`;
                     exportText += `${text}\n\n`;
-                    hasNotes = true;
+                    hasData = true;
                 }
             });
 
-            if (!hasNotes) {
-                exportText += "*No notes logged for this week.*";
+            if (!hasData) {
+                exportText += "*No notes or priorities logged for this week.*";
             }
 
             try {
                 // Copy to clipboard
                 await navigator.clipboard.writeText(exportText.trim());
                 
-                // Visual feedback on the button
+                // Visual feedback
                 const btn = document.getElementById('copy-btn');
                 btn.innerText = 'COPIED!';
                 btn.classList.replace('text-gray-300', 'text-green-400');
