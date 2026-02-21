@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sidekick Yearly Planner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            background-color: rgba(243, 244, 246, 0.3);
+            transition: background-color 0.2s ease;
+        }
+
+        .scroller::-webkit-scrollbar {
+            width: 6px;
+        }
+        .scroller::-webkit-scrollbar-thumb {
+            background-color: #d1d5db;
+            border-radius: 4px;
+        }
+
+        /* Hide number input arrows for a cleaner look */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4 sm:p-8">
+
+    <div class="bg-white w-full max-w-[1400px] min-h-[850px] border-4 border-gray-900 rounded-lg shadow-2xl overflow-hidden flex flex-col">
+        
+        <div class="bg-gray-800 border-b-4 border-gray-900 p-4 flex flex-wrap gap-4 justify-between items-center">
+            <div class="text-gray-500 font-bold tracking-[0.2em] text-xl">
+                SIDEKICK <span class="text-gray-600 text-sm ml-2">YEARLY</span>
+            </div>
+            
+            <div class="flex items-center gap-4 ml-auto">
+                <button onclick="goToCurrentYear()" class="text-xs font-bold text-gray-300 hover:text-white border border-gray-600 hover:border-gray-400 px-3 py-1 rounded transition-colors uppercase tracking-widest">
+                    This Year
+                </button>
+                
+                <div class="flex items-center gap-2">
+                    <label for="year-select" class="text-xs font-bold text-gray-400 uppercase tracking-widest">Year:</label>
+                    <div class="flex">
+                        <button onclick="changeYear(-1)" class="bg-gray-700 text-gray-400 hover:text-white px-2 rounded-l border border-gray-600 border-r-0 font-bold">-</button>
+                        <input type="number" id="year-select" onchange="renderYear()" class="bg-gray-700 text-gray-200 border-y border-gray-600 w-16 text-center py-1 text-sm font-bold tracking-widest transition-colors">
+                        <button onclick="changeYear(1)" class="bg-gray-700 text-gray-400 hover:text-white px-2 rounded-r border border-gray-600 border-l-0 font-bold">+</button>
+                    </div>
+                </div>
+                
+                <button onclick="clearYear()" class="text-xs font-bold text-gray-600 hover:text-red-400 border border-gray-600 hover:border-red-400 px-3 py-1 rounded transition-colors uppercase tracking-widest">
+                    Clear Year
+                </button>
+            </div>
+        </div>
+
+        <div id="months-grid" class="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 flex-grow">
+            </div>
+    </div>
+
+    <script>
+        const YEAR_DB_KEY = 'sidekickYearlyData';
+        const months = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initGrid();
+            goToCurrentYear();
+        });
+
+        // Setup the HTML structure for the 12 months
+        function initGrid() {
+            const grid = document.getElementById('months-grid');
+            grid.innerHTML = ''; // Clear just in case
+            
+            months.forEach((month, index) => {
+                const monthBlock = document.createElement('div');
+                monthBlock.id = `container-${index}`;
+                monthBlock.className = 'flex flex-col border-2 border-gray-900 rounded-sm transition-all duration-300 min-h-[200px]';
+                
+                monthBlock.innerHTML = `
+                    <div id="header-${index}" class="border-b-2 border-gray-900 p-2 flex justify-between items-center bg-gray-50 transition-colors duration-300">
+                        <span class="font-bold text-xs uppercase tracking-wider text-gray-800">${month}</span>
+                    </div>
+                    <textarea id="month-${index}" oninput="saveYearData()" class="flex-grow w-full bg-transparent resize-none p-3 text-gray-800 leading-[24px] scroller" placeholder="Goals, milestones, events..."></textarea>
+                `;
+                grid.appendChild(monthBlock);
+            });
+        }
+
+        // Jump to the current real-world year
+        function goToCurrentYear() {
+            const currentYear = new Date().getFullYear();
+            document.getElementById('year-select').value = currentYear;
+            renderYear();
+        }
+
+        // +/- button logic for the year input
+        function changeYear(delta) {
+            const input = document.getElementById('year-select');
+            input.value = parseInt(input.value) + delta;
+            renderYear();
+        }
+
+        // Main function to load data and handle UI states for the selected year
+        function renderYear() {
+            const selectedYear = parseInt(document.getElementById('year-select').value);
+            const currentDate = new Date();
+            const realYear = currentDate.getFullYear();
+            const realMonth = currentDate.getMonth(); // 0-11
+
+            // 1. Fetch data for this specific year
+            const allData = JSON.parse(localStorage.getItem(YEAR_DB_KEY)) || {};
+            const thisYearData = allData[selectedYear] || {};
+
+            // 2. Loop through UI and apply data + visual states
+            months.forEach((month, index) => {
+                // Populate text
+                const textarea = document.getElementById(`month-${index}`);
+                textarea.value = thisYearData[index] || '';
+
+                // Handle visual states (Past / Present / Future)
+                const container = document.getElementById(`container-${index}`);
+                const header = document.getElementById(`header-${index}`);
+
+                // Reset classes first
+                container.className = 'flex flex-col border-2 border-gray-900 rounded-sm transition-all duration-300 min-h-[200px]';
+                header.className = 'border-b-2 border-gray-900 p-2 flex justify-between items-center transition-colors duration-300';
+
+                if (selectedYear < realYear || (selectedYear === realYear && index < realMonth)) {
+                    // PAST
+                    container.classList.add('opacity-50', 'bg-gray-100');
+                    header.classList.add('bg-gray-200');
+                } else if (selectedYear === realYear && index === realMonth) {
+                    // PRESENT (Current Month)
+                    container.classList.add('border-blue-600', 'shadow-md');
+                    container.classList.remove('border-gray-900');
+                    header.classList.add('bg-blue-100', 'border-blue-600');
+                    header.classList.remove('border-gray-900', 'bg-gray-50');
+                    header.querySelector('span').classList.add('text-blue-900');
+                } else {
+                    // FUTURE
+                    container.classList.add('bg-white');
+                    header.classList.add('bg-gray-50');
+                }
+            });
+        }
+
+        // Save data uniquely to the currently selected year
+        function saveYearData() {
+            const selectedYear = document.getElementById('year-select').value;
+            const allData = JSON.parse(localStorage.getItem(YEAR_DB_KEY)) || {};
+            
+            // Initialize year object if it doesn't exist
+            if (!allData[selectedYear]) {
+                allData[selectedYear] = {};
+            }
+
+            // Gather text from all 12 boxes
+            months.forEach((month, index) => {
+                const val = document.getElementById(`month-${index}`).value;
+                allData[selectedYear][index] = val;
+            });
+
+            localStorage.setItem(YEAR_DB_KEY, JSON.stringify(allData));
+        }
+
+        function clearYear() {
+            const selectedYear = document.getElementById('year-select').value;
+            if (confirm(`Are you sure you want to clear all data for ${selectedYear}? This cannot be undone.`)) {
+                const allData = JSON.parse(localStorage.getItem(YEAR_DB_KEY)) || {};
+                delete allData[selectedYear]; // Only delete the selected year's data
+                localStorage.setItem(YEAR_DB_KEY, JSON.stringify(allData));
+                renderYear(); // Refresh the UI
+            }
+        }
+    </script>
+</body>
+</html>
