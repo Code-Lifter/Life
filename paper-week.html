@@ -27,7 +27,6 @@
             border-radius: 4px;
         }
         
-        /* Custom date input styling for dark mode header */
         ::-webkit-calendar-picker-indicator {
             filter: invert(0.8);
             cursor: pointer;
@@ -40,15 +39,27 @@
         
         <div class="bg-gray-800 border-b-4 border-gray-900 p-4 flex flex-wrap gap-4 justify-between items-center">
             <div class="text-gray-500 font-bold tracking-[0.2em] text-xl">
-                SIDEKICK
+                SIDEKICK <span class="text-gray-600 text-sm ml-2">WEEKLY</span>
             </div>
             
             <div class="flex items-center gap-4 ml-auto">
+                <button onclick="goToCurrentWeek()" class="text-xs font-bold text-gray-300 hover:text-white border border-gray-600 hover:border-gray-400 px-3 py-1 rounded transition-colors uppercase tracking-widest">
+                    This Week
+                </button>
+                
                 <div class="flex items-center gap-2">
                     <label for="week-start" class="text-xs font-bold text-gray-400 uppercase tracking-widest">Week of:</label>
-                    <input type="date" id="week-start" onchange="calculateDates()" class="bg-gray-700 text-gray-200 border border-gray-600 rounded px-2 py-1 text-sm font-medium focus:border-gray-400 transition-colors cursor-pointer">
+                    <div class="flex">
+                        <button onclick="changeWeek(-7)" class="bg-gray-700 text-gray-400 hover:text-white px-2 rounded-l border border-gray-600 border-r-0 font-bold transition-colors">-</button>
+                        <input type="date" id="week-start" onchange="calculateDates()" class="bg-gray-700 text-gray-200 border-y border-gray-600 px-2 py-1 text-sm font-medium focus:border-gray-400 transition-colors cursor-pointer">
+                        <button onclick="changeWeek(7)" class="bg-gray-700 text-gray-400 hover:text-white px-2 rounded-r border border-gray-600 border-l-0 font-bold transition-colors">+</button>
+                    </div>
                 </div>
                 
+                <button id="copy-btn" onclick="copyToNotes()" class="text-xs font-bold text-gray-300 hover:text-white border border-gray-600 hover:border-gray-400 px-3 py-1 rounded transition-colors uppercase tracking-widest">
+                    Copy to Notes
+                </button>
+
                 <button onclick="clearWeek()" class="text-xs font-bold text-gray-600 hover:text-red-400 border border-gray-600 hover:border-red-400 px-3 py-1 rounded transition-colors uppercase tracking-widest">
                     Clear Week
                 </button>
@@ -58,15 +69,15 @@
         <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-6 flex-grow">
             
             <div class="flex flex-col gap-6">
-                <div class="flex-1 flex flex-col border-2 border-gray-900 rounded-sm">
-                    <div class="border-b-2 border-gray-900 p-2 flex justify-between items-center bg-gray-50">
+                <div id="container-mon" class="flex-1 flex flex-col border-2 border-gray-900 rounded-sm transition-all duration-300">
+                    <div id="header-mon" class="border-b-2 border-gray-900 p-2 flex justify-between items-center bg-gray-50 transition-colors duration-300">
                         <span class="font-bold text-xs uppercase tracking-wider text-gray-800">Monday</span>
                         <span id="date-mon" class="text-xs font-medium text-gray-500 tracking-wide"></span>
                     </div>
                     <textarea id="day-mon" oninput="saveWeekData()" class="flex-grow w-full bg-transparent resize-none p-3 text-gray-800 leading-[24px] scroller"></textarea>
                 </div>
-                <div class="flex-1 flex flex-col border-2 border-gray-900 rounded-sm">
-                    <div class="border-b-2 border-gray-900 p-2 flex justify-between items-center bg-gray-50">
+                <div id="container-thu" class="flex-1 flex flex-col border-2 border-gray-900 rounded-sm transition-all duration-300">
+                    <div id="header-thu" class="border-b-2 border-gray-900 p-2 flex justify-between items-center bg-gray-50 transition-colors duration-300">
                         <span class="font-bold text-xs uppercase tracking-wider text-gray-800">Thursday</span>
                         <span id="date-thu" class="text-xs font-medium text-gray-500 tracking-wide"></span>
                     </div>
@@ -75,15 +86,15 @@
             </div>
 
             <div class="flex flex-col gap-6">
-                <div class="flex-1 flex flex-col border-2 border-gray-900 rounded-sm">
-                    <div class="border-b-2 border-gray-900 p-2 flex justify-between items-center bg-gray-50">
+                <div id="container-tue" class="flex-1 flex flex-col border-2 border-gray-900 rounded-sm transition-all duration-300">
+                    <div id="header-tue" class="border-b-2 border-gray-900 p-2 flex justify-between items-center bg-gray-50 transition-colors duration-300">
                         <span class="font-bold text-xs uppercase tracking-wider text-gray-800">Tuesday</span>
                         <span id="date-tue" class="text-xs font-medium text-gray-500 tracking-wide"></span>
                     </div>
                     <textarea id="day-tue" oninput="saveWeekData()" class="flex-grow w-full bg-transparent resize-none p-3 text-gray-800 leading-[24px] scroller"></textarea>
                 </div>
-                <div class="flex-1 flex flex-col border-2 border-gray-900 rounded-sm">
-                    <div class="border-b-2 border-gray-900 p-2 flex justify-between items-center bg-gray-50">
+                <div id="container-fri" class="flex-1 flex flex-col border-2 border-gray-900 rounded-sm transition-all duration-300">
+                    <div id="header-fri" class="border-b-2 border-gray-900 p-2 flex justify-between items-center bg-gray-50 transition-colors duration-300">
                         <span class="font-bold text-xs uppercase tracking-wider text-gray-800">Friday</span>
                         <span id="date-fri" class="text-xs font-medium text-gray-500 tracking-wide"></span>
                     </div>
@@ -92,8 +103,8 @@
             </div>
 
             <div class="flex flex-col gap-6">
-                <div class="flex-1 flex flex-col border-2 border-gray-900 rounded-sm">
-                    <div class="border-b-2 border-gray-900 p-2 flex justify-between items-center bg-gray-50">
+                <div id="container-wed" class="flex-1 flex flex-col border-2 border-gray-900 rounded-sm transition-all duration-300">
+                    <div id="header-wed" class="border-b-2 border-gray-900 p-2 flex justify-between items-center bg-gray-50 transition-colors duration-300">
                         <span class="font-bold text-xs uppercase tracking-wider text-gray-800">Wednesday</span>
                         <span id="date-wed" class="text-xs font-medium text-gray-500 tracking-wide"></span>
                     </div>
@@ -101,15 +112,15 @@
                 </div>
                 
                 <div class="flex-1 flex flex-col gap-6">
-                    <div class="flex-1 flex flex-col border-2 border-gray-900 rounded-sm">
-                        <div class="border-b-2 border-gray-900 p-2 flex justify-between items-center bg-gray-50">
+                    <div id="container-sat" class="flex-1 flex flex-col border-2 border-gray-900 rounded-sm transition-all duration-300">
+                        <div id="header-sat" class="border-b-2 border-gray-900 p-2 flex justify-between items-center bg-gray-50 transition-colors duration-300">
                             <span class="font-bold text-xs uppercase tracking-wider text-gray-800">Saturday</span>
                             <span id="date-sat" class="text-xs font-medium text-gray-500 tracking-wide"></span>
                         </div>
                         <textarea id="day-sat" oninput="saveWeekData()" class="flex-grow w-full bg-transparent resize-none p-3 text-gray-800 leading-[24px] scroller"></textarea>
                     </div>
-                    <div class="flex-1 flex flex-col border-2 border-gray-900 rounded-sm">
-                        <div class="border-b-2 border-gray-900 p-2 flex justify-between items-center bg-gray-50">
+                    <div id="container-sun" class="flex-1 flex flex-col border-2 border-gray-900 rounded-sm transition-all duration-300">
+                        <div id="header-sun" class="border-b-2 border-gray-900 p-2 flex justify-between items-center bg-gray-50 transition-colors duration-300">
                             <span class="font-bold text-xs uppercase tracking-wider text-gray-800">Sunday</span>
                             <span id="date-sun" class="text-xs font-medium text-gray-500 tracking-wide"></span>
                         </div>
@@ -122,76 +133,187 @@
     </div>
 
     <script>
-        const WEEK_DB_KEY = 'sidekickWeeklyData';
+        const WEEK_DB_KEY = 'sidekickWeeklyData_v2'; 
         const DATE_DB_KEY = 'sidekickWeekStart';
         const days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 
         document.addEventListener('DOMContentLoaded', () => {
-            loadWeekData();
+            initApp();
         });
+
+        function getMondayOfCurrentWeek() {
+            const today = new Date();
+            const dayOfWeek = today.getDay(); 
+            const distanceToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+            
+            const monday = new Date(today);
+            monday.setDate(today.getDate() + distanceToMonday);
+            return monday;
+        }
+
+        function formatDateForInput(dateObj) {
+            const y = dateObj.getFullYear();
+            const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const d = String(dateObj.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
+        function initApp() {
+            const savedDate = localStorage.getItem(DATE_DB_KEY);
+            if (savedDate) {
+                document.getElementById('week-start').value = savedDate;
+            } else {
+                document.getElementById('week-start').value = formatDateForInput(getMondayOfCurrentWeek());
+            }
+            calculateDates(); 
+        }
+
+        function goToCurrentWeek() {
+            const monday = getMondayOfCurrentWeek();
+            document.getElementById('week-start').value = formatDateForInput(monday);
+            calculateDates();
+        }
+
+        function changeWeek(daysToAdd) {
+            const dateInput = document.getElementById('week-start').value;
+            if (!dateInput) return;
+
+            const [year, month, day] = dateInput.split('-');
+            const currentDate = new Date(year, month - 1, day);
+            
+            currentDate.setDate(currentDate.getDate() + daysToAdd);
+            document.getElementById('week-start').value = formatDateForInput(currentDate);
+            
+            calculateDates();
+        }
 
         function calculateDates() {
             const dateInput = document.getElementById('week-start').value;
             if (!dateInput) return;
 
-            // Save the selected date so it persists on reload
             localStorage.setItem(DATE_DB_KEY, dateInput);
 
-            // Split the input (YYYY-MM-DD) to build a local date object securely
-            // This prevents timezone offset bugs where Monday becomes Sunday night
             const [year, month, day] = dateInput.split('-');
             const startDate = new Date(year, month - 1, day);
+            
+            const realToday = new Date();
+            realToday.setHours(0, 0, 0, 0);
 
             days.forEach((id, index) => {
                 const currentDate = new Date(startDate);
                 currentDate.setDate(startDate.getDate() + index);
+                currentDate.setHours(0, 0, 0, 0);
 
-                // Format as DD-Month-YYYY
                 const dayStr = String(currentDate.getDate()).padStart(2, '0');
-                const monthStr = currentDate.toLocaleString('default', { month: 'long' });
+                const monthStr = currentDate.toLocaleString('default', { month: 'short' });
                 const yearStr = currentDate.getFullYear();
+                document.getElementById(`date-${id}`).textContent = `${dayStr}-${monthStr}-${yearStr}`;
 
-                const formattedDate = `${dayStr}-${monthStr}-${yearStr}`;
+                const container = document.getElementById(`container-${id}`);
+                const header = document.getElementById(`header-${id}`);
                 
-                const dateSpan = document.getElementById(`date-${id}`);
-                if (dateSpan) {
-                    dateSpan.textContent = formattedDate;
+                container.className = 'flex-1 flex flex-col border-2 rounded-sm transition-all duration-300';
+                header.className = 'border-b-2 p-2 flex justify-between items-center transition-colors duration-300';
+
+                if (currentDate < realToday) {
+                    container.classList.add('border-gray-900', 'opacity-50', 'bg-gray-100');
+                    header.classList.add('border-gray-900', 'bg-gray-200');
+                    header.querySelector('span').classList.remove('text-blue-900');
+                } else if (currentDate.getTime() === realToday.getTime()) {
+                    container.classList.add('border-blue-600', 'shadow-md', 'bg-white');
+                    header.classList.add('border-blue-600', 'bg-blue-100');
+                    header.querySelector('span').classList.add('text-blue-900');
+                } else {
+                    container.classList.add('border-gray-900', 'bg-white');
+                    header.classList.add('border-gray-900', 'bg-gray-50');
+                    header.querySelector('span').classList.remove('text-blue-900');
                 }
             });
+
+            loadWeekData(dateInput);
         }
 
-        function loadWeekData() {
-            // Load Text Data
-            const storedData = JSON.parse(localStorage.getItem(WEEK_DB_KEY)) || {};
+        function loadWeekData(weekKey) {
+            const allData = JSON.parse(localStorage.getItem(WEEK_DB_KEY)) || {};
+            const thisWeekData = allData[weekKey] || {};
+
             days.forEach(day => {
                 const el = document.getElementById(`day-${day}`);
-                if (el) el.value = storedData[day] || '';
+                if (el) el.value = thisWeekData[day] || '';
             });
-
-            // Load Date Data
-            const savedDate = localStorage.getItem(DATE_DB_KEY);
-            if (savedDate) {
-                document.getElementById('week-start').value = savedDate;
-                calculateDates(); // Trigger the math to populate the headers
-            }
         }
 
         function saveWeekData() {
-            const data = {};
+            const weekKey = document.getElementById('week-start').value;
+            const allData = JSON.parse(localStorage.getItem(WEEK_DB_KEY)) || {};
+            
+            if (!allData[weekKey]) {
+                allData[weekKey] = {};
+            }
+
             days.forEach(day => {
                 const el = document.getElementById(`day-${day}`);
-                if (el) data[day] = el.value;
+                if (el) allData[weekKey][day] = el.value;
             });
-            localStorage.setItem(WEEK_DB_KEY, JSON.stringify(data));
+
+            localStorage.setItem(WEEK_DB_KEY, JSON.stringify(allData));
         }
 
         function clearWeek() {
-            if (confirm("Are you sure you want to clear the entire week? This cannot be undone.")) {
-                localStorage.removeItem(WEEK_DB_KEY);
+            const weekKey = document.getElementById('week-start').value;
+            if (confirm(`Are you sure you want to clear data for the week of ${weekKey}?`)) {
+                const allData = JSON.parse(localStorage.getItem(WEEK_DB_KEY)) || {};
+                delete allData[weekKey]; 
+                localStorage.setItem(WEEK_DB_KEY, JSON.stringify(allData));
+                
                 days.forEach(day => {
                     const el = document.getElementById(`day-${day}`);
                     if (el) el.value = '';
                 });
+            }
+        }
+
+        // Exporter Function for Obsidian/Notes
+        async function copyToNotes() {
+            const dateInput = document.getElementById('week-start').value;
+            let exportText = `# SIDEKICK: Week of ${dateInput}\n\n`;
+            
+            const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+            let hasNotes = false;
+
+            // Loop through and extract only days that have text
+            days.forEach((id, index) => {
+                const text = document.getElementById(`day-${id}`).value.trim();
+                const dateSpan = document.getElementById(`date-${id}`).textContent;
+                
+                if (text) {
+                    exportText += `### ${dayNames[index]} (${dateSpan})\n`;
+                    exportText += `${text}\n\n`;
+                    hasNotes = true;
+                }
+            });
+
+            if (!hasNotes) {
+                exportText += "*No notes logged for this week.*";
+            }
+
+            try {
+                // Copy to clipboard
+                await navigator.clipboard.writeText(exportText.trim());
+                
+                // Visual feedback on the button
+                const btn = document.getElementById('copy-btn');
+                btn.innerText = 'COPIED!';
+                btn.classList.replace('text-gray-300', 'text-green-400');
+                btn.classList.replace('border-gray-600', 'border-green-400');
+                
+                setTimeout(() => {
+                    btn.innerText = 'COPY TO NOTES';
+                    btn.classList.replace('text-green-400', 'text-gray-300');
+                    btn.classList.replace('border-green-400', 'border-gray-600');
+                }, 2000);
+            } catch (err) {
+                alert('Failed to copy to clipboard. Your browser might block this action.');
             }
         }
     </script>
