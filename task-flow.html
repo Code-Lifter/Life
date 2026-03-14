@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TaskFlow Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .ring-circle {
+            transition: stroke-dashoffset 1s linear;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+
+        @keyframes pulse-finish {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(59, 130, 246, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+        }
+        .pulse-effect { animation: pulse-finish 0.5s ease-out; }
+
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans h-screen overflow-hidden flex justify-center items-center">
+
+    <div class="w-full max-w-md h-full bg-slate-900 flex flex-col relative shadow-2xl sm:rounded-3xl sm:h-[90vh] sm:border sm:border-slate-800 overflow-hidden">
+
+        <div class="px-6 py-5 bg-slate-900 z-10 flex justify-between items-center border-b border-slate-800">
+            <h1 class="text-xl font-bold tracking-tight text-blue-500">Task<span class="text-white">Flow</span></h1>
+            
+            <div class="flex items-center gap-4">
+                <span id="total-time-est" class="text-xs font-mono text-slate-400 bg-slate-800 px-2 py-1 rounded">0m</span>
+                <button id="btn-sound" onclick="toggleSound()" class="text-blue-400 hover:text-white transition-colors">
+                    <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <div id="view-builder" class="flex-1 flex flex-col overflow-hidden">
+            
+            <div class="px-4 py-3 bg-slate-900 flex justify-between gap-3 border-b border-slate-800 shadow-sm z-10">
+                <button onclick="exportRoutine()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-blue-400 text-xs font-bold py-2 rounded-lg transition border border-slate-700 flex justify-center items-center gap-2">
+                    ↓ EXPORT
+                </button>
+                <button onclick="document.getElementById('import-file').click()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-blue-400 text-xs font-bold py-2 rounded-lg transition border border-slate-700 flex justify-center items-center gap-2">
+                    ↑ IMPORT
+                </button>
+                <input type="file" id="import-file" accept=".json" class="hidden" onchange="importRoutine(event)">
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-4 no-scrollbar space-y-3" id="task-list"></div>
+
+            <div class="p-4 bg-slate-800 border-t border-slate-700 shadow-xl z-20">
+                <div class="flex gap-2 mb-3">
+                    <input type="text" id="input-name" placeholder="Task (e.g. Vacuum)" 
+                        class="flex-[2] bg-slate-700 text-white placeholder-slate-400 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition border border-slate-600 min-w-0">
+                    <div class="flex gap-1 w-28">
+                        <div class="relative w-full">
+                            <input type="number" id="input-min" placeholder="0" class="w-full bg-slate-700 text-white px-2 py-3 rounded-xl text-center focus:outline-none focus:ring-2 focus:ring-blue-500 border border-slate-600">
+                            <span class="absolute right-1 top-3 text-slate-500 text-[10px] font-bold pointer-events-none">M</span>
+                        </div>
+                        <div class="relative w-full">
+                            <input type="number" id="input-sec" placeholder="0" value="30" class="w-full bg-slate-700 text-white px-2 py-3 rounded-xl text-center focus:outline-none focus:ring-2 focus:ring-blue-500 border border-slate-600">
+                            <span class="absolute right-1 top-3 text-slate-500 text-[10px] font-bold pointer-events-none">S</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="addTask()" class="w-full bg-slate-700 hover:bg-slate-600 text-blue-400 font-bold py-3 rounded-xl mb-4 border border-slate-600 border-dashed transition active:scale-98">
+                    + ADD TASK
+                </button>
+
+                <div class="bg-slate-700 p-2 rounded-lg flex items-center justify-between px-4 border border-slate-600 mb-4">
+                    <span class="text-xs text-slate-400 uppercase font-bold">Prep/Walk Time</span>
+                    <div class="flex items-center gap-3">
+                        <button onclick="adjustBuffer(-5)" class="text-orange-400 font-bold text-xl hover:text-white px-2">-</button>
+                        <span id="display-buffer" class="font-mono font-bold w-6 text-center">15</span>
+                        <button onclick="adjustBuffer(5)" class="text-orange-400 font-bold text-xl hover:text-white px-2">+</button>
+                    </div>
+                </div>
+
+                <button onclick="startRoutine()" class="w-full bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold py-4 rounded-xl shadow-lg hover:brightness-110 transition transform active:scale-95 flex items-center justify-center gap-2 tracking-wide">
+                    START CRUSHING IT
+                </button>
+            </div>
+        </div>
+
+        <div id="view-player" class="absolute inset-0 bg-slate-900 flex flex-col items-center hidden z-50">
+            
+            <div class="w-full px-6 py-6 flex justify-between items-end relative z-50">
+                <button onclick="stopRoutine()" class="bg-slate-800 hover:bg-red-900/50 text-slate-300 hover:text-red-400 px-4 py-2 rounded-lg text-xs font-bold tracking-wider uppercase transition">
+                    ✕ Exit
+                </button>
+                <div class="flex flex-col items-end pointer-events-none">
+                    <span id="player-progress" class="text-slate-500 text-xs font-bold uppercase tracking-widest">Task 1/5</span>
+                </div>
+            </div>
+
+            <div class="flex-1 flex flex-col items-center justify-center w-full relative -mt-10 z-0">
+                <div class="relative mb-8 transform scale-110" id="timer-container">
+                    <svg class="w-72 h-72 drop-shadow-2xl">
+                        <circle class="text-slate-800" stroke-width="8" stroke="currentColor" fill="transparent" r="135" cx="50%" cy="50%" />
+                        <circle id="progress-ring" class="text-blue-500 ring-circle" stroke-width="8" stroke-linecap="round" stroke="currentColor" fill="transparent" r="135" cx="50%" cy="50%" />
+                    </svg>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                        <span id="phase-label" class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">ACTION</span>
+                        <h2 id="current-timer" class="text-7xl font-mono font-bold text-white tracking-tighter">60</h2>
+                    </div>
+                </div>
+
+                <div class="text-center px-4 w-full">
+                    <h2 id="current-name" class="text-3xl font-bold text-white mb-2 truncate">Task Name</h2>
+                    <div id="next-container" class="transition-opacity duration-300 h-10">
+                        <p class="text-slate-500 text-xs uppercase font-bold tracking-wide">Up Next: <span id="next-name" class="text-slate-300">Next Task</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="w-full px-8 pb-10 flex flex-col items-center gap-4 z-50">
+                <button onclick="addTime(30)" class="px-6 py-2 bg-slate-800 border border-slate-700 text-slate-300 rounded-full text-sm font-bold uppercase tracking-wider hover:bg-slate-700 hover:text-white transition active:scale-95 shadow-md">
+                    +30 Secs
+                </button>
+                <div class="flex items-center justify-center gap-8 w-full">
+                    <button onclick="skipStep(-1)" class="p-4 rounded-full text-slate-500 hover:bg-slate-800 transition">⏮</button>
+                    <button onclick="togglePause()" id="btn-pause" class="w-20 h-20 bg-blue-500 hover:bg-blue-400 rounded-full flex items-center justify-center text-slate-900 shadow-xl shadow-blue-500/20 transition transform active:scale-95 text-3xl">
+                        <span id="icon-pause">⏸</span>
+                        <span id="icon-play" class="hidden pl-1">▶</span>
+                    </button>
+                    <button onclick="skipStep(1)" class="p-4 rounded-full text-slate-500 hover:bg-slate-800 transition">⏭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let audioCtx = null;
+        let soundEnabled = true;
+
+        // --- AUDIO & TTS ENGINE ---
+        function initAudio() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContext();
+            }
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance('');
+                utterance.volume = 0;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function speak(text) {
+            if (!soundEnabled || !('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel(); 
+            const msg = new SpeechSynthesisUtterance(text);
+            msg.rate = 1.05; 
+            msg.pitch = 1;
+            window.speechSynthesis.speak(msg);
+        }
+
+        function playTone(freq, type, duration) {
+            if(!soundEnabled || !audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        function playBeepLow() { playTone(440, 'sine', 0.5); } 
+        function playFinished() { 
+            if(!soundEnabled || !audioCtx) return;
+            setTimeout(() => playTone(523.25, 'triangle', 0.2), 0);
+            setTimeout(() => playTone(659.25, 'triangle', 0.2), 200);
+            setTimeout(() => playTone(783.99, 'triangle', 0.4), 400);
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const btn = document.getElementById('btn-sound');
+            btn.classList.toggle('text-slate-700');
+            btn.classList.toggle('text-blue-400');
+            if(!soundEnabled) window.speechSynthesis.cancel();
+        }
+
+        // --- APP STATE & LOGIC ---
+        let tasks = JSON.parse(localStorage.getItem('ft_tasks')) || [];
+        let settings = JSON.parse(localStorage.getItem('ft_settings_v2')) || { buffer: 15 };
+
+        let queue = [];
+        let currentIdx = 0;
+        let timerInterval = null;
+        let timeLeft = 0;
+        let isPaused = false;
+        let totalStepDuration = 0;
+        let draggedIdx = null;
+
+        document.getElementById('display-buffer').innerText = settings.buffer;
+        renderList();
+        updateTotalEst();
+
+        // --- JSON DATA IMPORT/EXPORT ---
+        function exportRoutine() {
+            if (tasks.length === 0) {
+                alert("Add some tasks before exporting!");
+                return;
+            }
+            const data = { tasks: tasks, settings: settings };
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
+            const downloadNode = document.createElement('a');
+            downloadNode.setAttribute("href", dataStr);
+            downloadNode.setAttribute("download", "TaskFlow_Routine.json");
+            document.body.appendChild(downloadNode);
+            downloadNode.click();
+            downloadNode.remove();
+        }
+
+        function importRoutine(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    // Bulletproof check to ensure the file is actually our format
+                    if (importedData.tasks && Array.isArray(importedData.tasks)) {
+                        tasks = importedData.tasks;
+                        if(importedData.settings && importedData.settings.buffer !== undefined) {
+                            settings = importedData.settings;
+                        }
+                        save();
+                        renderList();
+                        document.getElementById('display-buffer').innerText = settings.buffer;
+                        // Optional: subtle visual confirmation instead of an alert
+                        console.log("Routine imported successfully.");
+                    } else {
+                        alert("Invalid JSON format. Are you sure this is a TaskFlow file?");
+                    }
+                } catch (err) {
+                    alert("Error reading JSON file. It might be corrupted.");
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = ""; // Reset input so you can re-import the exact same file later
+        }
+
+        // --- BUILDER FUNCTIONS ---
+        function addTask() {
+            const nameIn = document.getElementById('input-name');
+            const minIn = parseInt(document.getElementById('input-min').value) || 0;
+            const secIn = parseInt(document.getElementById('input-sec').value) || 0;
+            
+            const totalSecs = (minIn * 60) + secIn;
+            
+            if(!nameIn.value.trim() || totalSecs <= 0) return;
+            
+            tasks.push({ id: Date.now(), name: nameIn.value.trim(), time: totalSecs, active: true });
+            save(); 
+            renderList();
+            
+            nameIn.value = ""; 
+            document.getElementById('input-min').value = "";
+            document.getElementById('input-sec').value = "30";
+            nameIn.focus();
+        }
+
+        function updateTaskName(id, newName) {
+            const task = tasks.find(t => t.id === id);
+            if(task && newName.trim()) task.name = newName.trim();
+            save();
+        }
+
+        function updateTaskTime(id, minStr, secStr) {
+            const min = parseInt(minStr) || 0;
+            const sec = parseInt(secStr) || 0;
+            const total = (min * 60) + sec;
+            
+            const task = tasks.find(t => t.id === id);
+            if(task && total > 0) task.time = total;
+            save();
+            updateTotalEst();
+        }
+
+        function toggleActive(id) {
+            const s = tasks.find(x => x.id === id);
+            if(s) s.active = !s.active;
+            save(); 
+            renderList();
+        }
+
+        function deleteTask(id) {
+            tasks = tasks.filter(x => x.id !== id);
+            save(); 
+            renderList();
+        }
+
+        function moveTask(index, direction) {
+            if (index + direction < 0 || index + direction >= tasks.length) return;
+            const item = tasks.splice(index, 1)[0];
+            tasks.splice(index + direction, 0, item);
+            save();
+            renderList();
+        }
+
+        function adjustBuffer(n) {
+            settings.buffer += n;
+            if(settings.buffer < 0) settings.buffer = 0;
+            document.getElementById('display-buffer').innerText = settings.buffer;
+            save();
+        }
+
+        function save() {
+            localStorage.setItem('ft_tasks', JSON.stringify(tasks));
+            localStorage.setItem('ft_settings_v2', JSON.stringify(settings));
+            updateTotalEst();
+        }
+
+        function updateTotalEst() {
+            const active = tasks.filter(s => s.active);
+            if(!active.length) { document.getElementById('total-time-est').innerText = "0m"; return; }
+            let totalSecs = active.reduce((acc, curr) => acc + curr.time + settings.buffer, 0);
+            const m = Math.floor(totalSecs / 60);
+            document.getElementById('total-time-est').innerText = `~${m}m`;
+        }
+
+        function formatDisplayTime(secs) {
+            if (secs < 60) return secs.toString();
+            const m = Math.floor(secs / 60);
+            const s = secs % 60;
+            return `${m}:${s < 10 ? '0' : ''}${s}`;
+        }
+
+        function renderList() {
+            const list = document.getElementById('task-list');
+            list.innerHTML = "";
+            
+            if(tasks.length === 0) {
+                list.innerHTML = `<div class="text-center text-slate-600 mt-10 p-4 border-2 border-dashed border-slate-800 rounded-xl">Add your first task below</div>`;
+                return;
+            }
+            
+            tasks.forEach((s, index) => {
+                const el = document.createElement('div');
+                el.className = `flex items-center p-3 rounded-xl border border-slate-800 transition-all cursor-grab active:cursor-grabbing ${s.active ? 'bg-slate-800/50 opacity-100' : 'bg-slate-900 opacity-50'}`;
+                el.draggable = true;
+                
+                const m = Math.floor(s.time / 60);
+                const sec = s.time % 60;
+                
+                el.innerHTML = `
+                    <div class="hidden sm:block mr-3 text-slate-500 hover:text-slate-300 text-lg cursor-grab">☰</div>
+                    <button onclick="toggleActive(${s.id})" class="mr-4 text-2xl transition-colors ${s.active ? 'text-blue-500' : 'text-slate-600'}">${s.active ? '◉' : '○'}</button>
+                    
+                    <div class="flex-1 pr-2 flex flex-col gap-1 min-w-0">
+                        <input type="text" onchange="updateTaskName(${s.id}, this.value)" value="${s.name}" 
+                            class="font-bold text-slate-200 bg-transparent border-b border-transparent hover:border-slate-600 focus:border-blue-500 focus:outline-none w-full truncate transition-colors">
+                        
+                        <div class="flex items-center gap-1 text-xs text-slate-400 font-mono">
+                            <input type="number" id="edit-min-${s.id}" onchange="updateTaskTime(${s.id}, this.value, document.getElementById('edit-sec-${s.id}').value)" value="${m}" 
+                                class="w-8 bg-transparent text-right border-b border-transparent hover:border-slate-600 focus:border-blue-500 focus:outline-none transition-colors">m
+                            <input type="number" id="edit-sec-${s.id}" onchange="updateTaskTime(${s.id}, document.getElementById('edit-min-${s.id}').value, this.value)" value="${sec}" 
+                                class="w-8 bg-transparent text-right border-b border-transparent hover:border-slate-600 focus:border-blue-500 focus:outline-none transition-colors">s
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-1 mr-2">
+                        <button onclick="moveTask(${index}, -1)" class="text-slate-500 hover:text-blue-400 bg-slate-800 rounded px-2 py-0.5 text-xs">▲</button>
+                        <button onclick="moveTask(${index}, 1)" class="text-slate-500 hover:text-blue-400 bg-slate-800 rounded px-2 py-0.5 text-xs">▼</button>
+                    </div>
+                    <button onclick="deleteTask(${s.id})" class="text-slate-600 hover:text-red-400 p-2 z-10 text-lg">✕</button>`;
+                
+                // --- Drag and Drop Events ---
+                el.addEventListener('dragstart', () => {
+                    draggedIdx = index;
+                    setTimeout(() => el.classList.add('opacity-30', 'border-dashed', 'border-blue-500'), 0);
+                });
+                
+                el.addEventListener('dragover', (e) => e.preventDefault());
+                
+                el.addEventListener('dragenter', (e) => {
+                    e.preventDefault();
+                    if(index !== draggedIdx) el.classList.add('border-blue-500', 'bg-slate-700');
+                });
+                
+                el.addEventListener('dragleave', () => el.classList.remove('border-blue-500', 'bg-slate-700'));
+                
+                el.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    el.classList.remove('border-blue-500', 'bg-slate-700');
+                    if (draggedIdx === null || draggedIdx === index) return;
+                    
+                    const movedItem = tasks.splice(draggedIdx, 1)[0];
+                    tasks.splice(index, 0, movedItem);
+                    save(); 
+                    renderList();
+                });
+                
+                el.addEventListener('dragend', () => {
+                    el.classList.remove('opacity-30', 'border-dashed', 'border-blue-500');
+                    draggedIdx = null;
+                });
+
+                list.appendChild(el);
+            });
+        }
+
+        // --- PLAYER ENGINE ---
+        function startRoutine() {
+            const active = tasks.filter(s => s.active);
+            if(!active.length) return alert("Select at least one task.");
+            initAudio(); 
+            queue = [];
+            
+            active.forEach((s, i) => {
+                if(settings.buffer > 0) {
+                    queue.push({ type: 'buffer', name: "Transition", nextName: s.name, time: settings.buffer, taskNum: i + 1, totalTasks: active.length });
+                }
+                const nextS = (i === active.length - 1) ? "Finished" : active[i+1].name;
+                queue.push({ type: 'work', name: s.name, nextName: nextS, time: s.time, taskNum: i + 1, totalTasks: active.length });
+            });
+            
+            queue.push({ type: 'finish' });
+            
+            document.getElementById('view-builder').classList.add('hidden');
+            document.getElementById('view-player').classList.remove('hidden');
+            currentIdx = 0; 
+            loadStep();
+        }
+
+        function loadStep() {
+            const step = queue[currentIdx];
+            const ring = document.getElementById('progress-ring');
+            const phaseLabel = document.getElementById('phase-label');
+
+            if(step.type === 'finish') { 
+                playFinished(); 
+                speak("All tasks completed. Great job.");
+                stopRoutine(); 
+                return; 
+            }
+
+            timeLeft = step.time;
+            totalStepDuration = step.time;
+            isPaused = false;
+            updatePlayIcon();
+
+            document.getElementById('current-timer').innerText = formatDisplayTime(timeLeft);
+            document.getElementById('current-name').innerText = step.name;
+            document.getElementById('player-progress').innerText = `TASK ${step.taskNum}/${step.totalTasks}`;
+            
+            if(step.type === 'buffer') {
+                ring.classList.remove('text-blue-500'); ring.classList.add('text-orange-400');
+                phaseLabel.innerText = "MOVE TO NEXT"; phaseLabel.classList.remove('text-blue-500'); phaseLabel.classList.add('text-orange-400');
+                document.getElementById('next-container').classList.remove('opacity-0');
+                document.getElementById('next-name').innerText = step.nextName;
+                speak(`Get ready for: ${step.nextName}`);
+            } else {
+                ring.classList.add('text-blue-500'); ring.classList.remove('text-orange-400');
+                phaseLabel.innerText = "ACTION"; phaseLabel.classList.add('text-blue-500'); phaseLabel.classList.remove('text-orange-400');
+                document.getElementById('next-container').classList.add('opacity-0');
+                speak(`Start: ${step.name}`);
+            }
+            
+            updateRingOffset(0);
+            if(timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(tick, 1000);
+        }
+
+        function tick() {
+            if(isPaused) return;
+            timeLeft--;
+            document.getElementById('current-timer').innerText = formatDisplayTime(timeLeft);
+            
+            if (timeLeft === 10) speak("10 seconds left");
+            if (timeLeft > 0 && timeLeft <= 3) playBeepLow();
+            
+            const percentDone = (totalStepDuration - timeLeft) / totalStepDuration;
+            updateRingOffset(percentDone);
+            if(timeLeft <= 0) { 
+                clearInterval(timerInterval); 
+                pulseEffect(); 
+                currentIdx++; 
+                loadStep(); 
+            }
+        }
+
+        function addTime(secs) {
+            if(queue[currentIdx].type === 'finish') return;
+            timeLeft += secs;
+            totalStepDuration += secs; 
+            document.getElementById('current-timer').innerText = formatDisplayTime(timeLeft);
+            const percentDone = (totalStepDuration - timeLeft) / totalStepDuration;
+            updateRingOffset(percentDone);
+        }
+
+        function updateRingOffset(percent) {
+            const r = 135; const c = 2 * Math.PI * r; const val = c * percent; 
+            document.getElementById('progress-ring').style.strokeDasharray = `${c} ${c}`;
+            document.getElementById('progress-ring').style.strokeDashoffset = val;
+        }
+
+        function pulseEffect() {
+            const container = document.getElementById('timer-container');
+            container.classList.remove('pulse-effect'); 
+            void container.offsetWidth; 
+            container.classList.add('pulse-effect');
+        }
+
+        function togglePause() { 
+            isPaused = !isPaused; 
+            updatePlayIcon(); 
+            if(isPaused) window.speechSynthesis.cancel();
+        }
+
+        function updatePlayIcon() {
+            const p = document.getElementById('icon-pause'); 
+            const pl = document.getElementById('icon-play');
+            if(isPaused) { 
+                p.classList.add('hidden'); 
+                pl.classList.remove('hidden'); 
+            } else { 
+                p.classList.remove('hidden'); 
+                pl.classList.add('hidden'); 
+            }
+        }
+
+        function skipStep(dir) {
+            let next = currentIdx + dir;
+            if(next < 0) next = 0; 
+            if(next >= queue.length - 1) { stopRoutine(); return; }
+            currentIdx = next; 
+            loadStep();
+        }
+
+        function stopRoutine() {
+            clearInterval(timerInterval);
+            window.speechSynthesis.cancel();
+            document.getElementById('view-player').classList.add('hidden');
+            document.getElementById('view-builder').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
