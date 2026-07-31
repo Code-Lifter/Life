@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WOOP Goal Wizard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4 font-sans text-slate-800">
+
+    <div class="bg-white max-w-lg w-full rounded-2xl shadow-xl overflow-hidden">
+        <!-- Header -->
+        <div class="bg-violet-600 p-6 text-white text-center">
+            <h1 class="text-2xl font-bold">WOOP Goal Builder</h1>
+            <p class="text-violet-100 text-sm mt-1">Wish, Outcome, Obstacle, Plan.</p>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="bg-slate-200 h-1.5 w-full">
+            <div id="progress-bar" class="bg-violet-500 h-1.5 transition-all duration-300 w-0"></div>
+        </div>
+
+        <!-- Wizard Content -->
+        <div class="p-6 md:p-8">
+            
+            <!-- Step 1: Wish -->
+            <div class="wizard-step block" id="step-0">
+                <h2 class="text-xl font-bold mb-2">Wish <span class="text-slate-400 font-normal text-sm">(1/4)</span></h2>
+                <p class="text-slate-600 mb-4">What is an exciting, challenging, but feasible goal you want to achieve?</p>
+                <label class="block text-sm font-medium mb-1">My wish is to...</label>
+                <input type="text" id="input-w" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none" placeholder="e.g., go for a 30-minute run after work">
+            </div>
+
+            <!-- Step 2: Outcome -->
+            <div class="wizard-step hidden" id="step-1">
+                <h2 class="text-xl font-bold mb-2">Outcome <span class="text-slate-400 font-normal text-sm">(2/4)</span></h2>
+                <p class="text-slate-600 mb-4">Imagine you achieve this wish. What is the absolute best result or feeling?</p>
+                <label class="block text-sm font-medium mb-1">The best outcome is...</label>
+                <input type="text" id="input-o1" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none" placeholder="e.g., feeling energized and proud of myself">
+            </div>
+
+            <!-- Step 3: Obstacle -->
+            <div class="wizard-step hidden" id="step-2">
+                <h2 class="text-xl font-bold mb-2">Obstacle <span class="text-slate-400 font-normal text-sm">(3/4)</span></h2>
+                <p class="text-slate-600 mb-4">What is your main <strong>internal</strong> obstacle? What is it within <em>you</em> that holds you back?</p>
+                <label class="block text-sm font-medium mb-1">My main internal obstacle is...</label>
+                <input type="text" id="input-o2" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none" placeholder="e.g., feeling exhausted and crashing on the couch">
+            </div>
+
+            <!-- Step 4: Plan -->
+            <div class="wizard-step hidden" id="step-3">
+                <h2 class="text-xl font-bold mb-2">Plan <span class="text-slate-400 font-normal text-sm">(4/4)</span></h2>
+                <p class="text-slate-600 mb-4">What can you do to overcome your obstacle? Create an "If / Then" rule.</p>
+                <div class="bg-violet-50 p-4 rounded-lg border border-violet-100 mb-4">
+                    <p class="text-sm font-medium text-violet-800">If <span id="dynamic-obstacle" class="font-bold underline decoration-violet-300">...</span></p>
+                </div>
+                <label class="block text-sm font-medium mb-1">Then I will...</label>
+                <input type="text" id="input-p" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none" placeholder="e.g., put on my running shoes immediately before sitting down">
+            </div>
+
+            <!-- Final Result Step -->
+            <div class="wizard-step hidden" id="step-4">
+                <div class="text-center mb-6">
+                    <div class="bg-violet-100 text-violet-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">✓</div>
+                    <h2 class="text-2xl font-bold">Your WOOP Plan</h2>
+                    <p class="text-slate-600 mt-2">Memorize this sequence to bypass your procrastination.</p>
+                </div>
+                
+                <div class="bg-slate-50 border border-slate-200 p-5 rounded-xl space-y-4">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">The Vision</span>
+                        <p id="final-vision-text" class="text-slate-700 font-medium"></p>
+                    </div>
+                    <hr class="border-slate-200">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-violet-500">The Contingency Plan</span>
+                        <p id="final-plan-text" class="text-lg leading-relaxed text-violet-900 font-bold italic"></p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="bg-slate-50 p-4 border-t border-slate-200 flex justify-between">
+            <button id="btn-prev" class="px-5 py-2.5 text-slate-600 font-medium hover:text-slate-900 hidden transition-colors" onclick="prevStep()">← Back</button>
+            <div class="flex-grow"></div>
+            <button id="btn-next" class="bg-violet-600 hover:bg-violet-700 text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-colors" onclick="nextStep()">Next Step →</button>
+            <button id="btn-restart" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-6 py-2.5 rounded-lg font-medium shadow-sm hidden transition-colors" onclick="restartWizard()">Start Over</button>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        let currentStep = 0;
+        const totalSteps = 4; // 0 through 3 are inputs, 4 is the result
+
+        function updateUI() {
+            // Hide all steps
+            document.querySelectorAll('.wizard-step').forEach(step => {
+                step.classList.add('hidden');
+                step.classList.remove('block');
+            });
+
+            // Show current step
+            document.getElementById(`step-${currentStep}`).classList.remove('hidden');
+            document.getElementById(`step-${currentStep}`).classList.add('block');
+
+            // Update Progress Bar
+            const progressPercentage = (currentStep / totalSteps) * 100;
+            document.getElementById('progress-bar').style.width = `${progressPercentage}%`;
+
+            // Inject the obstacle dynamically into the Step 3 UI
+            if (currentStep === 3) {
+                const obstacleInput = document.getElementById('input-o2').value.trim() || "[my internal obstacle arises]";
+                document.getElementById('dynamic-obstacle').innerText = obstacleInput;
+            }
+
+            // Handle Buttons
+            const btnPrev = document.getElementById('btn-prev');
+            const btnNext = document.getElementById('btn-next');
+            const btnRestart = document.getElementById('btn-restart');
+
+            // Back button logic
+            if (currentStep === 0 || currentStep === totalSteps) {
+                btnPrev.classList.add('hidden');
+            } else {
+                btnPrev.classList.remove('hidden');
+            }
+
+            // Next / Generate / Restart button logic
+            if (currentStep === totalSteps) {
+                // We are on the result page
+                btnNext.classList.add('hidden');
+                btnRestart.classList.remove('hidden');
+                generateGoalText();
+            } else if (currentStep === totalSteps - 1) {
+                // On the last input step
+                btnNext.innerText = "Lock in Plan ⚡";
+                btnNext.classList.remove('hidden');
+                btnRestart.classList.add('hidden');
+            } else {
+                // Standard input steps
+                btnNext.innerText = "Next Step →";
+                btnNext.classList.remove('hidden');
+                btnRestart.classList.add('hidden');
+            }
+        }
+
+        function nextStep() {
+            const inputs = ['input-w', 'input-o1', 'input-o2', 'input-p'];
+            if (currentStep < totalSteps) {
+                const currentInput = document.getElementById(inputs[currentStep]).value.trim();
+                if (!currentInput) {
+                    alert("Please fill out this step to continue.");
+                    return;
+                }
+                currentStep++;
+                updateUI();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                updateUI();
+            }
+        }
+
+        function restartWizard() {
+            // Clear inputs
+            document.getElementById('input-w').value = '';
+            document.getElementById('input-o1').value = '';
+            document.getElementById('input-o2').value = '';
+            document.getElementById('input-p').value = '';
+            
+            currentStep = 0;
+            updateUI();
+        }
+
+        function generateGoalText() {
+            const w = document.getElementById('input-w').value.trim() || "[Wish]";
+            const o1 = document.getElementById('input-o1').value.trim() || "[Outcome]";
+            const o2 = document.getElementById('input-o2').value.trim() || "[Obstacle]";
+            const p = document.getElementById('input-p').value.trim() || "[Plan]";
+
+            const visionStatement = `My wish is to ${w}, which will make me feel ${o1}.`;
+            const planStatement = `If ${o2}, then I will ${p}.`;
+            
+            document.getElementById('final-vision-text').innerText = visionStatement;
+            document.getElementById('final-plan-text').innerText = planStatement;
+        }
+    </script>
+</body>
+</html>
