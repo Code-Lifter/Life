@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinical Thought Record</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4 font-sans text-slate-800">
+
+    <div class="bg-white max-w-lg w-full rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
+        <!-- Header -->
+        <div class="bg-slate-800 p-5 text-white text-center shrink-0">
+            <h1 class="text-xl font-bold">Clinical Thought Record</h1>
+            <p class="text-slate-300 text-xs mt-1">Examine the evidence. Break the loop.</p>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="bg-slate-200 h-1.5 w-full shrink-0">
+            <div id="progress-bar" class="bg-blue-500 h-1.5 transition-all duration-300 w-0"></div>
+        </div>
+
+        <!-- Wizard Content (Scrollable) -->
+        <div class="p-6 md:p-8 overflow-y-auto flex-grow">
+            
+            <!-- Step 0: Trigger (Security Camera) -->
+            <div class="wizard-step block" id="step-0">
+                <h2 class="text-xl font-bold mb-2">The Trigger <span class="text-slate-400 font-normal text-sm">(1/10)</span></h2>
+                <p class="text-slate-600 mb-6 text-sm">Separate what actually happened from what you think it means.</p>
+                
+                <label class="block text-sm font-bold mb-1 text-slate-700">The Raw Facts</label>
+                <p class="text-xs text-slate-500 mb-2">Security camera rules: Only what could be seen or heard.</p>
+                <textarea id="input-facts" rows="2" class="w-full p-3 border border-slate-300 rounded-lg mb-4 focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="e.g., My boss didn't reply to my slack message."></textarea>
+
+                <label class="block text-sm font-bold mb-1 text-slate-700">The Interpretation</label>
+                <p class="text-xs text-slate-500 mb-2">What did you immediately assume this meant?</p>
+                <textarea id="input-interpretation" rows="2" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="e.g., She thinks I'm annoying."></textarea>
+            </div>
+
+            <!-- Step 1: Emotions (Multiple) -->
+            <div class="wizard-step hidden" id="step-1">
+                <h2 class="text-xl font-bold mb-2">The Emotions <span class="text-slate-400 font-normal text-sm">(2/10)</span></h2>
+                <p class="text-slate-600 mb-4 text-sm">Rate the intensity of everything you are feeling right now (Leave at 0 if not applicable).</p>
+                
+                <div class="space-y-4" id="emotion-sliders">
+                    <!-- Sliders generated here -->
+                </div>
+            </div>
+
+            <!-- Step 2: Automatic Thought -->
+            <div class="wizard-step hidden" id="step-2">
+                <h2 class="text-xl font-bold mb-2">Automatic Thought <span class="text-slate-400 font-normal text-sm">(3/10)</span></h2>
+                <p class="text-slate-600 mb-4 text-sm">What is the loudest, most distressing thought running through your mind right now?</p>
+                <textarea id="input-thought" rows="4" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="e.g., I'm going to be fired and I'll lose everything."></textarea>
+            </div>
+
+            <!-- Step 3: Evidence FOR -->
+            <div class="wizard-step hidden" id="step-3">
+                <h2 class="text-xl font-bold mb-2 text-red-600">Evidence FOR <span class="text-slate-400 font-normal text-sm">(4/10)</span></h2>
+                <p class="text-slate-600 mb-4 text-sm">Play devil's advocate. What undeniable, objective facts actually support this thought?</p>
+                <textarea id="input-evidence-for" rows="4" class="w-full p-3 border border-red-200 bg-red-50 rounded-lg focus:ring-2 focus:ring-red-500 focus:outline-none" placeholder="e.g., I did miss a deadline last week."></textarea>
+            </div>
+
+            <!-- Step 4: Evidence AGAINST -->
+            <div class="wizard-step hidden" id="step-4">
+                <h2 class="text-xl font-bold mb-2 text-green-600">Evidence AGAINST <span class="text-slate-400 font-normal text-sm">(5/10)</span></h2>
+                <p class="text-slate-600 mb-4 text-sm">Now be the defense attorney. What facts suggest this thought is incomplete, exaggerated, or false?</p>
+                <textarea id="input-evidence-against" rows="4" class="w-full p-3 border border-green-200 bg-green-50 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" placeholder="e.g., My overall performance review last month was highly positive."></textarea>
+            </div>
+
+            <!-- Step 5: Distortions -->
+            <div class="wizard-step hidden" id="step-5">
+                <h2 class="text-xl font-bold mb-2">Cognitive Traps <span class="text-slate-400 font-normal text-sm">(6/10)</span></h2>
+                <p class="text-slate-600 mb-4 text-sm">Which common logic flaws are sneaking into your thought process?</p>
+                
+                <div class="space-y-2 max-h-60 overflow-y-auto pr-1 text-sm">
+                    <label class="flex items-start space-x-3 p-3 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer">
+                        <input type="checkbox" value="Mind Reading" class="distortions mt-0.5 accent-blue-600 w-4 h-4">
+                        <div>
+                            <span class="block font-bold text-slate-800">Mind Reading</span>
+                            <span class="text-slate-500">Assuming you know what others are thinking.</span>
+                        </div>
+                    </label>
+                    <label class="flex items-start space-x-3 p-3 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer">
+                        <input type="checkbox" value="Catastrophising" class="distortions mt-0.5 accent-blue-600 w-4 h-4">
+                        <div>
+                            <span class="block font-bold text-slate-800">Catastrophising</span>
+                            <span class="text-slate-500">Blowing things entirely out of proportion.</span>
+                        </div>
+                    </label>
+                    <label class="flex items-start space-x-3 p-3 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer">
+                        <input type="checkbox" value="Fortune Telling" class="distortions mt-0.5 accent-blue-600 w-4 h-4">
+                        <div>
+                            <span class="block font-bold text-slate-800">Fortune Telling</span>
+                            <span class="text-slate-500">Predicting things will turn out badly without evidence.</span>
+                        </div>
+                    </label>
+                     <label class="flex items-start space-x-3 p-3 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer">
+                        <input type="checkbox" value="All-or-Nothing" class="distortions mt-0.5 accent-blue-600 w-4 h-4">
+                        <div>
+                            <span class="block font-bold text-slate-800">All-or-Nothing</span>
+                            <span class="text-slate-500">Viewing situations in extreme black or white categories.</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Step 6: Core Beliefs -->
+            <div class="wizard-step hidden" id="step-6">
+                <h2 class="text-xl font-bold mb-2">The Root <span class="text-slate-400 font-normal text-sm">(7/10)</span></h2>
+                <p class="text-slate-600 mb-4 text-sm">Have you had similar thoughts like this before? What deeper, recurring belief might this relate to?</p>
+                <select id="input-core-belief" class="w-full p-3 border border-slate-300 rounded-lg mb-4 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white text-sm">
+                    <option value="None">This is just a one-off situation.</option>
+                    <option value="Incompetence">"I'm not good enough / I'm incompetent."</option>
+                    <option value="Rejection">"People will eventually reject me."</option>
+                    <option value="Perfectionism">"I must be perfect or I am a failure."</option>
+                    <option value="Vulnerability">"The world is dangerous and I am not safe."</option>
+                </select>
+                <textarea id="input-core-notes" rows="2" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm" placeholder="Any additional notes on this pattern? (Optional)"></textarea>
+            </div>
+
+            <!-- Step 7: Balanced Conclusion -->
+            <div class="wizard-step hidden" id="step-7">
+                <h2 class="text-xl font-bold mb-2">The Reframe <span class="text-slate-400 font-normal text-sm">(8/10)</span></h2>
+                <p class="text-slate-600 mb-4 text-sm">Based on the evidence you just examined, what is the most balanced, realistic conclusion?</p>
+                <textarea id="input-reframe" rows="4" class="w-full p-3 border border-blue-300 bg-blue-50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Write the new thought here..."></textarea>
+            </div>
+
+            <!-- Step 8: Re-rate Emotions -->
+            <div class="wizard-step hidden" id="step-8">
+                <h2 class="text-xl font-bold mb-2">Check In <span class="text-slate-400 font-normal text-sm">(9/10)</span></h2>
+                <p class="text-slate-600 mb-4 text-sm">Read your balanced thought. How intense are those emotions now?</p>
+                <div id="rerate-container" class="space-y-4">
+                    <!-- Dynamically populated based on step 1 -->
+                </div>
+            </div>
+
+            <!-- Step 9: Action Plan -->
+            <div class="wizard-step hidden" id="step-9">
+                <h2 class="text-xl font-bold mb-2">The Action <span class="text-slate-400 font-normal text-sm">(10/10)</span></h2>
+                <p class="text-slate-600 mb-4 text-sm">CBT requires behaviour change. What specific, physical action will you take to test this new thought?</p>
+                <textarea id="input-action" rows="3" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="e.g., I will send a polite follow-up email tomorrow morning."></textarea>
+            </div>
+
+            <!-- Step 10: Final Result -->
+            <div class="wizard-step hidden" id="step-10">
+                <div class="text-center mb-6">
+                    <div class="bg-green-100 text-green-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">✓</div>
+                    <h2 class="text-2xl font-bold">Record Complete</h2>
+                </div>
+                
+                <div class="bg-slate-50 border border-slate-200 p-5 rounded-xl text-sm space-y-4">
+                    <div>
+                        <p class="text-slate-500 text-xs uppercase font-bold tracking-wider mb-1">Old Narrative</p>
+                        <p id="summary-old" class="text-slate-800 italic line-through"></p>
+                    </div>
+                    <div>
+                        <p class="text-slate-500 text-xs uppercase font-bold tracking-wider mb-1">Balanced Conclusion</p>
+                        <p id="summary-new" class="text-blue-900 font-bold"></p>
+                    </div>
+                    <div>
+                        <p class="text-slate-500 text-xs uppercase font-bold tracking-wider mb-1">Action Plan</p>
+                        <p id="summary-action" class="text-slate-800"></p>
+                    </div>
+                    
+                    <div class="pt-3 border-t border-slate-200" id="summary-deltas">
+                        <!-- Emotion drops injected here -->
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="bg-slate-100 p-4 border-t border-slate-200 flex justify-between shrink-0">
+            <button id="btn-prev" class="px-4 py-2 text-slate-600 font-medium hover:text-slate-900 hidden transition-colors" onclick="prevStep()">← Back</button>
+            <div class="flex-grow"></div>
+            <button id="btn-next" class="bg-slate-800 hover:bg-slate-900 text-white px-6 py-2 rounded-lg font-medium shadow-sm transition-colors" onclick="nextStep()">Next →</button>
+            <button id="btn-save" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium shadow-sm hidden transition-colors" onclick="saveRecord()">Save Offline</button>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 0;
+        const totalSteps = 10; 
+        const emotions = ['Anxiety', 'Sadness', 'Anger', 'Shame', 'Guilt'];
+        let activeEmotions = {}; // Stores original values
+
+        // Initialize Step 1 Sliders
+        const emoContainer = document.getElementById('emotion-sliders');
+        emotions.forEach(emo => {
+            emoContainer.innerHTML += `
+                <div>
+                    <div class="flex justify-between mb-1">
+                        <label class="text-sm font-medium text-slate-700">${emo}</label>
+                        <span id="val-${emo}" class="text-sm font-bold text-slate-500">0%</span>
+                    </div>
+                    <input type="range" id="input-${emo}" min="0" max="100" value="0" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="document.getElementById('val-${emo}').innerText = this.value + '%'">
+                </div>
+            `;
+        });
+
+        function updateUI() {
+            document.querySelectorAll('.wizard-step').forEach(step => step.classList.add('hidden'));
+            document.getElementById(`step-${currentStep}`).classList.remove('hidden');
+            document.getElementById(`step-${currentStep}`).classList.add('block');
+
+            const progressPercentage = (currentStep / totalSteps) * 100;
+            document.getElementById('progress-bar').style.width = `${progressPercentage}%`;
+
+            const btnPrev = document.getElementById('btn-prev');
+            const btnNext = document.getElementById('btn-next');
+            const btnSave = document.getElementById('btn-save');
+
+            btnPrev.classList.toggle('hidden', currentStep === 0 || currentStep === totalSteps);
+
+            if (currentStep === totalSteps) {
+                btnNext.classList.add('hidden');
+                btnSave.classList.remove('hidden');
+                generateSummary();
+            } else {
+                btnSave.classList.add('hidden');
+                btnNext.classList.remove('hidden');
+                btnNext.innerText = currentStep === totalSteps - 1 ? "Complete Review ✓" : "Next →";
+            }
+        }
+
+        function prepareRerateStep() {
+            // Capture which emotions were actually felt (>0)
+            activeEmotions = {};
+            emotions.forEach(emo => {
+                const val = parseInt(document.getElementById(`input-${emo}`).value);
+                if (val > 0) activeEmotions[emo] = val;
+            });
+
+            const rerateContainer = document.getElementById('rerate-container');
+            rerateContainer.innerHTML = '';
+
+            if (Object.keys(activeEmotions).length === 0) {
+                rerateContainer.innerHTML = '<p class="text-sm text-slate-500 italic">No emotions were rated above 0 in the beginning.</p>';
+                return;
+            }
+
+            for (const [emo, originalVal] of Object.entries(activeEmotions)) {
+                rerateContainer.innerHTML += `
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <label class="text-sm font-medium text-slate-700">${emo} (Started at ${originalVal}%)</label>
+                            <span id="new-val-${emo}" class="text-sm font-bold text-blue-600">${originalVal}%</span>
+                        </div>
+                        <input type="range" id="new-input-${emo}" min="0" max="100" value="${originalVal}" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="document.getElementById('new-val-${emo}').innerText = this.value + '%'">
+                    </div>
+                `;
+            }
+        }
+
+        function nextStep() {
+            // Basic check to ensure they don't skip the actual restructuring
+            if (currentStep === 3 && document.getElementById('input-evidence-for').value.trim() === '') {
+                alert("You must examine the evidence for the thought."); return;
+            }
+            if (currentStep === 4 && document.getElementById('input-evidence-against').value.trim() === '') {
+                alert("You must examine the evidence against the thought."); return;
+            }
+
+            if (currentStep === 7) prepareRerateStep();
+
+            if (currentStep < totalSteps) {
+                currentStep++;
+                updateUI();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                updateUI();
+            }
+        }
+
+        function generateSummary() {
+            document.getElementById('summary-old').innerText = document.getElementById('input-thought').value || "[No thought entered]";
+            document.getElementById('summary-new').innerText = document.getElementById('input-reframe').value || "[No reframe entered]";
+            document.getElementById('summary-action').innerText = document.getElementById('input-action').value || "[No action planned]";
+
+            const deltasContainer = document.getElementById('summary-deltas');
+            deltasContainer.innerHTML = '';
+
+            for (const [emo, oldVal] of Object.entries(activeEmotions)) {
+                const newVal = parseInt(document.getElementById(`new-input-${emo}`).value);
+                const drop = oldVal - newVal;
+                
+                let colorClass = drop > 0 ? "text-green-600" : (drop < 0 ? "text-red-600" : "text-slate-500");
+                let arrow = drop > 0 ? "↓" : (drop < 0 ? "↑" : "−");
+                
+                deltasContainer.innerHTML += `
+                    <div class="flex justify-between items-center mb-1 text-sm">
+                        <span class="text-slate-600">${emo}</span>
+                        <span class="font-bold ${colorClass}">${arrow} ${Math.abs(drop)}% (Now ${newVal}%)</span>
+                    </div>
+                `;
+            }
+        }
+
+        function saveRecord() {
+            const selectedDistortions = Array.from(document.querySelectorAll('.distortions:checked')).map(cb => cb.value);
+            
+            // Gather final emotions
+            let finalEmotions = {};
+            for (const emo of Object.keys(activeEmotions)) {
+                finalEmotions[emo] = {
+                    initial: activeEmotions[emo],
+                    final: parseInt(document.getElementById(`new-input-${emo}`).value)
+                };
+            }
+
+            const record = {
+                id: Date.now(),
+                date: new Date().toISOString(),
+                facts: document.getElementById('input-facts').value,
+                interpretation: document.getElementById('input-interpretation').value,
+                automaticThought: document.getElementById('input-thought').value,
+                evidenceFor: document.getElementById('input-evidence-for').value,
+                evidenceAgainst: document.getElementById('input-evidence-against').value,
+                distortions: selectedDistortions,
+                coreBelief: document.getElementById('input-core-belief').value,
+                reframe: document.getElementById('input-reframe').value,
+                emotions: finalEmotions,
+                action: document.getElementById('input-action').value
+            };
+
+            let history = JSON.parse(localStorage.getItem('cbt_clinical_history') || '[]');
+            history.push(record);
+            localStorage.setItem('cbt_clinical_history', JSON.stringify(history));
+
+            alert('Record saved to localStorage successfully.');
+            location.reload(); // Quick reset
+        }
+    </script>
+</body>
+</html>
