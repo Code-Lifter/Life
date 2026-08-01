@@ -203,19 +203,21 @@
             
             myBags.forEach((bag, idx) => {
                 const isCarry = bag.type === 'carry';
+                
+                // Segmented Switch UI for Bag Type
                 container.innerHTML += `
                     <div class="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm relative group">
                         <button onclick="deleteBag(${idx})" class="absolute top-3 right-3 text-gray-300 hover:text-red-500 p-1">✕</button>
                         
                         <div class="mb-4">
-                            <input type="text" value="${bag.name}" oninput="updateBagData(${idx}, 'name', this.value)" 
+                            <input type="text" value="${bag.name}" oninput="updateBagData(${idx}, 'name', this.value)" onfocus="this.select()"
                                 class="w-full text-lg font-bold text-gray-800 border-none focus:ring-0 p-0 placeholder-gray-300" placeholder="Bag Name">
                             
-                            <div class="flex mt-2 gap-2">
-                                <button onclick="setBagType(${idx}, 'carry')" class="flex-1 py-1.5 text-xs font-bold rounded-lg border transition-all ${isCarry ? 'bg-sky-50 border-sky-200 text-sky-700' : 'bg-white border-gray-200 text-gray-400 grayscale'}">
+                            <div class="flex mt-3 bg-gray-100 p-1 rounded-xl relative">
+                                <button onclick="setBagType(${idx}, 'carry')" class="flex-1 py-1.5 text-xs font-bold rounded-lg transition-all duration-200 ${isCarry ? 'bg-white shadow-sm text-sky-700' : 'text-gray-500 hover:text-gray-700'}">
                                     🎒 Cabin
                                 </button>
-                                <button onclick="setBagType(${idx}, 'check')" class="flex-1 py-1.5 text-xs font-bold rounded-lg border transition-all ${!isCarry ? 'bg-amber-50 border-amber-200 text-amber-700' : 'bg-white border-gray-200 text-gray-400 grayscale'}">
+                                <button onclick="setBagType(${idx}, 'check')" class="flex-1 py-1.5 text-xs font-bold rounded-lg transition-all duration-200 ${!isCarry ? 'bg-white shadow-sm text-amber-700' : 'text-gray-500 hover:text-gray-700'}">
                                     🧳 Hold
                                 </button>
                             </div>
@@ -235,7 +237,7 @@
         function renderBigInput(idx, field, val, label) {
             return `
                 <div class="bg-gray-50 rounded-xl p-2 text-center border border-gray-100 focus-within:border-black focus-within:bg-gray-100 transition-colors">
-                    <input type="number" value="${val}" oninput="updateBagData(${idx}, '${field}', this.value)" 
+                    <input type="number" value="${val}" oninput="updateBagData(${idx}, '${field}', this.value)" onfocus="this.select()"
                         class="w-full bg-transparent text-center font-bold text-gray-800 outline-none text-lg">
                     <div class="text-[10px] text-gray-400 font-bold uppercase tracking-wide">${label}</div>
                 </div>
@@ -251,7 +253,7 @@
                 container.innerHTML += `
                     <div class="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
                         <div class="bg-gray-900 text-white px-6 py-4 flex justify-between items-center">
-                            <input type="text" value="${flight.name}" oninput="updateFlightName(${fIdx}, this.value)" 
+                            <input type="text" value="${flight.name}" oninput="updateFlightName(${fIdx}, this.value)" onfocus="this.select()"
                                 class="bg-transparent text-white font-bold text-lg border-none focus:ring-0 w-full outline-none placeholder-gray-500">
                             <button onclick="deleteFlight(${fIdx})" class="text-gray-500 hover:text-white transition">✕</button>
                         </div>
@@ -296,7 +298,7 @@
             const val = limits[dim];
             return `
                 <div class="text-center">
-                    <input type="number" value="${val}" oninput="updateLimitData(${fIdx}, '${type}', '${dim}', this.value)" 
+                    <input type="number" value="${val}" oninput="updateLimitData(${fIdx}, '${type}', '${dim}', this.value)" onfocus="this.select()"
                         class="w-full text-center text-lg font-bold text-gray-700 border-b-2 border-gray-200 focus:border-black outline-none pb-1 bg-transparent transition-colors">
                     <label class="text-[10px] uppercase font-bold text-gray-400 mt-2 block">${dim}</label>
                 </div>
