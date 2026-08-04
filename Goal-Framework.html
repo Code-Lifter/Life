@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Goal Framework Command Center</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen antialiased flex flex-col justify-between p-6 md:p-12">
+
+  <main class="max-w-5xl mx-auto w-full space-y-10">
+    <!-- Header -->
+    <header class="space-y-3 text-center md:text-left">
+      <span class="text-xs font-bold uppercase tracking-widest text-emerald-400 bg-emerald-950/80 px-3 py-1 rounded-full border border-emerald-800/50">
+        System Selector
+      </span>
+      <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-white">
+        Choose Your Execution Engine
+      </h1>
+      <p class="text-slate-400 text-lg max-w-2xl">
+        Match your current point of friction to the framework designed to solve it.
+      </p>
+    </header>
+
+    <!-- Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      
+      <!-- SMART -->
+      <a href="smart.html" class="group block p-6 bg-slate-900 border border-slate-800 rounded-2xl hover:border-emerald-500/50 hover:bg-slate-900/80 transition-all duration-200">
+        <div class="flex items-center justify-between mb-4">
+          <span class="text-2xl font-black text-emerald-400 tracking-wider">SMART</span>
+          <span class="text-xs font-semibold px-2.5 py-1 rounded-md bg-slate-800 text-slate-300 group-hover:bg-emerald-500/10 group-hover:text-emerald-400 transition-colors">
+            Structure
+          </span>
+        </div>
+        <div class="mb-4">
+          <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Diagnostic Trigger</p>
+          <p class="text-lg font-bold text-white group-hover:text-emerald-300 transition-colors">
+            "I don't know where to start."
+          </p>
+        </div>
+        <p class="text-slate-400 text-sm leading-relaxed">
+          Best when your target is nebulous. Turns vague ambitions into concrete parameters with clear deadlines and boundaries.
+        </p>
+      </a>
+
+      <!-- WOOP -->
+      <a href="woop.html" class="group block p-6 bg-slate-900 border border-slate-800 rounded-2xl hover:border-amber-500/50 hover:bg-slate-900/80 transition-all duration-200">
+        <div class="flex items-center justify-between mb-4">
+          <span class="text-2xl font-black text-amber-400 tracking-wider">WOOP</span>
+          <span class="text-xs font-semibold px-2.5 py-1 rounded-md bg-slate-800 text-slate-300 group-hover:bg-amber-500/10 group-hover:text-amber-400 transition-colors">
+            Follow-Through
+          </span>
+        </div>
+        <div class="mb-4">
+          <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Diagnostic Trigger</p>
+          <p class="text-lg font-bold text-white group-hover:text-amber-300 transition-colors">
+            "I keep starting and giving up."
+          </p>
+        </div>
+        <p class="text-slate-400 text-sm leading-relaxed">
+          Best when momentum decays early. Pre-programs automatic responses to internal friction using mental contrasting.
+        </p>
+      </a>
+
+      <!-- HARD -->
+      <a href="hard.html" class="group block p-6 bg-slate-900 border border-slate-800 rounded-2xl hover:border-rose-500/50 hover:bg-slate-900/80 transition-all duration-200">
+        <div class="flex items-center justify-between mb-4">
+          <span class="text-2xl font-black text-rose-400 tracking-wider">HARD</span>
+          <span class="text-xs font-semibold px-2.5 py-1 rounded-md bg-slate-800 text-slate-300 group-hover:bg-rose-500/10 group-hover:text-rose-400 transition-colors">
+            Intrinsic Motivation
+          </span>
+        </div>
+        <div class="mb-4">
+          <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Diagnostic Trigger</p>
+          <p class="text-lg font-bold text-white group-hover:text-rose-300 transition-colors">
+            "I lack passion / My goal feels bland."
+          </p>
+        </div>
+        <p class="text-slate-400 text-sm leading-relaxed">
+          Best when goals feel like corporate obligations. Injects emotional resonance, vivid imagery, and high-challenge targets.
+        </p>
+      </a>
+
+      <!-- OKR -->
+      <a href="okr.html" class="group block p-6 bg-slate-900 border border-slate-800 rounded-2xl hover:border-cyan-500/50 hover:bg-slate-900/80 transition-all duration-200">
+        <div class="flex items-center justify-between mb-4">
+          <span class="text-2xl font-black text-cyan-400 tracking-wider">OKR</span>
+          <span class="text-xs font-semibold px-2.5 py-1 rounded-md bg-slate-800 text-slate-300 group-hover:bg-cyan-500/10 group-hover:text-cyan-400 transition-colors">
+            Scale & Metrics
+          </span>
+        </div>
+        <div class="mb-4">
+          <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Diagnostic Trigger</p>
+          <p class="text-lg font-bold text-white group-hover:text-cyan-300 transition-colors">
+            "I have a big team or aggressive metric."
+          </p>
+        </div>
+        <p class="text-slate-400 text-sm leading-relaxed">
+          Best for ambitious stretch goals and complex coordination. Connects high-level qualitative vision to non-negotiable quantitative metrics.
+        </p>
+      </a>
+
+    </div>
+  </main>
+
+  <footer class="mt-12 text-center text-xs text-slate-600">
+    Framework Launcher • Offline Ready
+  </footer>
+
+</body>
+</html>
