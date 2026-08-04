@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMART Goal Wizard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4 font-sans text-slate-800">
+
+    <div class="bg-white max-w-lg w-full rounded-2xl shadow-xl overflow-hidden">
+        <!-- Header -->
+        <div class="bg-blue-600 p-6 text-white text-center">
+            <h1 class="text-2xl font-bold">SMART Goal Builder</h1>
+            <p class="text-blue-100 text-sm mt-1">Turn your vague idea into an actionable plan.</p>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="bg-slate-200 h-1.5 w-full">
+            <div id="progress-bar" class="bg-blue-500 h-1.5 transition-all duration-300 w-0"></div>
+        </div>
+
+        <!-- Wizard Content -->
+        <div class="p-6 md:p-8">
+            
+            <!-- Step 1: Specific -->
+            <div class="wizard-step block" id="step-0">
+                <h2 class="text-xl font-bold mb-2">Specific <span class="text-slate-400 font-normal text-sm">(1/5)</span></h2>
+                <p class="text-slate-600 mb-4">What exactly do you want to achieve? Be as clear and detailed as possible.</p>
+                <label class="block text-sm font-medium mb-1">I want to...</label>
+                <input type="text" id="input-s" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="e.g., launch a weekly email newsletter">
+            </div>
+
+            <!-- Step 2: Measurable -->
+            <div class="wizard-step hidden" id="step-1">
+                <h2 class="text-xl font-bold mb-2">Measurable <span class="text-slate-400 font-normal text-sm">(2/5)</span></h2>
+                <p class="text-slate-600 mb-4">How will you know when you've succeeded? Give it a number.</p>
+                <label class="block text-sm font-medium mb-1">I will measure my success by...</label>
+                <input type="text" id="input-m" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="e.g., reaching 500 subscribers">
+            </div>
+
+            <!-- Step 3: Achievable -->
+            <div class="wizard-step hidden" id="step-2">
+                <h2 class="text-xl font-bold mb-2">Achievable <span class="text-slate-400 font-normal text-sm">(3/5)</span></h2>
+                <p class="text-slate-600 mb-4">How will you actually do this? What is your realistic action plan?</p>
+                <label class="block text-sm font-medium mb-1">I will achieve this by...</label>
+                <input type="text" id="input-a" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="e.g., writing for 45 minutes every morning">
+            </div>
+
+            <!-- Step 4: Relevant -->
+            <div class="wizard-step hidden" id="step-3">
+                <h2 class="text-xl font-bold mb-2">Relevant <span class="text-slate-400 font-normal text-sm">(4/5)</span></h2>
+                <p class="text-slate-600 mb-4">Why does this matter right now? How does it fit your bigger picture?</p>
+                <label class="block text-sm font-medium mb-1">This is important because...</label>
+                <input type="text" id="input-r" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="e.g., it builds an audience for my future business">
+            </div>
+
+            <!-- Step 5: Time-Bound -->
+            <div class="wizard-step hidden" id="step-4">
+                <h2 class="text-xl font-bold mb-2">Time-Bound <span class="text-slate-400 font-normal text-sm">(5/5)</span></h2>
+                <p class="text-slate-600 mb-4">When is the absolute deadline for this goal?</p>
+                <label class="block text-sm font-medium mb-1">I will accomplish this by...</label>
+                <input type="date" id="input-t" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+            </div>
+
+            <!-- Final Result Step -->
+            <div class="wizard-step hidden" id="step-5">
+                <div class="text-center mb-6">
+                    <div class="bg-green-100 text-green-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">✓</div>
+                    <h2 class="text-2xl font-bold">Your SMART Goal</h2>
+                    <p class="text-slate-600 mt-2">Here is your precision-engineered plan.</p>
+                </div>
+                
+                <div class="bg-blue-50 border border-blue-100 p-5 rounded-xl">
+                    <p id="final-goal-text" class="text-lg leading-relaxed text-blue-900 font-medium italic"></p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="bg-slate-50 p-4 border-t border-slate-200 flex justify-between">
+            <button id="btn-prev" class="px-5 py-2.5 text-slate-600 font-medium hover:text-slate-900 hidden transition-colors" onclick="prevStep()">← Back</button>
+            <div class="flex-grow"></div>
+            <button id="btn-next" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-colors" onclick="nextStep()">Next Step →</button>
+            <button id="btn-restart" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-6 py-2.5 rounded-lg font-medium shadow-sm hidden transition-colors" onclick="restartWizard()">Start Over</button>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        let currentStep = 0;
+        const totalSteps = 5; // 0 through 4 are input steps, 5 is the result
+
+        function updateUI() {
+            // Hide all steps
+            document.querySelectorAll('.wizard-step').forEach(step => {
+                step.classList.add('hidden');
+                step.classList.remove('block');
+            });
+
+            // Show current step
+            document.getElementById(`step-${currentStep}`).classList.remove('hidden');
+            document.getElementById(`step-${currentStep}`).classList.add('block');
+
+            // Update Progress Bar
+            const progressPercentage = (currentStep / totalSteps) * 100;
+            document.getElementById('progress-bar').style.width = `${progressPercentage}%`;
+
+            // Handle Buttons
+            const btnPrev = document.getElementById('btn-prev');
+            const btnNext = document.getElementById('btn-next');
+            const btnRestart = document.getElementById('btn-restart');
+
+            // Back button logic
+            if (currentStep === 0 || currentStep === totalSteps) {
+                btnPrev.classList.add('hidden');
+            } else {
+                btnPrev.classList.remove('hidden');
+            }
+
+            // Next / Generate / Restart button logic
+            if (currentStep === totalSteps) {
+                // We are on the result page
+                btnNext.classList.add('hidden');
+                btnRestart.classList.remove('hidden');
+                generateGoalText();
+            } else if (currentStep === totalSteps - 1) {
+                // On the last input step
+                btnNext.innerText = "Generate Goal ⚡";
+                btnNext.classList.remove('hidden');
+                btnRestart.classList.add('hidden');
+            } else {
+                // Standard input steps
+                btnNext.innerText = "Next Step →";
+                btnNext.classList.remove('hidden');
+                btnRestart.classList.add('hidden');
+            }
+        }
+
+        function nextStep() {
+            // Basic validation to prevent empty clicks (optional but helpful)
+            const inputs = ['input-s', 'input-m', 'input-a', 'input-r', 'input-t'];
+            if (currentStep < totalSteps) {
+                const currentInput = document.getElementById(inputs[currentStep]).value.trim();
+                if (!currentInput && currentStep !== 4) { // Don't block if date is empty, but encourage text
+                    alert("Please fill out this step to continue.");
+                    return;
+                }
+                currentStep++;
+                updateUI();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                updateUI();
+            }
+        }
+
+        function restartWizard() {
+            // Clear inputs
+            document.getElementById('input-s').value = '';
+            document.getElementById('input-m').value = '';
+            document.getElementById('input-a').value = '';
+            document.getElementById('input-r').value = '';
+            document.getElementById('input-t').value = '';
+            
+            currentStep = 0;
+            updateUI();
+        }
+
+        function generateGoalText() {
+            const s = document.getElementById('input-s').value.trim() || "[Specific Goal]";
+            const m = document.getElementById('input-m').value.trim() || "[Measurement]";
+            const a = document.getElementById('input-a').value.trim() || "[Action Plan]";
+            const r = document.getElementById('input-r').value.trim() || "[Reason]";
+            const t = document.getElementById('input-t').value.trim() || "[Deadline]";
+
+            // Format the date nicely if provided
+            let formattedDate = t;
+            if (t !== "[Deadline]") {
+                const dateObj = new Date(t);
+                formattedDate = dateObj.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            }
+
+            const goalStatement = `I will ${s}. I will measure my success by ${m}. I will achieve this by ${a}, which is important right now because ${r}. I will accomplish all of this by ${formattedDate}.`;
+            
+            document.getElementById('final-goal-text').innerText = goalStatement;
+        }
+    </script>
+</body>
+</html>

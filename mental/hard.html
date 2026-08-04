@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HARD Goal Wizard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4 font-sans text-slate-800">
+
+    <div class="bg-white max-w-lg w-full rounded-2xl shadow-xl overflow-hidden">
+        <!-- Header -->
+        <div class="bg-rose-600 p-6 text-white text-center">
+            <h1 class="text-2xl font-bold">HARD Goal Builder</h1>
+            <p class="text-rose-100 text-sm mt-1">Heartfelt, Animated, Required, Difficult.</p>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="bg-slate-200 h-1.5 w-full">
+            <div id="progress-bar" class="bg-rose-500 h-1.5 transition-all duration-300 w-0"></div>
+        </div>
+
+        <!-- Wizard Content -->
+        <div class="p-6 md:p-8">
+            
+            <!-- Step 1: Heartfelt -->
+            <div class="wizard-step block" id="step-0">
+                <h2 class="text-xl font-bold mb-2">Heartfelt <span class="text-slate-400 font-normal text-sm">(1/4)</span></h2>
+                <p class="text-slate-600 mb-4">What is your ambitious goal, and why do you have a deep, personal emotional connection to it?</p>
+                <label class="block text-sm font-medium mb-1">My goal is to...</label>
+                <input type="text" id="input-h-goal" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none mb-3" placeholder="e.g., transition into a career in design">
+                <label class="block text-sm font-medium mb-1">And I deeply care about this because...</label>
+                <input type="text" id="input-h-reason" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none" placeholder="e.g., I want to spend my life doing creative work">
+            </div>
+
+            <!-- Step 2: Animated -->
+            <div class="wizard-step hidden" id="step-1">
+                <h2 class="text-xl font-bold mb-2">Animated <span class="text-slate-400 font-normal text-sm">(2/4)</span></h2>
+                <p class="text-slate-600 mb-4">Vividly imagine your success. What exactly does your day-to-day life look like once you achieve this?</p>
+                <label class="block text-sm font-medium mb-1">I can clearly picture...</label>
+                <input type="text" id="input-a" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none" placeholder="e.g., waking up excited to open my laptop and design for clients">
+            </div>
+
+            <!-- Step 3: Required -->
+            <div class="wizard-step hidden" id="step-2">
+                <h2 class="text-xl font-bold mb-2">Required <span class="text-slate-400 font-normal text-sm">(3/4)</span></h2>
+                <p class="text-slate-600 mb-4">Why is there absolute urgency? Why must this be done right now, instead of next year?</p>
+                <label class="block text-sm font-medium mb-1">This is required right now because...</label>
+                <input type="text" id="input-r" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none" placeholder="e.g., I am burning out in my current job and need a change immediately">
+            </div>
+
+            <!-- Step 4: Difficult -->
+            <div class="wizard-step hidden" id="step-3">
+                <h2 class="text-xl font-bold mb-2">Difficult <span class="text-slate-400 font-normal text-sm">(4/4)</span></h2>
+                <p class="text-slate-600 mb-4">How does this push you out of your comfort zone? What hard thing are you committing to?</p>
+                <label class="block text-sm font-medium mb-1">To achieve this, I will push my limits by...</label>
+                <input type="text" id="input-d" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none" placeholder="e.g., learning a complex new software from scratch every evening">
+            </div>
+
+            <!-- Final Result Step -->
+            <div class="wizard-step hidden" id="step-4">
+                <div class="text-center mb-6">
+                    <div class="bg-rose-100 text-rose-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">🔥</div>
+                    <h2 class="text-2xl font-bold">Your HARD Goal</h2>
+                    <p class="text-slate-600 mt-2">Read this when you need a reminder of your ambition.</p>
+                </div>
+                
+                <div class="bg-rose-50 border border-rose-200 p-6 rounded-xl space-y-3">
+                    <p class="text-slate-800 leading-relaxed">
+                        <span class="font-bold text-rose-700">Heartfelt:</span> I will <span id="out-h-goal" class="font-medium"></span> because <span id="out-h-reason" class="font-medium"></span>.
+                    </p>
+                    <p class="text-slate-800 leading-relaxed">
+                        <span class="font-bold text-rose-700">Animated:</span> When I succeed, I can clearly picture <span id="out-a" class="font-medium"></span>.
+                    </p>
+                    <p class="text-slate-800 leading-relaxed">
+                        <span class="font-bold text-rose-700">Required:</span> I must do this right now because <span id="out-r" class="font-medium"></span>.
+                    </p>
+                    <p class="text-slate-800 leading-relaxed">
+                        <span class="font-bold text-rose-700">Difficult:</span> I know this will be tough, but I am ready to push my limits by <span id="out-d" class="font-medium"></span>.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="bg-slate-50 p-4 border-t border-slate-200 flex justify-between">
+            <button id="btn-prev" class="px-5 py-2.5 text-slate-600 font-medium hover:text-slate-900 hidden transition-colors" onclick="prevStep()">← Back</button>
+            <div class="flex-grow"></div>
+            <button id="btn-next" class="bg-rose-600 hover:bg-rose-700 text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-colors" onclick="nextStep()">Next Step →</button>
+            <button id="btn-restart" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-6 py-2.5 rounded-lg font-medium shadow-sm hidden transition-colors" onclick="restartWizard()">Start Over</button>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        let currentStep = 0;
+        const totalSteps = 4; // 0 through 3 are inputs, 4 is the result
+
+        function updateUI() {
+            // Hide all steps
+            document.querySelectorAll('.wizard-step').forEach(step => {
+                step.classList.add('hidden');
+                step.classList.remove('block');
+            });
+
+            // Show current step
+            document.getElementById(`step-${currentStep}`).classList.remove('hidden');
+            document.getElementById(`step-${currentStep}`).classList.add('block');
+
+            // Update Progress Bar
+            const progressPercentage = (currentStep / totalSteps) * 100;
+            document.getElementById('progress-bar').style.width = `${progressPercentage}%`;
+
+            // Handle Buttons
+            const btnPrev = document.getElementById('btn-prev');
+            const btnNext = document.getElementById('btn-next');
+            const btnRestart = document.getElementById('btn-restart');
+
+            // Back button logic
+            if (currentStep === 0 || currentStep === totalSteps) {
+                btnPrev.classList.add('hidden');
+            } else {
+                btnPrev.classList.remove('hidden');
+            }
+
+            // Next / Generate / Restart button logic
+            if (currentStep === totalSteps) {
+                // We are on the result page
+                btnNext.classList.add('hidden');
+                btnRestart.classList.remove('hidden');
+                generateGoalText();
+            } else if (currentStep === totalSteps - 1) {
+                // On the last input step
+                btnNext.innerText = "Ignite Goal 🔥";
+                btnNext.classList.remove('hidden');
+                btnRestart.classList.add('hidden');
+            } else {
+                // Standard input steps
+                btnNext.innerText = "Next Step →";
+                btnNext.classList.remove('hidden');
+                btnRestart.classList.add('hidden');
+            }
+        }
+
+        function nextStep() {
+            // Check inputs based on current step
+            let currentInputs = [];
+            if (currentStep === 0) currentInputs = ['input-h-goal', 'input-h-reason'];
+            if (currentStep === 1) currentInputs = ['input-a'];
+            if (currentStep === 2) currentInputs = ['input-r'];
+            if (currentStep === 3) currentInputs = ['input-d'];
+
+            if (currentStep < totalSteps) {
+                // Validate that all inputs on the current step are filled
+                let allFilled = true;
+                currentInputs.forEach(id => {
+                    if (!document.getElementById(id).value.trim()) allFilled = false;
+                });
+
+                if (!allFilled) {
+                    alert("Please fill out all fields on this step to continue.");
+                    return;
+                }
+                currentStep++;
+                updateUI();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                updateUI();
+            }
+        }
+
+        function restartWizard() {
+            // Clear inputs
+            document.getElementById('input-h-goal').value = '';
+            document.getElementById('input-h-reason').value = '';
+            document.getElementById('input-a').value = '';
+            document.getElementById('input-r').value = '';
+            document.getElementById('input-d').value = '';
+            
+            currentStep = 0;
+            updateUI();
+        }
+
+        function generateGoalText() {
+            const hGoal = document.getElementById('input-h-goal').value.trim() || "[Goal]";
+            const hReason = document.getElementById('input-h-reason').value.trim() || "[Reason]";
+            const a = document.getElementById('input-a').value.trim() || "[Animated Vision]";
+            const r = document.getElementById('input-r').value.trim() || "[Urgent Reason]";
+            const d = document.getElementById('input-d').value.trim() || "[Difficult Action]";
+            
+            document.getElementById('out-h-goal').innerText = hGoal;
+            document.getElementById('out-h-reason').innerText = hReason;
+            document.getElementById('out-a').innerText = a;
+            document.getElementById('out-r').innerText = r;
+            document.getElementById('out-d').innerText = d;
+        }
+    </script>
+</body>
+</html>
