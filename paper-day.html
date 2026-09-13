@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,13 +10,13 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
+            background-color: #0f172a;
         }
 
         /* Remove default outline */
         input:focus, textarea:focus {
             outline: none;
-            background-color: rgba(243, 244, 246, 0.5);
+            background-color: rgba(30, 41, 59, 0.5);
         }
 
         /* Scrollbar styling */
@@ -24,15 +24,15 @@
             width: 6px;
         }
         .scroller::-webkit-scrollbar-thumb {
-            background-color: #d1d5db;
+            background-color: #334155;
             border-radius: 4px;
         }
 
         /* Drag and Drop Styling */
         .dragging {
             opacity: 0.5;
-            background-color: #e5e7eb;
-            border: 2px dashed #9ca3af;
+            background-color: #1e293b;
+            border: 2px dashed #64748b;
         }
         
         .drag-handle {
@@ -43,29 +43,29 @@
         }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4 sm:p-8">
+<body class="flex items-center justify-center min-h-screen p-4 sm:p-8 bg-slate-950 text-slate-100">
 
-    <div class="bg-white w-full max-w-[1400px] border-4 border-gray-900 rounded-lg shadow-2xl overflow-hidden flex flex-col">
+    <div class="bg-slate-900 w-full max-w-[1400px] border-4 border-slate-700 rounded-lg shadow-2xl overflow-hidden flex flex-col">
         
-        <div class="bg-gray-800 border-b-4 border-gray-900 p-4 flex justify-between items-center">
-            <div class="text-gray-500 font-bold tracking-[0.2em] text-xl">
-                SIDEKICK <span class="text-gray-600 text-sm ml-2">DAILY</span>
+        <div class="bg-slate-950 border-b-4 border-slate-700 p-4 flex justify-between items-center">
+            <div class="text-slate-300 font-bold tracking-[0.2em] text-xl">
+                SIDEKICK <span class="text-slate-500 text-sm ml-2">DAILY</span>
             </div>
             <div class="flex gap-4">
-                <button id="copy-btn" onclick="copyToNotes()" class="text-xs font-bold text-gray-300 hover:text-white border border-gray-600 hover:border-gray-400 px-3 py-1 rounded transition-colors uppercase tracking-widest">
+                <button id="copy-btn" onclick="copyToNotes()" class="text-xs font-bold text-slate-300 hover:text-white border border-slate-600 hover:border-slate-400 px-3 py-1 rounded transition-colors uppercase tracking-widest">
                     Copy to Notes
                 </button>
-                <button onclick="resetDay()" class="text-xs font-bold text-gray-600 hover:text-red-400 border border-gray-600 hover:border-red-400 px-3 py-1 rounded transition-colors uppercase tracking-widest">
+                <button onclick="resetDay()" class="text-xs font-bold text-slate-400 hover:text-red-400 border border-slate-600 hover:border-red-400 px-3 py-1 rounded transition-colors uppercase tracking-widest">
                     Reset Day
                 </button>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-0 divide-y-4 lg:divide-y-0 lg:divide-x-4 divide-gray-900 h-full">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-0 divide-y-4 lg:divide-y-0 lg:divide-x-4 divide-slate-700 h-full">
 
             <div class="lg:col-span-3 flex flex-col p-4 h-full min-h-[600px]">
-                <h2 class="font-bold text-xs uppercase tracking-wider mb-2 border-b-2 border-gray-900 pb-1">Schedule</h2>
-                <div class="flex-grow border-2 border-gray-900 rounded-sm p-2 relative">
+                <h2 class="font-bold text-xs uppercase tracking-wider mb-2 border-b-2 border-slate-700 pb-1 text-slate-400">Schedule</h2>
+                <div class="flex-grow border-2 border-slate-700 rounded-sm p-2 relative bg-slate-950/50">
                     <div id="schedule-container" class="flex flex-col gap-1 h-full overflow-y-auto scroller">
                         </div>
                 </div>
@@ -74,24 +74,24 @@
             <div class="lg:col-span-5 flex flex-col">
                 
                 <div class="p-4 flex-grow-0">
-                    <h2 class="font-bold text-xs uppercase tracking-wider mb-2 border-b-2 border-gray-900 pb-1">Daily Priorities</h2>
+                    <h2 class="font-bold text-xs uppercase tracking-wider mb-2 border-b-2 border-slate-700 pb-1 text-slate-400">Daily Priorities</h2>
                     <div id="priorities-container" class="flex flex-col gap-4 mt-2">
                         </div>
                 </div>
 
-                <div class="border-t-4 border-gray-900"></div>
+                <div class="border-t-4 border-slate-700"></div>
 
                 <div class="p-4 flex-grow flex flex-col h-full min-h-[300px]">
-                    <h2 class="font-bold text-xs uppercase tracking-wider mb-2 border-b-2 border-gray-900 pb-1">Notes</h2>
-                    <textarea id="notes-area" class="w-full h-full p-4 border-none resize-none text-gray-800 leading-6 text-lg" placeholder="Brain dump here..."></textarea>
+                    <h2 class="font-bold text-xs uppercase tracking-wider mb-2 border-b-2 border-slate-700 pb-1 text-slate-400">Notes</h2>
+                    <textarea id="notes-area" class="w-full h-full p-4 border-none resize-none text-slate-200 bg-slate-900 leading-6 text-lg placeholder-slate-600" placeholder="Brain dump here..."></textarea>
                 </div>
             </div>
 
             <div class="lg:col-span-4 flex flex-col p-4 h-full min-h-[600px]">
-                <h2 class="font-bold text-xs uppercase tracking-wider mb-2 border-b-2 border-gray-900 pb-1">Tasks</h2>
+                <h2 class="font-bold text-xs uppercase tracking-wider mb-2 border-b-2 border-slate-700 pb-1 text-slate-400">Tasks</h2>
                 <div id="tasks-container" class="flex flex-col gap-3 h-full overflow-y-auto scroller pb-2">
                     </div>
-                <button onclick="addNewTask()" class="mt-4 text-xs font-bold text-gray-400 hover:text-gray-900 uppercase tracking-wide text-center w-full py-3 border-2 border-dashed border-gray-200 hover:border-gray-900 transition-colors">
+                <button onclick="addNewTask()" class="mt-4 text-xs font-bold text-slate-400 hover:text-white uppercase tracking-wide text-center w-full py-3 border-2 border-dashed border-slate-700 hover:border-slate-500 transition-colors">
                     + Add Task Row
                 </button>
             </div>
@@ -140,11 +140,11 @@
 
         function createScheduleRow(container, timeVal, textVal) {
             const row = document.createElement('div');
-            row.className = 'flex items-center gap-2 text-sm p-1 hover:bg-gray-50 transition-colors draggable-item';
+            row.className = 'flex items-center gap-2 text-sm p-1 hover:bg-slate-800/60 transition-colors draggable-item';
             row.setAttribute('draggable', 'true');
             
             row.innerHTML = `
-                <div class="drag-handle text-gray-300 hover:text-gray-600 p-1">
+                <div class="drag-handle text-slate-600 hover:text-slate-400 p-1">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
                         <circle cx="8" cy="4" r="2" />
                         <circle cx="8" cy="12" r="2" />
@@ -155,13 +155,13 @@
                     </svg>
                 </div>
                 <input type="text" 
-                    class="w-12 text-right bg-transparent text-gray-500 font-mono placeholder-gray-300 focus:text-black border-b border-transparent focus:border-gray-400" 
+                    class="w-12 text-right bg-transparent text-slate-400 font-mono placeholder-slate-600 focus:text-white border-b border-transparent focus:border-slate-500" 
                     placeholder="00:00" 
                     value="${timeVal}"
                     oninput="saveData()">
-                <span class="text-gray-300">|</span>
+                <span class="text-slate-600">|</span>
                 <input type="text" 
-                    class="flex-grow bg-transparent border-b border-gray-100 focus:border-gray-900 transition-colors" 
+                    class="flex-grow bg-transparent border-b border-slate-800 text-slate-200 focus:border-slate-400 transition-colors" 
                     value="${textVal}"
                     oninput="saveData()">
             `;
@@ -247,26 +247,26 @@
 
         function getPrioHTML(state, text, num) {
             let iconSvg = '';
-            let textClass = 'bg-white text-gray-800';
+            let textClass = 'bg-slate-900 text-slate-200';
             
             if (state === 0) { 
                 iconSvg = `<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" class="fill-none"/>`;
-                textClass = 'text-gray-800';
+                textClass = 'text-slate-200';
             } else if (state === 1) { 
                 iconSvg = `<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" class="fill-none"/><path d="M12 2 A10 10 0 0 1 12 22 Z" fill="currentColor"/>`;
-                textClass = 'text-gray-900 font-semibold';
+                textClass = 'text-white font-semibold';
             } else { 
-                iconSvg = `<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" class="fill-gray-900"/><path d="M7 12L10 15L17 8" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
-                textClass = 'line-through text-gray-400 bg-gray-50';
+                iconSvg = `<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" class="fill-slate-100"/><path d="M7 12L10 15L17 8" stroke="#0f172a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
+                textClass = 'line-through text-slate-500 bg-slate-900/50';
             }
 
             const placeholders = ["Priority One...", "Priority Two...", "Priority Three..."];
 
             return `
-                <button onclick="cyclePrioState(this)" data-state="${state}" class="flex-shrink-0 focus:outline-none transition-transform hover:scale-110 text-gray-900 w-8 h-8 flex items-center justify-center">
+                <button onclick="cyclePrioState(this)" data-state="${state}" class="flex-shrink-0 focus:outline-none transition-transform hover:scale-110 text-slate-100 w-8 h-8 flex items-center justify-center">
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">${iconSvg}</svg>
                 </button>
-                <input type="text" class="w-full border-b-2 border-gray-200 focus:border-gray-900 p-2 font-medium h-10 text-lg transition-colors ${textClass}" placeholder="${placeholders[num-1]}" value="${text}" oninput="saveData()">
+                <input type="text" class="w-full border-b-2 border-slate-700 focus:border-slate-300 bg-transparent p-2 font-medium h-10 text-lg transition-colors placeholder-slate-600 ${textClass}" placeholder="${placeholders[num-1]}" value="${text}" oninput="saveData()">
             `;
         }
 
@@ -320,24 +320,24 @@
 
         function getTaskHTML(state, text) {
             let iconSvg = '';
-            let textClass = 'bg-white text-gray-800';
+            let textClass = 'bg-slate-900 text-slate-200';
             
             if (state === 0) { 
                 iconSvg = `<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" class="fill-none"/>`;
-                textClass = 'text-gray-800';
+                textClass = 'text-slate-200';
             } else if (state === 1) { 
                 iconSvg = `<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" class="fill-none"/><path d="M12 2 A10 10 0 0 1 12 22 Z" fill="currentColor"/>`;
-                textClass = 'text-gray-900 font-semibold';
+                textClass = 'text-white font-semibold';
             } else { 
-                iconSvg = `<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" class="fill-gray-900"/><path d="M7 12L10 15L17 8" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
-                textClass = 'line-through text-gray-400 bg-gray-50';
+                iconSvg = `<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" class="fill-slate-100"/><path d="M7 12L10 15L17 8" stroke="#0f172a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
+                textClass = 'line-through text-slate-500 bg-slate-900/50';
             }
 
             return `
-                <button onclick="cycleTaskState(this)" data-state="${state}" class="flex-shrink-0 focus:outline-none transition-transform hover:scale-110 text-gray-900 w-6 h-6">
+                <button onclick="cycleTaskState(this)" data-state="${state}" class="flex-shrink-0 focus:outline-none transition-transform hover:scale-110 text-slate-100 w-6 h-6">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">${iconSvg}</svg>
                 </button>
-                <input type="text" class="w-full border-b border-gray-200 focus:border-gray-900 p-1 px-2 text-sm transition-all ${textClass}" value="${text}" oninput="saveData()">
+                <input type="text" class="w-full border-b border-slate-700 focus:border-slate-300 bg-transparent p-1 px-2 text-sm transition-all ${textClass}" value="${text}" oninput="saveData()">
             `;
         }
 
@@ -456,13 +456,13 @@
                 
                 const btn = document.getElementById('copy-btn');
                 btn.innerText = 'COPIED!';
-                btn.classList.replace('text-gray-300', 'text-green-400');
-                btn.classList.replace('border-gray-600', 'border-green-400');
+                btn.classList.replace('text-slate-300', 'text-green-400');
+                btn.classList.replace('border-slate-600', 'border-green-400');
                 
                 setTimeout(() => {
                     btn.innerText = 'COPY TO NOTES';
-                    btn.classList.replace('text-green-400', 'text-gray-300');
-                    btn.classList.replace('border-green-400', 'border-gray-600');
+                    btn.classList.replace('text-green-400', 'text-slate-300');
+                    btn.classList.replace('border-green-400', 'border-slate-600');
                 }, 2000);
             } catch (err) {
                 alert('Failed to copy to clipboard. Your browser might block this action.');
