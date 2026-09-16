@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dave Ramsey House Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+</head>
+<body class="bg-gray-900 text-gray-100 font-sans min-h-screen">
+
+    <!-- Top Home Button (Not Fixed) -->
+    <div class="p-4 bg-gray-900">
+        <a href="/" class="inline-flex items-center text-blue-400 hover:text-blue-300 transition-colors duration-200 text-sm font-semibold">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            Back to Home
+        </a>
+    </div>
+
+    <!-- Main Calculator Container -->
+    <main class="max-w-lg mx-auto p-6 md:mt-8 mt-2 mb-12 bg-gray-800 rounded-2xl shadow-xl border border-gray-700 mx-4">
+        <h1 class="text-2xl font-bold mb-2 text-white">Dave Ramsey Affordability Calculator</h1>
+        <p class="text-gray-400 text-sm mb-6 pb-4 border-b border-gray-700">Calculates maximum home price based on the 25% rule and a 15-year fixed mortgage.</p>
+
+        <form id="calcForm" class="space-y-4">
+            
+            <!-- Income & Down Payment -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Monthly Take-Home Pay</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">$</span>
+                        <input type="number" id="takeHome" required class="w-full bg-gray-700 text-white border border-gray-600 rounded-lg pl-8 pr-3 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="6000">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Down Payment</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">$</span>
+                        <input type="number" id="downPayment" class="w-full bg-gray-700 text-white border border-gray-600 rounded-lg pl-8 pr-3 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="50000">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rates & Estimates -->
+            <div class="grid grid-cols-1 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Interest Rate (15-Year Fixed)</label>
+                    <div class="relative">
+                        <input type="number" id="rate" step="0.1" value="6.5" class="w-full bg-gray-700 text-white border border-gray-600 rounded-lg pl-3 pr-8 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                        <span class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400">%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1">Monthly Taxes</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-2 flex items-center text-gray-400 text-sm">$</span>
+                        <input type="number" id="taxes" class="w-full bg-gray-700 text-white border border-gray-600 rounded-lg pl-6 pr-2 py-2 text-sm focus:outline-none focus:border-blue-500" placeholder="250">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1">Monthly Insurance</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-2 flex items-center text-gray-400 text-sm">$</span>
+                        <input type="number" id="insurance" class="w-full bg-gray-700 text-white border border-gray-600 rounded-lg pl-6 pr-2 py-2 text-sm focus:outline-none focus:border-blue-500" placeholder="100">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1">Monthly HOA</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-2 flex items-center text-gray-400 text-sm">$</span>
+                        <input type="number" id="hoa" class="w-full bg-gray-700 text-white border border-gray-600 rounded-lg pl-6 pr-2 py-2 text-sm focus:outline-none focus:border-blue-500" placeholder="0">
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="w-full mt-6 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-200">
+                Calculate Budget
+            </button>
+        </form>
+
+        <!-- Results Section -->
+        <div id="results" class="mt-8 hidden space-y-4 animate-fade-in">
+            <h2 class="text-xl font-semibold text-white border-b border-gray-700 pb-2">Your Results</h2>
+            
+            <div class="bg-gray-900 rounded-lg p-4 border border-gray-700 flex justify-between items-center">
+                <span class="text-gray-400 text-sm">Max Monthly Payment (25%)</span>
+                <span id="resMonthly" class="text-lg font-bold text-green-400"></span>
+            </div>
+
+            <div class="bg-gray-900 rounded-lg p-4 border border-gray-700 flex justify-between items-center">
+                <span class="text-gray-400 text-sm">Budget Remaining for P&I</span>
+                <span id="resPI" class="text-lg font-bold text-white"></span>
+            </div>
+
+            <div class="bg-blue-900/30 rounded-lg p-5 border border-blue-800/50 mt-4">
+                <p class="text-blue-300 text-sm font-medium mb-1">Maximum Home Price</p>
+                <p id="resPrice" class="text-3xl font-extrabold text-white"></p>
+                <p class="text-gray-400 text-xs mt-2">Based on a 15-year fixed mortgage, plus your down payment.</p>
+            </div>
+        </div>
+    </main>
+
+    <style>
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+
+    <script>
+        document.getElementById('calcForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Gather inputs
+            const takeHome = parseFloat(document.getElementById('takeHome').value) || 0;
+            const downPayment = parseFloat(document.getElementById('downPayment').value) || 0;
+            const rate = parseFloat(document.getElementById('rate').value) || 0;
+            const taxes = parseFloat(document.getElementById('taxes').value) || 0;
+            const insurance = parseFloat(document.getElementById('insurance').value) || 0;
+            const hoa = parseFloat(document.getElementById('hoa').value) || 0;
+
+            // 1. Calculate max monthly payment (25% Rule)
+            const maxMonthly = takeHome * 0.25;
+
+            // 2. Subtract non-loan costs to find max Principal & Interest (P&I)
+            const maxPI = maxMonthly - taxes - insurance - hoa;
+
+            let maxLoan = 0;
+            
+            // 3. Reverse-calculate maximum loan amount based on 15-year term
+            if (maxPI > 0) {
+                if (rate > 0) {
+                    const monthlyRate = (rate / 100) / 12;
+                    const numPayments = 15 * 12; // 15 years
+                    
+                    // Present Value of Annuity Formula
+                    maxLoan = maxPI * ((1 - Math.pow(1 + monthlyRate, -numPayments)) / monthlyRate);
+                } else {
+                    // 0% interest edge case
+                    maxLoan = maxPI * 15 * 12; 
+                }
+            }
+
+            // 4. Calculate total home price
+            const maxHomePrice = maxLoan + downPayment;
+
+            // Format Currency
+            const formatter = new Intl.NumberFormat('en-US', { 
+                style: 'currency', 
+                currency: 'USD',
+                maximumFractionDigits: 0
+            });
+
+            // Update DOM
+            document.getElementById('resMonthly').innerText = formatter.format(maxMonthly);
+            
+            if (maxPI > 0) {
+                document.getElementById('resPI').innerText = formatter.format(maxPI);
+                document.getElementById('resPrice').innerText = formatter.format(maxHomePrice);
+            } else {
+                document.getElementById('resPI').innerText = "$0 (Fees exceed budget)";
+                document.getElementById('resPI').classList.add('text-red-400');
+                document.getElementById('resPrice').innerText = formatter.format(downPayment);
+            }
+
+            // Show results
+            document.getElementById('results').classList.remove('hidden');
+        });
+    </script>
+</body>
+</html>
