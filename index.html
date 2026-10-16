@@ -4,34 +4,35 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Utility Hub</title>
+    
+    <!-- External Dependencies -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- ==========================================
+         CUSTOM STYLES
+         ========================================== -->
     <style>
-      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap");
+      /* --- Fonts --- */
+      @import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Lato:wght@400;700&display=swap");
 
-      body {
-        background-color: #000;
-        font-family: 'Inter', sans-serif;
-        color: white;
-        overflow-x: hidden;
-      }
-
-      /* iOS App Icon Shape */
-      .app-icon {
+      /* --- App Shell & Base Setup --- */
+      html, body {
+        height: 100%;
         width: 100%;
-        aspect-ratio: 1/1;
-        border-radius: 22%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: transform 0.1s ease;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        margin: 0;
+        overflow: hidden; /* Lock body scroll */
+        background-color: #1c1917;
+        background-image: radial-gradient(circle at center, #292524 0%, #1c1917 100%);
+        font-family: "Lato", sans-serif;
+        color: #d6d3d1;
       }
 
-      .app-icon:active {
-        transform: scale(0.9);
+      /* --- Typography --- */
+      h1, h2, .fantasy-font {
+        font-family: "Cinzel", serif;
       }
 
-      /* Gradients */
+      /* --- Gradients (Combined from both sources) --- */
       .bg-orange { background: linear-gradient(135deg, #ff9500, #ffcc00); }
       .bg-green { background: linear-gradient(135deg, #34c759, #30d158); }
       .bg-indigo { background: linear-gradient(135deg, #5856d6, #5e5ce6); }
@@ -43,187 +44,354 @@
       .bg-pink { background: linear-gradient(135deg, #ff2d55, #ff6b8b); }
       .bg-brown { background: linear-gradient(135deg, #a2845e, #c7a77d); }
 
-      /* Hide scrollbar but allow scrolling */
-      .custom-scroll::-webkit-scrollbar { display: none; }
-      .custom-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+      /* --- Custom Scrollbar (Grid Area) --- */
+      .custom-scroll::-webkit-scrollbar {
+        width: 6px;
+      }
+      .custom-scroll::-webkit-scrollbar-track {
+        background: #292524;
+      }
+      .custom-scroll::-webkit-scrollbar-thumb {
+        background: #57534e;
+        border-radius: 3px;
+      }
+      .custom-scroll::-webkit-scrollbar-thumb:hover {
+        background: #78716c;
+      }
+
+      /* --- Components: Game Cards --- */
+      .game-card {
+        transition: all 0.2s ease-out;
+        border: 1px solid #44403c;
+      }
+      .game-card:hover {
+        transform: translateY(-2px);
+        border-color: #f59e0b;
+        background-color: #292524;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+      }
+      .game-card:active {
+        transform: scale(0.98);
+      }
     </style>
   </head>
-  <body class="flex flex-col items-center h-screen">
+  
+  <body class="flex flex-col">
     
-    <div class="w-full max-w-[420px] h-full flex flex-col bg-black">
+    <!-- ==========================================
+         HEADER
+         ========================================== -->
+    <header class="h-[10dvh] min-h-[60px] flex items-center justify-center bg-stone-900 border-b-4 border-amber-700 shadow-xl z-40 shrink-0 relative">
+      <h1 class="text-amber-500 font-bold tracking-widest uppercase drop-shadow-md" style="font-size: min(6vw, 4vh)">
+        Utility Hub
+      </h1>
+    </header>
+
+    <!-- ==========================================
+         MAIN CONTENT AREA
+         ========================================== -->
+    <main class="flex-grow overflow-y-auto custom-scroll relative">
         
-        <header class="pt-14 px-6 pb-4 shrink-0">
-          <h1 class="text-3xl font-extrabold tracking-tight">Mini Apps</h1>
-          <p class="text-stone-500 text-sm font-medium">Select a module</p>
-        </header>
-
-        <main class="flex-grow overflow-y-auto px-6 custom-scroll">
-          <div class="sticky top-0 bg-black/90 backdrop-blur-md py-4 z-50">
+      <!-- --- Sticky Search Bar Section --- -->
+      <div class="sticky top-0 z-30 pt-3 pb-3 px-3 sm:px-8 border-b border-stone-800 shadow-sm" style="background-color: rgba(28, 25, 23, 0.95); backdrop-filter: blur(8px);">
+        <div class="relative max-w-md mx-auto">
+            <!-- Search Icon -->
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg class="h-4 w-4 sm:h-5 sm:w-5 text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+            </div>
+            <!-- Search Input -->
             <input 
-              type="text" id="appSearch" placeholder="Search apps..." 
-              class="w-full bg-stone-900 border-none rounded-xl py-3 px-4 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-white placeholder-stone-500"
+                type="text" 
+                id="gameSearch" 
+                placeholder="Find a module..." 
+                class="block w-full pl-9 sm:pl-10 pr-3 py-1.5 sm:py-3 border border-stone-600 rounded-xl leading-5 bg-stone-800 text-stone-200 placeholder-stone-500 focus:outline-none focus:bg-stone-900 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 text-xs sm:text-base transition-colors shadow-lg"
             >
-          </div>
+        </div>
+      </div>
 
-          <div class="grid grid-cols-3 gap-x-6 gap-y-8 pb-20 mt-2">
-            
-            <div class="app-item flex flex-col items-center gap-2">
-              <a href="money.html" class="app-icon bg-green">
-                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-              </a>
-              <span class="text-[11px] font-semibold text-stone-400 text-center">Money</span>
+      <!-- --- Cards Grid Container --- -->
+      <div class="p-3 sm:p-8 max-w-[1400px] mx-auto">
+        <!-- Grid: 3 cols on mobile, scaling up for tablet/desktop -->
+        <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 sm:gap-5 pb-20">
+          
+          <!-- Money -->
+          <a href="money.html" class="game-card bg-stone-800 rounded-lg sm:rounded-xl flex flex-col group relative overflow-hidden">
+            <div class="absolute inset-0 bg-amber-500 opacity-0 group-hover:opacity-10 transition-opacity z-10 pointer-events-none"></div>
+            <div class="w-full aspect-square bg-green relative flex items-center justify-center p-2">
+              <svg class="w-8 h-8 sm:w-16 sm:h-16 text-white drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             </div>
-
-            <div class="app-item flex flex-col items-center gap-2">
-              <a href="tally-counter.html" class="app-icon bg-gray">
-                 <span class="text-2xl font-bold text-white">01</span>
-              </a>
-              <span class="text-[11px] font-semibold text-stone-400 text-center">Tally</span>
+            <div class="p-1.5 sm:p-3 flex-grow flex items-center justify-center text-center bg-stone-800 border-t border-stone-700 z-20">
+              <h2 class="fantasy-font text-xs sm:text-base font-bold text-stone-200 group-hover:text-amber-500 transition-colors leading-tight">
+                Money
+              </h2>
             </div>
+          </a>
 
-            <div class="app-item flex flex-col items-center gap-2">
-              <a href="test.html" class="app-icon bg-indigo">
-                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
-              </a>
-              <span class="text-[11px] font-semibold text-stone-400 text-center">Money V2</span>
+          <!-- Tally -->
+          <a href="tally-counter.html" class="game-card bg-stone-800 rounded-lg sm:rounded-xl flex flex-col group relative overflow-hidden">
+            <div class="absolute inset-0 bg-amber-500 opacity-0 group-hover:opacity-10 transition-opacity z-10 pointer-events-none"></div>
+            <div class="w-full aspect-square bg-gray relative flex items-center justify-center p-2">
+               <span class="text-3xl sm:text-5xl font-bold text-white drop-shadow-md">01</span>
             </div>
-
-            <div class="app-item flex flex-col items-center gap-2">
-              <a href="wood-cutting.html" class="app-icon bg-brown">
-                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.121-2.121M3 8a3 3 0 100 6 3 3 0 000-6zm12 8a3 3 0 100 6 3 3 0 000-6z"/></svg>
-              </a>
-              <span class="text-[11px] font-semibold text-stone-400 text-center">Wood Cutting</span>
+            <div class="p-1.5 sm:p-3 flex-grow flex items-center justify-center text-center bg-stone-800 border-t border-stone-700 z-20">
+              <h2 class="fantasy-font text-xs sm:text-base font-bold text-stone-200 group-hover:text-amber-500 transition-colors leading-tight">
+                Tally
+              </h2>
             </div>
+          </a>
 
-            <div class="app-item flex flex-col items-center gap-2">
-              <a href="plane.html" class="app-icon bg-blue">
-                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-              </a>
-              <span class="text-[11px] font-semibold text-stone-400 text-center">Plane bags</span>
+          <!-- Money V2 -->
+          <a href="test.html" class="game-card bg-stone-800 rounded-lg sm:rounded-xl flex flex-col group relative overflow-hidden">
+            <div class="absolute inset-0 bg-amber-500 opacity-0 group-hover:opacity-10 transition-opacity z-10 pointer-events-none"></div>
+            <div class="w-full aspect-square bg-indigo relative flex items-center justify-center p-2">
+              <svg class="w-8 h-8 sm:w-16 sm:h-16 text-white drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
             </div>
-
-            <div class="app-item flex flex-col items-center gap-2">
-              <a href="goal.html" class="app-icon bg-red">
-                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z M12 16a4 4 0 100-8 4 4 0 000 8z M12 13a1 1 0 100-2 1 1 0 000 2z"/></svg>
-              </a>
-              <span class="text-[11px] font-semibold text-stone-400 text-center">Goal V2</span>
+            <div class="p-1.5 sm:p-3 flex-grow flex items-center justify-center text-center bg-stone-800 border-t border-stone-700 z-20">
+              <h2 class="fantasy-font text-xs sm:text-base font-bold text-stone-200 group-hover:text-amber-500 transition-colors leading-tight">
+                Money V2
+              </h2>
             </div>
+          </a>
 
-            <div class="app-item flex flex-col items-center gap-2">
-              <a href="year-goal.html" class="app-icon bg-purple">
-                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-              </a>
-              <span class="text-[11px] font-semibold text-stone-400 text-center">Year Goals</span>
+          <!-- Wood Cutting -->
+          <a href="wood-cutting.html" class="game-card bg-stone-800 rounded-lg sm:rounded-xl flex flex-col group relative overflow-hidden">
+            <div class="absolute inset-0 bg-amber-500 opacity-0 group-hover:opacity-10 transition-opacity z-10 pointer-events-none"></div>
+            <div class="w-full aspect-square bg-brown relative flex items-center justify-center p-2">
+              <svg class="w-8 h-8 sm:w-16 sm:h-16 text-white drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.121-2.121M3 8a3 3 0 100 6 3 3 0 000-6zm12 8a3 3 0 100 6 3 3 0 000-6z"/></svg>
             </div>
-            
-            <!-- Paper Day -->
-            <div class="app-item flex flex-col items-center gap-2">
-              <a href="paper-day.html" class="app-icon bg-orange">
-                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-              </a>
-              <span class="text-[11px] font-semibold text-stone-400 text-center">Paper day</span>
+            <div class="p-1.5 sm:p-3 flex-grow flex items-center justify-center text-center bg-stone-800 border-t border-stone-700 z-20">
+              <h2 class="fantasy-font text-xs sm:text-base font-bold text-stone-200 group-hover:text-amber-500 transition-colors leading-tight">
+                Wood Cutting
+              </h2>
             </div>
+          </a>
 
-            <!-- Paper Week -->
-            <div class="app-item flex flex-col items-center gap-2">
-              <a href="paper-week.html" class="app-icon bg-teal">
-                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-              </a>
-              <span class="text-[11px] font-semibold text-stone-400 text-center">Paper Week</span>
+          <!-- Plane bags -->
+          <a href="plane.html" class="game-card bg-stone-800 rounded-lg sm:rounded-xl flex flex-col group relative overflow-hidden">
+            <div class="absolute inset-0 bg-amber-500 opacity-0 group-hover:opacity-10 transition-opacity z-10 pointer-events-none"></div>
+            <div class="w-full aspect-square bg-blue relative flex items-center justify-center p-2">
+              <svg class="w-8 h-8 sm:w-16 sm:h-16 text-white drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             </div>
-
-            <!-- Paper Month -->
-            <div class="app-item flex flex-col items-center gap-2">
-              <a href="paper-month.html" class="app-icon bg-blue">
-                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
-              </a>
-              <span class="text-[11px] font-semibold text-stone-400 text-center">Paper Month</span>
+            <div class="p-1.5 sm:p-3 flex-grow flex items-center justify-center text-center bg-stone-800 border-t border-stone-700 z-20">
+              <h2 class="fantasy-font text-xs sm:text-base font-bold text-stone-200 group-hover:text-amber-500 transition-colors leading-tight">
+                Plane bags
+              </h2>
             </div>
+          </a>
 
-            <!-- Paper Work -->
-            <div class="app-item flex flex-col items-center gap-2">
-              <a href="paper-work.html" class="app-icon bg-gray">
-                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-              </a>
-              <span class="text-[11px] font-semibold text-stone-400 text-center">Paper Work</span>
+          <!-- Goal V2 -->
+          <a href="goal.html" class="game-card bg-stone-800 rounded-lg sm:rounded-xl flex flex-col group relative overflow-hidden">
+            <div class="absolute inset-0 bg-amber-500 opacity-0 group-hover:opacity-10 transition-opacity z-10 pointer-events-none"></div>
+            <div class="w-full aspect-square bg-red relative flex items-center justify-center p-2">
+              <svg class="w-8 h-8 sm:w-16 sm:h-16 text-white drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z M12 16a4 4 0 100-8 4 4 0 000 8z M12 13a1 1 0 100-2 1 1 0 000 2z"/></svg>
             </div>
-
-                        <!-- arnold -->
-            <div class="app-item flex flex-col items-center gap-2">
-              <a href="arnold.html" class="app-icon bg-gray">
-                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-              </a>
-              <span class="text-[11px] font-semibold text-stone-400 text-center">Arnold 7 Rules</span>
+            <div class="p-1.5 sm:p-3 flex-grow flex items-center justify-center text-center bg-stone-800 border-t border-stone-700 z-20">
+              <h2 class="fantasy-font text-xs sm:text-base font-bold text-stone-200 group-hover:text-amber-500 transition-colors leading-tight">
+                Goal V2
+              </h2>
             </div>
+          </a>
 
-            <!-- Ank -->
-            <div class="app-item flex flex-col items-center gap-2">
-              <a href="anki.html" class="app-icon bg-pink">
-                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-              </a>
-              <span class="text-[11px] font-semibold text-stone-400 text-center">Anki</span>
+          <!-- Year Goals -->
+          <a href="year-goal.html" class="game-card bg-stone-800 rounded-lg sm:rounded-xl flex flex-col group relative overflow-hidden">
+            <div class="absolute inset-0 bg-amber-500 opacity-0 group-hover:opacity-10 transition-opacity z-10 pointer-events-none"></div>
+            <div class="w-full aspect-square bg-purple relative flex items-center justify-center p-2">
+              <svg class="w-8 h-8 sm:w-16 sm:h-16 text-white drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
             </div>
-
-            <!-- Diary -->
-            <div class="app-item flex flex-col items-center gap-2">
-              <a href="diary.html" class="app-icon bg-pink">
-                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-              </a>
-              <span class="text-[11px] font-semibold text-stone-400 text-center">Diary</span>
+            <div class="p-1.5 sm:p-3 flex-grow flex items-center justify-center text-center bg-stone-800 border-t border-stone-700 z-20">
+              <h2 class="fantasy-font text-xs sm:text-base font-bold text-stone-200 group-hover:text-amber-500 transition-colors leading-tight">
+                Year Goals
+              </h2>
             </div>
+          </a>
 
-            <!-- year-theme -->
-            <div class="app-item flex flex-col items-center gap-2">
-              <a href="year-theme.html" class="app-icon bg-pink">
-                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-              </a>
-              <span class="text-[11px] font-semibold text-stone-400 text-center">Year Theme</span>
+          <!-- Paper Day -->
+          <a href="paper-day.html" class="game-card bg-stone-800 rounded-lg sm:rounded-xl flex flex-col group relative overflow-hidden">
+            <div class="absolute inset-0 bg-amber-500 opacity-0 group-hover:opacity-10 transition-opacity z-10 pointer-events-none"></div>
+            <div class="w-full aspect-square bg-orange relative flex items-center justify-center p-2">
+              <svg class="w-8 h-8 sm:w-16 sm:h-16 text-white drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
             </div>
-
-            <!-- Task Flow -->
-            <div class="app-item flex flex-col items-center gap-2">
-              <a href="task-flow.html" class="app-icon bg-green">
-                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-              </a>
-              <span class="text-[11px] font-semibold text-stone-400 text-center">Task Flow</span>
+            <div class="p-1.5 sm:p-3 flex-grow flex items-center justify-center text-center bg-stone-800 border-t border-stone-700 z-20">
+              <h2 class="fantasy-font text-xs sm:text-base font-bold text-stone-200 group-hover:text-amber-500 transition-colors leading-tight">
+                Paper Day
+              </h2>
             </div>
+          </a>
 
-            <!-- Goal Framework -->
-            <div class="app-item flex flex-col items-center gap-2">
-              <a href="Goal-Framework.html" class="app-icon bg-purple">
-                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 21h6m-3-3v3m-5-9c0-2.761 2.239-5 5-5s5 2.239 5 5c0 1.83-1.004 3.42-2.5 4.293V17a1 1 0 01-1 1h-3a1 1 0 01-1-1v-.707C10.004 15.42 9 13.83 9 12z"/></svg>
-              </a>
-              <span class="text-[11px] font-semibold text-stone-400 text-center">Mental Framework</span>
+          <!-- Paper Week -->
+          <a href="paper-week.html" class="game-card bg-stone-800 rounded-lg sm:rounded-xl flex flex-col group relative overflow-hidden">
+            <div class="absolute inset-0 bg-amber-500 opacity-0 group-hover:opacity-10 transition-opacity z-10 pointer-events-none"></div>
+            <div class="w-full aspect-square bg-teal relative flex items-center justify-center p-2">
+              <svg class="w-8 h-8 sm:w-16 sm:h-16 text-white drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
             </div>
-
-            <!-- CBT -->
-            <div class="app-item flex flex-col items-center gap-2">
-              <a href="CBT.html" class="app-icon bg-teal">
-                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-              </a>
-              <span class="text-[11px] font-semibold text-stone-400 text-center">CBT</span>
+            <div class="p-1.5 sm:p-3 flex-grow flex items-center justify-center text-center bg-stone-800 border-t border-stone-700 z-20">
+              <h2 class="fantasy-font text-xs sm:text-base font-bold text-stone-200 group-hover:text-amber-500 transition-colors leading-tight">
+                Paper Week
+              </h2>
             </div>
+          </a>
 
-            <!-- Dave Ramsey House Calculator -->
-            <div class="app-item flex flex-col items-center gap-2">
-              <a href="Dave Ramsey House Calculator.html" class="app-icon bg-teal">
-                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-              </a>
-              <span class="text-[11px] font-semibold text-stone-400 text-center">Dave Ramsey House Calculator</span>
+          <!-- Paper Month -->
+          <a href="paper-month.html" class="game-card bg-stone-800 rounded-lg sm:rounded-xl flex flex-col group relative overflow-hidden">
+            <div class="absolute inset-0 bg-amber-500 opacity-0 group-hover:opacity-10 transition-opacity z-10 pointer-events-none"></div>
+            <div class="w-full aspect-square bg-blue relative flex items-center justify-center p-2">
+              <svg class="w-8 h-8 sm:w-16 sm:h-16 text-white drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
             </div>
+            <div class="p-1.5 sm:p-3 flex-grow flex items-center justify-center text-center bg-stone-800 border-t border-stone-700 z-20">
+              <h2 class="fantasy-font text-xs sm:text-base font-bold text-stone-200 group-hover:text-amber-500 transition-colors leading-tight">
+                Paper Month
+              </h2>
+            </div>
+          </a>
 
-          </div>
-        </main>
-    </div>
+          <!-- Paper Work -->
+          <a href="paper-work.html" class="game-card bg-stone-800 rounded-lg sm:rounded-xl flex flex-col group relative overflow-hidden">
+            <div class="absolute inset-0 bg-amber-500 opacity-0 group-hover:opacity-10 transition-opacity z-10 pointer-events-none"></div>
+            <div class="w-full aspect-square bg-gray relative flex items-center justify-center p-2">
+              <svg class="w-8 h-8 sm:w-16 sm:h-16 text-white drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+            </div>
+            <div class="p-1.5 sm:p-3 flex-grow flex items-center justify-center text-center bg-stone-800 border-t border-stone-700 z-20">
+              <h2 class="fantasy-font text-xs sm:text-base font-bold text-stone-200 group-hover:text-amber-500 transition-colors leading-tight">
+                Paper Work
+              </h2>
+            </div>
+          </a>
 
+          <!-- Arnold 7 Rules -->
+          <a href="arnold.html" class="game-card bg-stone-800 rounded-lg sm:rounded-xl flex flex-col group relative overflow-hidden">
+            <div class="absolute inset-0 bg-amber-500 opacity-0 group-hover:opacity-10 transition-opacity z-10 pointer-events-none"></div>
+            <div class="w-full aspect-square bg-gray relative flex items-center justify-center p-2">
+              <svg class="w-8 h-8 sm:w-16 sm:h-16 text-white drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+            </div>
+            <div class="p-1.5 sm:p-3 flex-grow flex items-center justify-center text-center bg-stone-800 border-t border-stone-700 z-20">
+              <h2 class="fantasy-font text-xs sm:text-base font-bold text-stone-200 group-hover:text-amber-500 transition-colors leading-tight">
+                Arnold 7 Rules
+              </h2>
+            </div>
+          </a>
+
+          <!-- Anki -->
+          <a href="anki.html" class="game-card bg-stone-800 rounded-lg sm:rounded-xl flex flex-col group relative overflow-hidden">
+            <div class="absolute inset-0 bg-amber-500 opacity-0 group-hover:opacity-10 transition-opacity z-10 pointer-events-none"></div>
+            <div class="w-full aspect-square bg-pink relative flex items-center justify-center p-2">
+              <svg class="w-8 h-8 sm:w-16 sm:h-16 text-white drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+            </div>
+            <div class="p-1.5 sm:p-3 flex-grow flex items-center justify-center text-center bg-stone-800 border-t border-stone-700 z-20">
+              <h2 class="fantasy-font text-xs sm:text-base font-bold text-stone-200 group-hover:text-amber-500 transition-colors leading-tight">
+                Anki
+              </h2>
+            </div>
+          </a>
+
+          <!-- Diary -->
+          <a href="diary.html" class="game-card bg-stone-800 rounded-lg sm:rounded-xl flex flex-col group relative overflow-hidden">
+            <div class="absolute inset-0 bg-amber-500 opacity-0 group-hover:opacity-10 transition-opacity z-10 pointer-events-none"></div>
+            <div class="w-full aspect-square bg-pink relative flex items-center justify-center p-2">
+              <svg class="w-8 h-8 sm:w-16 sm:h-16 text-white drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+            </div>
+            <div class="p-1.5 sm:p-3 flex-grow flex items-center justify-center text-center bg-stone-800 border-t border-stone-700 z-20">
+              <h2 class="fantasy-font text-xs sm:text-base font-bold text-stone-200 group-hover:text-amber-500 transition-colors leading-tight">
+                Diary
+              </h2>
+            </div>
+          </a>
+
+          <!-- Year Theme -->
+          <a href="year-theme.html" class="game-card bg-stone-800 rounded-lg sm:rounded-xl flex flex-col group relative overflow-hidden">
+            <div class="absolute inset-0 bg-amber-500 opacity-0 group-hover:opacity-10 transition-opacity z-10 pointer-events-none"></div>
+            <div class="w-full aspect-square bg-pink relative flex items-center justify-center p-2">
+              <svg class="w-8 h-8 sm:w-16 sm:h-16 text-white drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+            </div>
+            <div class="p-1.5 sm:p-3 flex-grow flex items-center justify-center text-center bg-stone-800 border-t border-stone-700 z-20">
+              <h2 class="fantasy-font text-xs sm:text-base font-bold text-stone-200 group-hover:text-amber-500 transition-colors leading-tight">
+                Year Theme
+              </h2>
+            </div>
+          </a>
+
+          <!-- Task Flow -->
+          <a href="task-flow.html" class="game-card bg-stone-800 rounded-lg sm:rounded-xl flex flex-col group relative overflow-hidden">
+            <div class="absolute inset-0 bg-amber-500 opacity-0 group-hover:opacity-10 transition-opacity z-10 pointer-events-none"></div>
+            <div class="w-full aspect-square bg-green relative flex items-center justify-center p-2">
+              <svg class="w-8 h-8 sm:w-16 sm:h-16 text-white drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+            </div>
+            <div class="p-1.5 sm:p-3 flex-grow flex items-center justify-center text-center bg-stone-800 border-t border-stone-700 z-20">
+              <h2 class="fantasy-font text-xs sm:text-base font-bold text-stone-200 group-hover:text-amber-500 transition-colors leading-tight">
+                Task Flow
+              </h2>
+            </div>
+          </a>
+
+          <!-- Mental Framework -->
+          <a href="Goal-Framework.html" class="game-card bg-stone-800 rounded-lg sm:rounded-xl flex flex-col group relative overflow-hidden">
+            <div class="absolute inset-0 bg-amber-500 opacity-0 group-hover:opacity-10 transition-opacity z-10 pointer-events-none"></div>
+            <div class="w-full aspect-square bg-purple relative flex items-center justify-center p-2">
+              <svg class="w-8 h-8 sm:w-16 sm:h-16 text-white drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 21h6m-3-3v3m-5-9c0-2.761 2.239-5 5-5s5 2.239 5 5c0 1.83-1.004 3.42-2.5 4.293V17a1 1 0 01-1 1h-3a1 1 0 01-1-1v-.707C10.004 15.42 9 13.83 9 12z"/></svg>
+            </div>
+            <div class="p-1.5 sm:p-3 flex-grow flex items-center justify-center text-center bg-stone-800 border-t border-stone-700 z-20">
+              <h2 class="fantasy-font text-xs sm:text-base font-bold text-stone-200 group-hover:text-amber-500 transition-colors leading-tight">
+                Mental Framework
+              </h2>
+            </div>
+          </a>
+
+          <!-- CBT -->
+          <a href="CBT.html" class="game-card bg-stone-800 rounded-lg sm:rounded-xl flex flex-col group relative overflow-hidden">
+            <div class="absolute inset-0 bg-amber-500 opacity-0 group-hover:opacity-10 transition-opacity z-10 pointer-events-none"></div>
+            <div class="w-full aspect-square bg-teal relative flex items-center justify-center p-2">
+              <svg class="w-8 h-8 sm:w-16 sm:h-16 text-white drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <div class="p-1.5 sm:p-3 flex-grow flex items-center justify-center text-center bg-stone-800 border-t border-stone-700 z-20">
+              <h2 class="fantasy-font text-xs sm:text-base font-bold text-stone-200 group-hover:text-amber-500 transition-colors leading-tight">
+                CBT
+              </h2>
+            </div>
+          </a>
+
+          <!-- Dave Ramsey House Calculator -->
+          <a href="Dave Ramsey House Calculator.html" class="game-card bg-stone-800 rounded-lg sm:rounded-xl flex flex-col group relative overflow-hidden">
+            <div class="absolute inset-0 bg-amber-500 opacity-0 group-hover:opacity-10 transition-opacity z-10 pointer-events-none"></div>
+            <div class="w-full aspect-square bg-teal relative flex items-center justify-center p-2">
+              <svg class="w-8 h-8 sm:w-16 sm:h-16 text-white drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <div class="p-1.5 sm:p-3 flex-grow flex items-center justify-center text-center bg-stone-800 border-t border-stone-700 z-20">
+              <h2 class="fantasy-font text-xs sm:text-base font-bold text-stone-200 group-hover:text-amber-500 transition-colors leading-tight">
+                Dave Ramsey House Calculator
+              </h2>
+            </div>
+          </a>
+
+        </div>
+      </div>
+    </main>
+
+    <!-- ==========================================
+         JAVASCRIPT
+         ========================================== -->
     <script>
-      document.getElementById('appSearch').addEventListener('input', function(e) {
-        const term = e.target.value.toLowerCase();
-        document.querySelectorAll('.app-item').forEach(item => {
-          const title = item.querySelector('span').innerText.toLowerCase();
-          item.style.display = title.includes(term) ? 'flex' : 'none';
+        // Listen for user typing in the search bar
+        document.getElementById('gameSearch').addEventListener('input', function(e) {
+            // Get the user's input and convert to lowercase for case-insensitive matching
+            const searchTerm = e.target.value.toLowerCase();
+            // Select all game card anchor tags
+            const cards = document.querySelectorAll('.game-card');
+
+            cards.forEach(card => {
+                // Find the game title text inside the card's <h2> element
+                const title = card.querySelector('h2').innerText.toLowerCase();
+                
+                // Toggle card visibility based on whether the title includes the search string
+                if (title.includes(searchTerm)) {
+                    card.classList.remove('hidden');
+                    card.classList.add('flex'); // Restore the required flex layout class
+                } else {
+                    card.classList.add('hidden'); // Hide unmatched cards
+                    card.classList.remove('flex');
+                }
+            });
         });
-      });
     </script>
   </body>
 </html>
