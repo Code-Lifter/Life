@@ -3,549 +3,1485 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Deep Goal Tracker v1.6</title>
+    <title>Deep Goal Tracker v1.8</title>
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- type="text/tailwindcss" is required for @apply to work with the Tailwind CDN -->
+    <style type="text/tailwindcss">
+        .toolbar-btn { @apply text-white text-sm px-3 py-1.5 rounded border flex items-center gap-1.5 shadow-lg transition; }
+        .year-action-btn { @apply w-8 shrink-0 flex items-center justify-center bg-gray-800 text-gray-400 rounded border border-gray-600 transition shadow-lg cursor-pointer text-xl font-bold; }
+        .ctrl-btn { @apply text-gray-400 hover:text-white hover:bg-gray-700 text-[11px] px-1.5 py-0.5 font-mono border-r border-gray-600 last:border-r-0; }
+        .section-label { @apply text-[11px] uppercase tracking-widest text-gray-500 font-bold mb-1.5 px-0.5; }
+        .nav-btn { @apply w-8 h-7 rounded hover:bg-white/10 text-gray-300 text-lg leading-none transition; }
+        .add-btn { @apply text-gray-500 hover:text-white hover:bg-white/10 rounded w-5 h-5 leading-none text-sm transition shrink-0; }
+        .box-head { @apply flex justify-between items-center gap-2 mb-1.5 border-b border-gray-700 pb-1 shrink-0; }
+        .text-input { @apply bg-black/50 border border-orange-500/60 rounded px-1.5 py-0.5 text-xs text-white placeholder-gray-500 outline-none; }
+    </style>
+
     <style>
-        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 2px; }
         ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
-        
+
         .glass-panel {
             background-color: rgba(30, 30, 30, 0.6);
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.2s ease;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
         }
-        
         .selected-box {
             border: 1px solid #f97316 !important;
             background-color: rgba(249, 115, 22, 0.15);
         }
 
-        .tag-pill {
-            @apply px-2 py-0.5 rounded text-[10px] font-mono cursor-pointer border border-transparent transition-all;
+        /* ---------- To-do rows ---------- */
+        .item {
+            position: relative; display: flex; align-items: flex-start;
+            padding: 2px 2px; border-radius: 4px; outline: none;
+            user-select: none; -webkit-user-select: none;
         }
-        .tag-pill.active {
-            @apply bg-orange-600 text-white border-orange-400;
+        .item:hover { background: rgba(255, 255, 255, 0.04); }
+        .item:focus-visible { box-shadow: inset 0 0 0 1px rgba(249, 115, 22, 0.55); }
+        .item.editing { user-select: auto; -webkit-user-select: auto; }
+
+        .grip {
+            width: 10px; margin-right: 2px; height: 16px; line-height: 16px; flex-shrink: 0;
+            font-size: 10px; text-align: center; color: #6b7280; cursor: grab;
+            opacity: 0; touch-action: none; transition: opacity .1s, color .1s;
         }
-        .tag-pill.inactive {
-            @apply bg-gray-800 text-gray-400 border-gray-600 hover:border-gray-400 hover:text-white;
+        .item:hover .grip, .item:focus-within .grip { opacity: 1; }
+        .grip:hover { color: #e5e7eb; }
+        .grip-space { width: 12px; flex-shrink: 0; }
+
+        /* Vertical guide lines that show which group an item belongs to */
+        .guides {
+            flex-shrink: 0; align-self: stretch; margin: -2px 0;
+            background-image: repeating-linear-gradient(to right, transparent 0 6px, rgba(255,255,255,.13) 6px 7px, transparent 7px 14px);
         }
 
-        /* Hashtag styling within text */
-        .hashtag-highlight {
-            color: #f97316;
-            font-weight: bold;
+        .chev {
+            width: 12px; height: 16px; margin-right: 2px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 8px; color: #9ca3af; border-radius: 3px; transition: transform .15s, color .1s;
+        }
+        .chev:hover { color: #fff; background: rgba(255, 255, 255, 0.1); }
+        .chev.open { transform: rotate(90deg); }
+        .chev-space { width: 14px; flex-shrink: 0; }
+
+        .task-check {
+            appearance: none; -webkit-appearance: none;
+            width: 14px; height: 14px; margin: 1px 6px 0 0; flex-shrink: 0;
+            border: 1px solid #6b7280; border-radius: 3px;
+            background: transparent; cursor: pointer;
+            transition: background-color .15s, border-color .15s;
+        }
+        .task-check:hover { border-color: #f97316; }
+        .task-check:checked {
+            border-color: #f97316;
+            background: #f97316 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 10'%3E%3Cpath d='M1 5l3.5 3.5L11 1' fill='none' stroke='%23111' stroke-width='2'/%3E%3C/svg%3E") center / 9px no-repeat;
+        }
+        .check-ghost { width: 14px; height: 14px; margin: 3px 6px 0 0; flex-shrink: 0; border: 1px dashed #4b5563; border-radius: 3px; }
+
+        .item-text { flex: 1; min-width: 0; font-size: 12px; line-height: 16px; color: #d1d5db; overflow-wrap: anywhere; transition: color .2s; }
+        .item.is-parent > .item-text { font-weight: 600; color: #f3f4f6; }
+        .item-text.is-done, .item.is-parent > .item-text.is-done {
+            color: #6b7280; text-decoration: line-through; text-decoration-color: rgba(249, 115, 22, 0.6);
+        }
+        .kid-count { font-size: 10px; line-height: 16px; font-family: ui-monospace, monospace; color: #6b7280; margin-left: 4px; flex-shrink: 0; }
+        .kid-count.all { color: #22c55e; }
+
+        .edit-input, .add-input { flex: 1; min-width: 0; }
+
+        /* Row controls: hover (mouse) or focus (tap / keyboard) */
+        .task-controls {
+            position: absolute; right: 1px; top: 1px; z-index: 20;
+            display: flex; opacity: 0; pointer-events: none; transition: opacity .12s;
+        }
+        .item:hover > .task-controls,
+        .item:focus-within > .task-controls { opacity: 1; pointer-events: auto; }
+
+        @media (hover: none) {
+            .grip { opacity: .55; width: 16px; font-size: 13px; }
+            .grip-space { width: 18px; }
+            .task-controls { position: static; display: none; opacity: 1; pointer-events: auto; flex-basis: 100%; width: max-content; margin: 3px 0 0 18px; }
+            .item { flex-wrap: wrap; }
+            .item:focus-within > .task-controls { display: flex; }
+            .ctrl-btn { padding: 4px 9px; font-size: 13px; }
+            .add-btn { opacity: 1 !important; }
         }
 
-        .group:hover .task-controls { opacity: 1; pointer-events: auto; }
-        
-        .year-action-btn {
-            @apply w-8 flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white rounded border border-gray-600 transition shadow-lg cursor-pointer;
+        /* ---------- Drag & drop ---------- */
+        .drag-ghost {
+            position: fixed; left: 0; top: 0; z-index: 200; pointer-events: none;
+            display: flex; align-items: center; gap: 6px; padding: 4px 8px;
+            background: #1f2937; border: 1px solid #f97316; border-radius: 6px;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, .55); font-size: 12px; color: #f3f4f6;
         }
+        .ghost-check { width: 12px; height: 12px; border: 1px solid #6b7280; border-radius: 3px; flex-shrink: 0; }
+        .ghost-check.done { background: #f97316; border-color: #f97316; }
+        .ghost-text { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .ghost-count { font-size: 10px; font-family: ui-monospace, monospace; color: #fb923c; flex-shrink: 0; }
+
+        .drop-line {
+            position: fixed; z-index: 150; height: 2px; display: none; pointer-events: none;
+            background: #f97316; border-radius: 1px;
+        }
+        .drop-line::before {
+            content: ''; position: absolute; left: -5px; top: -3px; width: 8px; height: 8px;
+            border: 2px solid #f97316; border-radius: 50%; background: #111827;
+        }
+        .drop-target { box-shadow: inset 0 0 0 1px rgba(249, 115, 22, 0.8) !important; }
+        .drag-source { opacity: .3; }
+        body.is-dragging, body.is-dragging * { cursor: grabbing !important; user-select: none !important; -webkit-user-select: none !important; }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-300 font-sans min-h-screen flex flex-col overflow-y-auto">
+<body class="bg-gray-900 text-gray-300 font-sans min-h-screen">
 
-    <div class="fixed inset-0 z-[-1] opacity-20 bg-[url('https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?q=80&w=2074&auto=format&fit=crop')] bg-cover bg-center"></div>
+    <div class="fixed inset-0 -z-10 opacity-20 pointer-events-none bg-[url('https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?q=80&w=2074&auto=format&fit=crop')] bg-cover bg-center"></div>
 
-    <div class="flex flex-col gap-2 px-3 py-3 shrink-0 top-0 z-50">
-        
-        <div class="flex justify-end items-center gap-2">
-            <button onclick="initFileSave()" class="bg-gray-800 hover:bg-gray-700 text-white text-sm px-3 py-1.5 rounded border border-gray-600 flex items-center gap-1 shadow-lg transition">
-                <span>💾</span> Connect
+    <header class="sticky top-0 z-50 bg-gray-900/85 backdrop-blur border-b border-white/5 px-3 py-2">
+        <div class="flex items-center gap-2 max-w-[1600px] mx-auto">
+            <h1 class="text-white font-bold text-sm tracking-wide mr-auto truncate">Deep Goal Tracker</h1>
+            <button id="hide-done-btn" data-action="toggle-hide-done" class="toolbar-btn bg-gray-800 hover:bg-gray-700 border-gray-600"></button>
+            <button id="link-btn" data-action="link-file" class="toolbar-btn bg-gray-800 hover:bg-gray-700 border-gray-600"></button>
+            <button data-action="download" class="toolbar-btn bg-gray-800 hover:bg-gray-700 border-gray-600" title="Download a backup copy of all your data">
+                <span>⬇</span><span class="hidden sm:inline">Export</span>
             </button>
-            <button onclick="downloadData()" class="bg-gray-800 hover:bg-gray-700 text-white text-sm px-3 py-1.5 rounded border border-gray-600 flex items-center gap-1 shadow-lg transition">
-                <span>⬇</span> Save
+            <button data-action="load" class="toolbar-btn bg-gray-800 hover:bg-gray-700 border-gray-600" title="Replace your data with a saved JSON file (undoable)">
+                <span>⬆</span><span class="hidden sm:inline">Import</span>
             </button>
-            <button onclick="document.getElementById('file-input').click()" class="bg-gray-800 hover:bg-gray-700 text-white text-sm px-3 py-1.5 rounded border border-gray-600 flex items-center gap-1 shadow-lg transition">
-                <span>⬆</span> Load
-            </button>
-            <input type="file" id="file-input" class="hidden" accept=".json" onchange="loadData(this)">
+            <input type="file" id="file-input" class="hidden" accept=".json,application/json">
         </div>
+    </header>
 
-        <div id="tag-bar" class="flex gap-2 overflow-x-auto pb-1 custom-scrollbar min-h-[28px]">
+    <main class="flex flex-col gap-5 px-3 pt-3 pb-24 max-w-[1600px] mx-auto">
+
+        <!-- Life goals -->
+        <section class="glass-panel rounded-lg p-3 flex flex-col" data-drop data-type="life" data-key="">
+            <div class="flex justify-between items-center border-b border-gray-700 pb-2 mb-2 gap-2">
+                <h2 class="text-white font-bold text-sm uppercase tracking-wide flex items-center gap-2">Life Goals <span id="life-count"></span></h2>
+                <button data-action="add" data-type="life" data-key="" class="text-xs bg-gray-700 hover:bg-gray-600 text-white px-2 py-1 rounded transition shadow">+ Add Goal</button>
             </div>
+            <div id="life-goals-container" class="flex flex-col" data-rows></div>
+        </section>
 
+        <!-- Years -->
+        <section>
+            <div class="section-label">Years</div>
+            <div class="flex gap-2 items-stretch">
+                <button data-action="year-remove" class="year-action-btn hover:bg-red-900/50 hover:border-red-500 hover:text-red-200" title="Hide oldest year (its items are kept)">−</button>
+                <div id="years-container" class="flex-1 flex gap-2 overflow-x-auto pb-1"></div>
+                <button data-action="year-add" class="year-action-btn hover:bg-green-900/50 hover:border-green-500 hover:text-green-200" title="Add next year">+</button>
+            </div>
+        </section>
+
+        <!-- Months -->
+        <section>
+            <div id="months-label" class="section-label"></div>
+            <div id="months-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-2"></div>
+        </section>
+
+        <!-- Weeks -->
+        <section>
+            <div id="weeks-label" class="section-label"></div>
+            <div id="weeks-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2"></div>
+        </section>
+
+        <!-- Calendar -->
+        <section class="glass-panel rounded-lg overflow-hidden flex flex-col">
+            <div class="flex items-center justify-between px-2 py-1.5 border-b border-gray-700 bg-black/20">
+                <button data-action="prev-month" class="nav-btn" title="Previous month" aria-label="Previous month">‹</button>
+                <div class="flex items-center gap-2">
+                    <span id="cal-title" class="text-sm text-orange-500 font-bold"></span>
+                    <button data-action="today" class="text-[11px] px-2 py-0.5 rounded border border-gray-600 text-gray-300 hover:bg-white/10 hover:text-white transition">Today</button>
+                </div>
+                <button data-action="next-month" class="nav-btn" title="Next month" aria-label="Next month">›</button>
+            </div>
+            <div class="overflow-x-auto">
+                <div class="min-w-[680px]">
+                    <div class="grid grid-cols-[2rem_repeat(7,minmax(0,1fr))] border-b border-gray-700 bg-black/20 text-[11px] font-bold text-gray-400 py-1.5 text-center">
+                        <div class="text-gray-600">Wk</div>
+                        <div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div>
+                        <div class="text-gray-500">SAT</div><div class="text-gray-500">SUN</div>
+                    </div>
+                    <div id="calendar-grid" class="grid grid-cols-[2rem_repeat(7,minmax(0,1fr))]"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Toast (undo + status messages) -->
+    <div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-[100] bg-gray-800 border border-gray-600 text-sm text-gray-200 rounded-lg shadow-2xl px-4 py-2 flex items-center gap-4 transition-all duration-200 opacity-0 translate-y-2 pointer-events-none max-w-[90vw]">
+        <span id="toast-msg"></span>
+        <button id="toast-undo" data-action="undo" class="text-orange-400 font-bold hover:text-orange-300 hidden">Undo</button>
     </div>
 
-    <div class="flex-1 flex flex-col px-3 pb-3 gap-3">
-
-        <div class="w-full glass-panel rounded-lg p-3 flex flex-col h-full shrink-0">
-            <div class="flex justify-between items-center border-b border-gray-700 pb-2 mb-2 shrink-0">
-                <h2 class="text-white font-bold text-sm uppercase tracking-wide">Life Goals</h2>
-                <button onclick="addItem('life')" class="text-xs bg-gray-700 hover:bg-gray-600 text-white px-2 py-1 rounded transition shadow">+ Add Goal</button>
-            </div>
-            <div id="life-goals-container" class="flex-1 overflow-y-auto pr-1 flex flex-col gap-1"></div>
-        </div>
-
-        <br>
-
-        <div class="flex gap-2 h-full shrink-0">
-            <button onclick="removeOldestYear()" class="year-action-btn text-xl font-bold hover:bg-red-900/50 hover:border-red-500 hover:text-red-200" title="Remove Oldest Year">−</button>
-            <div id="years-container" class="flex-1 flex gap-2 overflow-x-auto pb-1"></div>
-            <button onclick="addNewYear()" class="year-action-btn text-xl font-bold hover:bg-green-900/50 hover:border-green-500 hover:text-green-200" title="Add Next Year">+</button>
-        </div>
-
-        <br>
-        
-        <div id="months-container" class="grid grid-cols-6 gap-2 h-full shrink-0"></div>
-
-        <br>
-
-        <div id="weeks-container" class="grid grid-cols-5 gap-2 h-full shrink-0"></div>
-
-        <br>
-
-        <div class="glass-panel rounded-lg p-0 overflow-hidden flex flex-col h-full">
-            <div class="grid grid-cols-[2rem_repeat(7,1fr)] border-b border-gray-700 bg-black/20 text-xs font-bold text-gray-400 py-1.5 text-center shrink-0">
-                <div class="text-gray-600">#</div> <div>MO</div><div>TU</div><div>WE</div><div>TH</div><div>FR</div><div>SA</div><div>SU</div>
-            </div>
-            
-            <div id="calendar-header" class="text-sm text-center py-1 text-orange-500 font-bold bg-black/10 shrink-0"></div>
-            
-            <div id="calendar-grid" class="grid grid-cols-[2rem_repeat(7,1fr)] auto-rows-fr h-full overflow-y-auto"></div>
-        </div>
-
-    </div>
+    <!-- Drop indicator line for drag & drop -->
+    <div id="drop-line" class="drop-line"></div>
 
 <script>
-        // --- 1. STATE & NAVIGATION ---
-        const today = new Date();
-        let currentState = {
-            selectedYear: today.getFullYear(),
-            selectedMonth: today.getMonth(),
-            activeTag: null // NEW: Filter state
+    // =========================================================
+    // 1. CONSTANTS & HELPERS
+    // =========================================================
+    const STORAGE_KEY = 'goalApp_v11';   // unchanged, so existing data loads
+    const UI_KEY = 'goalApp_ui';
+    const INDENT = 14;                   // px per indent level
+    const MAX_INDENT = 6;
+    const GRIP_W = window.matchMedia('(hover: none)').matches ? 18 : 12;
+    const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    const MONTHS_FULL = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    const BUCKET = { year: 'years', month: 'months', week: 'weeks', day: 'days' };
+    const FS_SUPPORTED = 'showSaveFilePicker' in window;
+
+    const $ = id => document.getElementById(id);
+    const ESC_MAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+    const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ESC_MAP[c]);
+    const pad2 = n => String(n).padStart(2, '0');
+    const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
+
+    function nowParts() {
+        const n = new Date();
+        return { y: n.getFullYear(), m: n.getMonth(), d: n.getDate() };
+    }
+    function defaultYearList() {
+        const y = new Date().getFullYear();
+        return [y, y + 1, y + 2, y + 3, y + 4];
+    }
+
+    // =========================================================
+    // 2. STATE
+    // =========================================================
+    let rendering = false;
+    let refocus = null;
+    let undoSnapshot = null;
+    let lastId = 0;
+
+    function newId() {
+        lastId = Math.max(Date.now(), lastId + 1);   // never two identical ids
+        return lastId;
+    }
+
+    function obj(v) { return v && typeof v === 'object' && !Array.isArray(v) ? v : {}; }
+
+    function fixList(l) {
+        return (Array.isArray(l) ? l : [])
+            .filter(x => x && typeof x === 'object')
+            .map(x => ({
+                ...x,
+                id: typeof x.id === 'number' ? x.id : newId(),
+                text: String(x.text ?? ''),
+                done: !!x.done,
+                indent: clamp(Number(x.indent) || 0, 0, MAX_INDENT)
+            }));
+    }
+    function fixBucket(b) {
+        const out = {};
+        Object.entries(obj(b)).forEach(([k, v]) => { const l = fixList(v); if (l.length) out[k] = l; });
+        return out;
+    }
+
+    function normalize(d) {
+        d = obj(d);
+        return {
+            life: fixList(d.life),
+            years: fixBucket(d.years),
+            months: fixBucket(d.months),
+            weeks: fixBucket(d.weeks),
+            days: fixBucket(d.days),
+            yearList: Array.isArray(d.yearList) && d.yearList.length
+                ? [...new Set(d.yearList.map(Number).filter(Number.isFinite))].sort((a, b) => a - b)
+                : defaultYearList()
         };
+    }
 
-        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    function loadStored() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            return normalize(raw ? JSON.parse(raw) : null);
+        } catch { return normalize(null); }
+    }
 
-        const defaultData = {
-            life: [],
-            years: {},
-            months: {},
-            weeks: {}, 
-            days: {},
-            yearList: [2026, 2027, 2028, 2029, 2030] 
-        };
+    let appData = loadStored();
 
-        let appData = JSON.parse(localStorage.getItem('goalApp_v11')) || defaultData;
+    let ui = { hideDone: false };
+    try { ui = { ...ui, ...JSON.parse(localStorage.getItem(UI_KEY) || '{}') }; } catch {}
+    function saveUi() { try { localStorage.setItem(UI_KEY, JSON.stringify(ui)); } catch {} }
 
-        if (!appData.weeks) appData.weeks = {};
-        if (!appData.yearList) appData.yearList = [2026, 2027, 2028, 2029, 2030];
+    const start = nowParts();
+    const currentState = {
+        selectedYear: start.y,
+        selectedMonth: start.m,
+        adding: null,    // { type, key, afterId, indent } — inline "new item" row
+        editing: null    // { type, key, id } — inline edit row
+    };
 
-        // --- FILE SYSTEM HANDLES ---
-        let fileHandle = null;
+    // =========================================================
+    // 3. LIST / TREE HELPERS
+    //    Lists stay flat arrays; nesting comes from `indent`.
+    //    An item's children are the following items with a deeper indent.
+    // =========================================================
+    const ind = it => it.indent || 0;
 
-        async function saveData() {
-            localStorage.setItem('goalApp_v11', JSON.stringify(appData));
-            renderAll();
-            if (fileHandle) {
-                await writeToFile();
+    function getList(type, key, create = false) {
+        if (type === 'life') return appData.life;
+        const bucket = appData[BUCKET[type]];
+        if (!bucket[key]) {
+            if (!create) return [];
+            bucket[key] = [];
+        }
+        return bucket[key];
+    }
+
+    function pruneEmpty(type, key) {
+        if (type === 'life') return;
+        const bucket = appData[BUCKET[type]];
+        if (bucket[key] && bucket[key].length === 0) delete bucket[key];
+    }
+
+    function findItem(ref) {
+        return ref ? getList(ref.type, ref.key).find(i => i.id === ref.id) : undefined;
+    }
+
+    function itemRef(el) {
+        const it = el.closest('.item');
+        return it ? { type: it.dataset.type, key: it.dataset.key, id: Number(it.dataset.id) } : null;
+    }
+
+    function rowSelector(ref) {
+        return `.item[data-type="${ref.type}"][data-key="${ref.key}"][data-id="${ref.id}"]`;
+    }
+
+    // Index just past item i's last descendant
+    function subtreeEnd(list, i) {
+        const base = ind(list[i]);
+        let j = i + 1;
+        while (j < list.length && ind(list[j]) > base) j++;
+        return j;
+    }
+
+    // A group is done when everything inside it is done
+    function syncTree(list) {
+        for (let i = list.length - 1; i >= 0; i--) {
+            const end = subtreeEnd(list, i);
+            if (end > i + 1) list[i].done = list.slice(i + 1, end).every(x => x.done);
+        }
+    }
+
+    // Ticking a group ticks everything inside it
+    function setDone(list, i, value) {
+        const end = subtreeEnd(list, i);
+        for (let k = i; k < end; k++) list[k].done = value;
+        syncTree(list);
+    }
+
+    function maxIndentAt(list, at) {
+        const prev = list[at - 1];
+        return prev ? Math.min(MAX_INDENT, ind(prev) + 1) : 0;
+    }
+
+    // Indent/outdent an item together with its children
+    function indentBlock(list, i, delta) {
+        const end = subtreeEnd(list, i);
+        const cur = ind(list[i]);
+        const target = clamp(cur + delta, 0, maxIndentAt(list, i));
+        const d = target - cur;
+        if (!d) return false;
+        for (let k = i; k < end; k++) list[k].indent = clamp(ind(list[k]) + d, 0, MAX_INDENT);
+        return true;
+    }
+
+    // Move an item (with children) past its neighbouring sibling
+    function moveSibling(list, i, dir) {
+        const me = ind(list[i]);
+        const end = subtreeEnd(list, i);
+        if (dir < 0) {
+            let p = i - 1;
+            while (p >= 0 && ind(list[p]) > me) p--;
+            if (p < 0 || ind(list[p]) !== me) return false;
+            const block = list.splice(i, end - i);
+            list.splice(p, 0, ...block);
+        } else {
+            if (end >= list.length || ind(list[end]) !== me) return false;
+            const nEnd = subtreeEnd(list, end);
+            const next = list.splice(end, nEnd - end);
+            list.splice(i, 0, ...next);
+        }
+        return true;
+    }
+
+    function expandAncestors(list, i) {
+        let d = ind(list[i]);
+        for (let k = i - 1; k >= 0 && d > 0; k--) {
+            if (ind(list[k]) < d) { list[k].collapsed = false; d = ind(list[k]); }
+        }
+    }
+
+    // Where the inline "new item" row sits in the data
+    function addIndex(list, a) {
+        if (a.afterId == null) return list.length;
+        const i = list.findIndex(x => x.id === a.afterId);
+        return i < 0 ? list.length : subtreeEnd(list, i);
+    }
+
+    function insertNew(a, text, done = false, indent = a.indent || 0) {
+        const list = getList(a.type, a.key, true);
+        const at = addIndex(list, a);
+        const d = clamp(indent, 0, maxIndentAt(list, at));
+        const item = { id: newId(), text, done, indent: d };
+        list.splice(at, 0, item);
+        syncTree(list);
+        a.afterId = item.id;   // the next new item goes below this one
+        a.indent = d;
+        return item;
+    }
+
+    // Save whatever is typed in an open add/edit row. Returns true if data changed.
+    function commitPending() {
+        let changed = false;
+        const a = currentState.adding;
+        const addEl = document.querySelector('.add-input');
+        if (a && addEl) {
+            const text = addEl.value.trim();
+            if (text) { insertNew(a, text); changed = true; }
+        }
+        const ed = currentState.editing;
+        const editEl = document.querySelector('.edit-input');
+        if (ed && editEl) {
+            const text = editEl.value.trim();
+            const item = findItem(ed);
+            if (item && text && text !== item.text) { item.text = text; changed = true; }
+        }
+        currentState.adding = null;
+        currentState.editing = null;
+        return changed;
+    }
+
+    function commitThen(fn) {
+        const changed = commitPending();
+        fn();
+        changed ? saveData() : renderAll();
+    }
+
+    function rerenderKeeping(value) {
+        renderAll();
+        const input = document.querySelector('.add-input, .edit-input');
+        if (input) { input.value = value; input.setSelectionRange(value.length, value.length); }
+    }
+
+    // =========================================================
+    // 4. SAVING / FILES
+    // =========================================================
+    function saveData(opts = {}) {
+        if (!opts.keepUndo) clearUndo();
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+        } catch (e) {
+            console.error(e);
+            showToast('⚠ Could not save to browser storage — use Export');
+        }
+        renderAll();
+        scheduleFileWrite();
+    }
+
+    // Another tab changed the data: pick it up instead of overwriting it later
+    window.addEventListener('storage', e => {
+        if (e.key !== STORAGE_KEY || !e.newValue) return;
+        try { appData = normalize(JSON.parse(e.newValue)); } catch { return; }
+        if (!document.querySelector('.add-input, .edit-input') && !drag) renderAll();
+    });
+
+    function downloadData() {
+        const n = nowParts();
+        const blob = new Blob([JSON.stringify(appData, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = Object.assign(document.createElement('a'), {
+            href: url, download: `my_goals_${n.y}-${pad2(n.m + 1)}-${pad2(n.d)}.json`
+        });
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    function loadData(input) {
+        const file = input.files[0];
+        input.value = '';
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+            let parsed;
+            try { parsed = JSON.parse(e.target.result); }
+            catch { showToast("⚠ That file isn't valid JSON"); return; }
+            if (!parsed || !Array.isArray(parsed.life) || typeof parsed.years !== 'object') {
+                showToast("⚠ That doesn't look like a goals file");
+                return;
             }
+            commitPending();
+            snapshot();
+            appData = normalize(parsed);
+            saveData({ keepUndo: true });
+            showToast(`Loaded ${file.name}`, true);
+        };
+        reader.readAsText(file);
+    }
+
+    // --- Auto-save to a file (Chrome / Edge). Handle is remembered across reloads. ---
+    let fileHandle = null;
+    let pendingHandle = null;
+    let writeTimer = null;
+    let writeChain = Promise.resolve();
+
+    function idb(mode, fn) {
+        return new Promise((resolve, reject) => {
+            const req = indexedDB.open('goalApp', 1);
+            req.onupgradeneeded = () => req.result.createObjectStore('handles');
+            req.onerror = () => reject(req.error);
+            req.onsuccess = () => {
+                const tx = req.result.transaction('handles', mode);
+                const r = fn(tx.objectStore('handles'));
+                tx.oncomplete = () => resolve(r && r.result);
+                tx.onerror = () => reject(tx.error);
+            };
+        });
+    }
+    const idbGet = k => idb('readonly', s => s.get(k));
+    const idbSet = (k, v) => idb('readwrite', s => s.put(v, k));
+    const idbDel = k => idb('readwrite', s => s.delete(k));
+
+    async function restoreHandle() {
+        if (!FS_SUPPORTED) return;
+        try {
+            const h = await idbGet('file');
+            if (!h) return;
+            const perm = await h.queryPermission({ mode: 'readwrite' });
+            if (perm === 'granted') fileHandle = h;
+            else pendingHandle = h;
+            updateLinkBtn();
+        } catch (e) { console.error(e); }
+    }
+
+    async function linkFile() {
+        try {
+            const handle = await window.showSaveFilePicker({
+                suggestedName: 'my_goals.json',
+                types: [{ description: 'JSON Files', accept: { 'application/json': ['.json'] } }]
+            });
+            fileHandle = handle;
+            pendingHandle = null;
+            try { await idbSet('file', handle); } catch (e) { console.error(e); }
+            updateLinkBtn();
+            await queueWrite();
+            showToast(`Auto-saving to ${handle.name}`);
+        } catch (err) {
+            if (err.name !== 'AbortError') { console.error(err); showToast('⚠ Could not link file'); }
+        }
+    }
+
+    async function reconnectFile() {
+        try {
+            const perm = await pendingHandle.requestPermission({ mode: 'readwrite' });
+            if (perm !== 'granted') return;
+            fileHandle = pendingHandle;
+            pendingHandle = null;
+            updateLinkBtn();
+            await queueWrite();
+            showToast(`Auto-saving to ${fileHandle.name}`);
+        } catch (e) { console.error(e); showToast('⚠ Could not reconnect — link the file again'); }
+    }
+
+    async function unlinkFile() {
+        if (!confirm(`Stop auto-saving to ${fileHandle.name}?`)) return;
+        fileHandle = null;
+        pendingHandle = null;
+        try { await idbDel('file'); } catch {}
+        updateLinkBtn();
+    }
+
+    function scheduleFileWrite() {
+        if (!fileHandle) return;
+        clearTimeout(writeTimer);
+        writeTimer = setTimeout(queueWrite, 300);
+    }
+
+    function queueWrite() {
+        writeChain = writeChain.then(writeToFile);
+        return writeChain;
+    }
+
+    async function writeToFile() {
+        if (!fileHandle) return;
+        try {
+            const writable = await fileHandle.createWritable();
+            await writable.write(JSON.stringify(appData, null, 2));
+            await writable.close();
+        } catch (err) {
+            console.error(err);
+            pendingHandle = fileHandle;
+            fileHandle = null;
+            updateLinkBtn();
+            showToast('⚠ Lost access to the file — click Reconnect');
+        }
+    }
+
+    function updateLinkBtn() {
+        const b = $('link-btn');
+        const base = 'toolbar-btn ';
+        if (!FS_SUPPORTED) { b.className = 'hidden'; return; }
+        if (fileHandle) {
+            b.className = base + 'bg-green-800 hover:bg-green-700 border-green-600';
+            b.innerHTML = '<span>✓</span><span class="hidden sm:inline">Auto-saving</span>';
+            b.title = `Auto-saving to ${fileHandle.name} — click to stop`;
+        } else if (pendingHandle) {
+            b.className = base + 'bg-amber-800 hover:bg-amber-700 border-amber-600';
+            b.innerHTML = '<span>↻</span><span class="hidden sm:inline">Reconnect file</span>';
+            b.title = `Click to resume auto-saving to ${pendingHandle.name}`;
+        } else {
+            b.className = base + 'bg-gray-800 hover:bg-gray-700 border-gray-600';
+            b.innerHTML = '<span>💾</span><span class="hidden sm:inline">Link file</span>';
+            b.title = 'Auto-save every change to a JSON file on your computer';
+        }
+    }
+
+    // =========================================================
+    // 5. UNDO + TOAST
+    // =========================================================
+    let toastTimer = null;
+
+    function snapshot() { undoSnapshot = JSON.stringify(appData); }
+
+    function undo() {
+        if (!undoSnapshot) return;
+        appData = normalize(JSON.parse(undoSnapshot));
+        undoSnapshot = null;
+        saveData();
+        showToast('Restored');
+    }
+
+    function clearUndo() {
+        if (!undoSnapshot) return;
+        undoSnapshot = null;
+        hideToast();
+    }
+
+    function showToast(msg, undoable = false) {
+        const t = $('toast');
+        $('toast-msg').textContent = msg;
+        $('toast-undo').classList.toggle('hidden', !undoable);
+        t.classList.remove('opacity-0', 'translate-y-2', 'pointer-events-none');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => { undoSnapshot = null; hideToast(); }, undoable ? 6000 : 3000);
+    }
+
+    function hideToast() {
+        $('toast').classList.add('opacity-0', 'translate-y-2', 'pointer-events-none');
+    }
+
+    // =========================================================
+    // 6. RENDERING
+    // =========================================================
+    function dot() { return '<span class="inline-block w-1.5 h-1.5 rounded-full bg-orange-500" title="Current"></span>'; }
+
+    function countBadge(list) {
+        if (!list || !list.length) return '';
+        const done = list.filter(i => i.done).length;
+        const all = done === list.length;
+        return `<span class="text-[10px] font-mono ${all ? 'text-green-500' : 'text-gray-500'}">${done}/${list.length}</span>`;
+    }
+
+    function addBtn(type, key, extra = '') {
+        return `<button data-action="add" data-type="${type}" data-key="${key}" class="add-btn ${extra}" title="Add item" aria-label="Add item">+</button>`;
+    }
+
+    function ctrl(action, label, title, danger = false) {
+        return `<button data-action="${action}" class="ctrl-btn ${danger ? 'hover:!text-red-400' : ''}" title="${title}" aria-label="${title}">${label}</button>`;
+    }
+
+    function guides(depth) {
+        return depth ? `<span class="guides" style="width:${depth * INDENT}px"></span>` : '';
+    }
+
+    function renderItem(item, type, key, kids, listHasGroups) {
+        const ed = currentState.editing;
+        const isEditing = ed && ed.type === type && String(ed.key) === String(key) && ed.id === item.id;
+        const data = `data-type="${type}" data-key="${key}" data-id="${item.id}"`;
+        const chev = kids
+            ? `<button data-action="collapse" class="chev ${item.collapsed ? '' : 'open'}" title="${item.collapsed ? 'Expand' : 'Collapse'}" aria-label="${item.collapsed ? 'Expand' : 'Collapse'}">▶</button>`
+            : (listHasGroups ? '<span class="chev-space"></span>' : '');
+        const check = `<input type="checkbox" class="task-check" ${item.done ? 'checked' : ''} aria-label="Mark done">`;
+
+        if (isEditing) {
+            return `<div class="item editing ${kids ? 'is-parent' : ''}" ${data}>
+                        <span class="grip-space"></span>${guides(ind(item))}${chev}${check}
+                        <input type="text" class="edit-input text-input" value="${esc(item.text)}">
+                    </div>`;
         }
 
-        function downloadData() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData));
-            const downloadAnchorNode = document.createElement('a');
-            downloadAnchorNode.setAttribute("href", dataStr);
-            downloadAnchorNode.setAttribute("download", "my_goals.json");
-            document.body.appendChild(downloadAnchorNode);
-            downloadAnchorNode.click();
-            downloadAnchorNode.remove();
+        let count = '';
+        if (kids) {
+            const done = kids.filter(k => k.done).length;
+            count = `<span class="kid-count ${done === kids.length ? 'all' : ''}">${done}/${kids.length}</span>`;
         }
 
-        async function initFileSave() {
-            try {
-                const options = {
-                    suggestedName: 'my_goals.json',
-                    types: [{
-                        description: 'JSON Files',
-                        accept: { 'application/json': ['.json'] },
-                    }],
-                };
-                fileHandle = await window.showSaveFilePicker(options);
-                const btn = document.querySelector('button[onclick="initFileSave()"]');
-                if(btn) {
-                    btn.innerHTML = "<span>✓</span> Auto-Saving";
-                    btn.classList.replace("bg-gray-800", "bg-green-700");
+        return `
+            <div class="item ${kids ? 'is-parent' : ''}" tabindex="0" ${data}>
+                <span class="grip" title="Drag to move" aria-hidden="true">⠿</span>${guides(ind(item))}${chev}${check}
+                <span class="item-text ${item.done ? 'is-done' : ''}" title="Double-click to edit">${esc(item.text)}</span>${count}
+                <div class="task-controls bg-gray-800 border border-gray-600 rounded shadow-xl overflow-hidden">
+                    ${ctrl('add-sub', '+', 'Add sub-item')}${ctrl('outdent', '⇤', 'Outdent (Shift+Tab)')}${ctrl('indent', '⇥', 'Indent (Tab)')}${ctrl('edit', '✎', 'Edit (Enter)')}${ctrl('delete', '×', 'Delete', true)}
+                </div>
+            </div>`;
+    }
+
+    function addRow(list, a, at, listHasGroups) {
+        const depth = clamp(a.indent || 0, 0, maxIndentAt(list, at));
+        const ph = a.type === 'day' ? 'Add…' : 'New item — Enter to add, Tab to indent, Esc to close';
+        return `<div class="flex items-start py-[2px] px-[2px]">
+                    <span class="grip-space"></span>${guides(depth)}${listHasGroups ? '<span class="chev-space"></span>' : ''}<span class="check-ghost"></span>
+                    <input type="text" class="add-input text-input" placeholder="${esc(ph)}">
+                </div>`;
+    }
+
+    function renderList(list, type, key, emptyHint = '') {
+        const a = currentState.adding;
+        const addingHere = a && a.type === type && String(a.key) === String(key);
+        const at = addingHere ? addIndex(list, a) : -1;
+        const listHasGroups = list.some((x, i) => i + 1 < list.length && ind(list[i + 1]) > ind(x));
+
+        let html = '';
+        let visible = 0;
+        let hideDeeper = Infinity;   // skip items deeper than this (inside a collapsed/hidden group)
+
+        for (let i = 0; i < list.length; i++) {
+            if (i === at) html += addRow(list, a, at, listHasGroups);
+            const item = list[i];
+            const d = ind(item);
+            if (d > hideDeeper) continue;
+            hideDeeper = Infinity;
+
+            const end = subtreeEnd(list, i);
+            const kids = end > i + 1 ? list.slice(i + 1, end) : null;
+            if (ui.hideDone && item.done) { hideDeeper = d; continue; }
+            if (kids && item.collapsed) hideDeeper = d;
+
+            html += renderItem(item, type, key, kids, listHasGroups);
+            visible++;
+        }
+        if (at === list.length) html += addRow(list, a, at, listHasGroups);
+
+        if (!html && emptyHint) {
+            html = `<div class="text-[11px] text-gray-600 italic px-1">${emptyHint}</div>`;
+        } else if (!visible && list.length && !addingHere) {
+            html += `<div class="text-[10px] text-gray-600 italic px-1">${list.length} done · hidden</div>`;
+        }
+        return html;
+    }
+
+    function renderToolbar() {
+        const b = $('hide-done-btn');
+        b.className = 'toolbar-btn ' + (ui.hideDone
+            ? 'bg-orange-700 hover:bg-orange-600 border-orange-500'
+            : 'bg-gray-800 hover:bg-gray-700 border-gray-600');
+        b.innerHTML = `<span>${ui.hideDone ? '◉' : '○'}</span><span class="hidden sm:inline">${ui.hideDone ? 'Done hidden' : 'Hide done'}</span>`;
+        b.title = ui.hideDone ? 'Show completed items' : 'Hide completed items';
+    }
+
+    function renderLifeGoals() {
+        $('life-count').innerHTML = countBadge(appData.life);
+        $('life-goals-container').innerHTML = renderList(appData.life, 'life', '', 'No life goals yet — add your first one.');
+    }
+
+    function renderYears() {
+        const now = nowParts();
+        $('years-container').innerHTML = appData.yearList.map(y => {
+            const sel = currentState.selectedYear === y;
+            const list = appData.years[y] || [];
+            return `
+                <div data-select-year="${y}" data-drop data-type="year" data-key="${y}"
+                     class="glass-panel rounded-lg p-2.5 flex flex-col flex-1 min-w-[170px] max-h-64 cursor-pointer hover:bg-white/5 ${sel ? 'selected-box' : ''}">
+                    <div class="box-head">
+                        <span class="text-sm font-bold flex items-center gap-1.5 ${sel ? 'text-orange-500' : 'text-gray-400'}">${y}${y === now.y ? dot() : ''}</span>
+                        <span class="flex items-center gap-2">${countBadge(list)}${addBtn('year', y)}</span>
+                    </div>
+                    <div class="box-scroll flex-1 overflow-y-auto pr-1" data-rows>${renderList(list, 'year', y)}</div>
+                </div>`;
+        }).join('');
+    }
+
+    function renderMonths() {
+        const now = nowParts();
+        const y = currentState.selectedYear;
+        $('months-label').textContent = `Months · ${y}`;
+        $('months-container').innerHTML = MONTHS.map((name, idx) => {
+            const sel = currentState.selectedMonth === idx;
+            const key = `${y}-${idx}`;
+            const list = appData.months[key] || [];
+            const isNow = y === now.y && idx === now.m;
+            return `
+                <div data-select-month="${idx}" data-drop data-type="month" data-key="${key}"
+                     class="glass-panel rounded-lg p-2 flex flex-col min-w-0 min-h-[96px] max-h-56 cursor-pointer hover:bg-white/5 ${sel ? 'selected-box' : ''}">
+                    <div class="box-head">
+                        <span class="text-xs uppercase font-bold truncate flex items-center gap-1.5 ${sel ? 'text-orange-500' : 'text-gray-400'}">${name}${isNow ? dot() : ''}</span>
+                        <span class="flex items-center gap-2">${countBadge(list)}${addBtn('month', key)}</span>
+                    </div>
+                    <div class="box-scroll flex-1 overflow-y-auto pr-1" data-rows>${renderList(list, 'month', key)}</div>
+                </div>`;
+        }).join('');
+    }
+
+    function getWeekNumber(d) {
+        d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+        d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+        const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+        return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+    }
+
+    function getMonthWeeks(year, month) {
+        const offset = (new Date(year, month, 1).getDay() + 6) % 7;
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const rows = Math.ceil((offset + daysInMonth) / 7);
+        const weeks = [];
+        for (let r = 0; r < rows; r++) {
+            const startDay = Math.max(1, r * 7 - offset + 1);
+            const endDay = Math.min(daysInMonth, (r + 1) * 7 - offset);
+            weeks.push({ index: r + 1, startDay, endDay, iso: getWeekNumber(new Date(year, month, startDay)) });
+        }
+        return { weeks, offset, daysInMonth };
+    }
+
+    function renderWeeks() {
+        const now = nowParts();
+        const y = currentState.selectedYear, m = currentState.selectedMonth;
+        const { weeks } = getMonthWeeks(y, m);
+        $('weeks-label').textContent = `Weeks · ${MONTHS_FULL[m]} ${y}`;
+
+        const container = $('weeks-container');
+        container.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 '
+            + (weeks.length === 6 ? 'xl:grid-cols-6' : weeks.length === 4 ? 'xl:grid-cols-4' : 'xl:grid-cols-5');
+
+        container.innerHTML = weeks.map(w => {
+            const key = `${y}-${m}-W${w.index}`;
+            const list = appData.weeks[key] || [];
+            const isNow = y === now.y && m === now.m && now.d >= w.startDay && now.d <= w.endDay;
+            const range = w.startDay === w.endDay ? `${w.startDay} ${MONTHS[m]}` : `${w.startDay}–${w.endDay} ${MONTHS[m]}`;
+            return `
+                <div data-drop data-type="week" data-key="${key}"
+                     class="glass-panel rounded-lg p-2 flex flex-col min-w-0 min-h-[96px] max-h-56 ${isNow ? 'ring-1 ring-orange-500/50' : ''}">
+                    <div class="box-head">
+                        <span class="min-w-0 truncate">
+                            <span class="text-xs uppercase font-bold ${isNow ? 'text-orange-400' : 'text-gray-400'}">Week ${w.index}</span>
+                            <span class="text-[10px] text-gray-500 font-mono ml-1">${range} · W${w.iso}</span>
+                        </span>
+                        <span class="flex items-center gap-2">${countBadge(list)}${addBtn('week', key)}</span>
+                    </div>
+                    <div class="box-scroll flex-1 overflow-y-auto pr-1" data-rows>${renderList(list, 'week', key)}</div>
+                </div>`;
+        }).join('');
+    }
+
+    function renderCalendar() {
+        const now = nowParts();
+        const y = currentState.selectedYear, m = currentState.selectedMonth;
+        $('cal-title').textContent = `${MONTHS_FULL[m]} ${y}`;
+
+        const { weeks, offset, daysInMonth } = getMonthWeeks(y, m);
+        let html = '';
+
+        weeks.forEach((w, r) => {
+            const isNowWeek = y === now.y && m === now.m && now.d >= w.startDay && now.d <= w.endDay;
+            html += `<div class="border-r border-b border-gray-800 bg-black/30 flex items-start justify-center pt-1.5 text-[10px] font-mono select-none ${isNowWeek ? 'text-orange-400' : 'text-gray-600'}">W${w.iso}</div>`;
+
+            for (let c = 0; c < 7; c++) {
+                const d = r * 7 + c - offset + 1;
+                if (d < 1 || d > daysInMonth) {
+                    html += '<div class="border-r border-b border-gray-800/60 bg-black/40"></div>';
+                    continue;
                 }
-                await writeToFile();
-            } catch (err) { console.error(err); }
-        }
-
-        async function writeToFile() {
-            if (!fileHandle) return;
-            try {
-                const writable = await fileHandle.createWritable();
-                await writable.write(JSON.stringify(appData, null, 2));
-                await writable.close();
-            } catch (err) { console.error(err); }
-        }
-
-        async function loadData(input) {
-            const file = input.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const parsedData = JSON.parse(e.target.result);
-                    if (parsedData.life && parsedData.years) {
-                        appData = parsedData;
-                        if (!appData.weeks) appData.weeks = {};
-                        if (!appData.yearList) appData.yearList = [2026, 2027, 2028, 2029, 2030];
-                        saveData();
-                    } 
-                } catch (error) { alert("Error reading file."); }
-            };
-            reader.readAsText(file);
-        }
-
-        // --- SELECTION & FILTER LOGIC ---
-        function selectYear(year) {
-            currentState.selectedYear = parseInt(year);
-            renderAll();
-        }
-        function selectMonth(monthIndex) {
-            currentState.selectedMonth = parseInt(monthIndex);
-            renderAll(); 
-        }
-        
-        // NEW: Tag Filter Logic
-        function toggleTag(tag) {
-            if (currentState.activeTag === tag) {
-                currentState.activeTag = null; // Unselect
-            } else {
-                currentState.activeTag = tag; // Select
+                const key = `${y}-${m}-${d}`;
+                const list = appData.days[key] || [];
+                const isToday = y === now.y && m === now.m && d === now.d;
+                const weekend = c >= 5;
+                html += `
+                    <div data-day="${key}" data-drop data-type="day" data-key="${key}" ${isToday ? 'data-today' : ''}
+                         class="group/cell border-r border-b border-gray-700/70 p-1 flex flex-col min-h-[88px] cursor-text hover:bg-white/5 transition
+                                ${weekend ? 'bg-black/15' : ''} ${isToday ? 'ring-1 ring-inset ring-orange-500/70 bg-orange-500/5' : ''}">
+                        <div class="flex justify-between items-center mb-1 shrink-0">
+                            <span class="text-xs ${isToday ? 'bg-orange-500 text-black font-bold rounded px-1' : 'text-gray-500'}">${d}</span>
+                            ${addBtn('day', key, 'opacity-0 group-hover/cell:opacity-100')}
+                        </div>
+                        <div class="flex-1 min-w-0" data-rows>${renderList(list, 'day', key)}</div>
+                    </div>`;
             }
-            renderAll();
-        }
+        });
+        $('calendar-grid').innerHTML = html;
+    }
 
-        // --- TAG EXTRACTION ---
-        function getAllTags() {
-            const tags = new Set();
-            const regex = /#[\w-]+/g;
-
-            // Helper to scan a list
-            const scan = (list) => {
-                if(!list) return;
-                list.forEach(item => {
-                    const matches = item.text.match(regex);
-                    if (matches) matches.forEach(t => tags.add(t));
-                });
-            };
-
-            // Scan all data
-            scan(appData.life);
-            Object.values(appData.years).forEach(scan);
-            Object.values(appData.months).forEach(scan);
-            Object.values(appData.weeks).forEach(scan);
-            Object.values(appData.days).forEach(scan);
-
-            return Array.from(tags).sort();
-        }
-
-        // --- DATA MANIPULATION ---
-        function addNewYear() {
-            const maxYear = Math.max(...appData.yearList);
-            appData.yearList.push(maxYear + 1);
-            saveData();
-        }
-
-        function removeOldestYear() {
-            if (appData.yearList.length <= 1) return;
-            if(!confirm("Remove oldest year?")) return;
-            appData.yearList.shift(); 
-            saveData();
-        }
-
-        // --- RENDERING ---
-        function renderAll() {
-            renderTags();
+    function renderAll() {
+        rendering = true;
+        try {
+            renderToolbar();
             renderLifeGoals();
             renderYears();
             renderMonths();
-            renderWeeks(); 
+            renderWeeks();
             renderCalendar();
+        } finally {
+            rendering = false;
         }
+        const input = document.querySelector('.add-input, .edit-input');
+        if (input) {
+            input.focus();
+            const len = input.value.length;
+            input.setSelectionRange(len, len);
+        } else if (refocus) {
+            document.querySelector(rowSelector(refocus))?.focus({ preventScroll: true });
+        }
+        refocus = null;
+    }
 
-        function renderTags() {
-            const tags = getAllTags();
-            const container = document.getElementById('tag-bar');
-            
-            if (tags.length === 0) {
-                container.innerHTML = '<span class="text-xs text-gray-600 italic py-1">Type #tag to filter...</span>';
+    // =========================================================
+    // 7. ACTIONS
+    // =========================================================
+    function openAdd(type, key) {
+        const a = currentState.adding;
+        const same = a && a.type === type && String(a.key) === String(key) && a.afterId == null;
+        commitThen(() => {
+            if (!same) currentState.adding = { type, key: String(key), afterId: null, indent: 0 };
+        });
+    }
+
+    function itemAction(action, ref, opts = {}) {
+        if (!ref) return;
+        const changed = commitPending();
+        const list = getList(ref.type, ref.key);
+        const i = list.findIndex(x => x.id === ref.id);
+        if (i < 0) { changed ? saveData() : renderAll(); return; }
+        const item = list[i];
+
+        switch (action) {
+            case 'collapse':  item.collapsed = !item.collapsed; break;
+            case 'indent':    indentBlock(list, i, 1); syncTree(list); break;
+            case 'outdent':   indentBlock(list, i, -1); syncTree(list); break;
+            case 'move-up':   moveSibling(list, i, -1); break;
+            case 'move-down': moveSibling(list, i, 1); break;
+            case 'toggle':    setDone(list, i, !item.done); break;
+            case 'add-sub':
+                item.collapsed = false;
+                currentState.adding = { type: ref.type, key: ref.key, afterId: item.id, indent: ind(item) + 1 };
+                saveData();
+                return;
+            case 'edit':
+                currentState.editing = { ...ref };
+                changed ? saveData() : renderAll();
+                return;
+            case 'delete': {
+                snapshot();
+                const end = subtreeEnd(list, i);
+                const n = end - i;
+                const neighbour = list[end] || list[i - 1];
+                list.splice(i, n);
+                syncTree(list);
+                pruneEmpty(ref.type, ref.key);
+                if (opts.fromKey && neighbour) refocus = { ...ref, id: neighbour.id };
+                saveData({ keepUndo: true });
+                showToast(n > 1 ? `Deleted ${n} items` : 'Item deleted', true);
                 return;
             }
-
-            let html = '';
-            // "Show All" button? Only if a tag is active.
-            if (currentState.activeTag) {
-                html += `<button onclick="toggleTag('${currentState.activeTag}')" class="tag-pill bg-red-900 text-red-200 border-red-700">✖ Clear Filter</button>`;
-            }
-
-            html += tags.map(tag => {
-                const isActive = currentState.activeTag === tag;
-                return `<button onclick="toggleTag('${tag}')" class="tag-pill ${isActive ? 'active' : 'inactive'}">${tag}</button>`;
-            }).join('');
-            
-            container.innerHTML = html;
         }
+        refocus = ref;   // keep the row focused so you can repeat (⇥⇥, Alt+↑↑ …)
+        saveData();
+    }
 
-        function createItemHTML(item, type, key) {
-            // FILTER CHECK
-            if (currentState.activeTag) {
-                if (!item.text.includes(currentState.activeTag)) {
-                    return ''; // Hide item if it doesn't have the tag
-                }
-            }
+    function shiftMonth(delta) {
+        commitThen(() => {
+            let m = currentState.selectedMonth + delta, y = currentState.selectedYear;
+            if (m < 0) { m = 11; y--; }
+            if (m > 11) { m = 0; y++; }
+            currentState.selectedMonth = m;
+            currentState.selectedYear = y;
+            ensureYearListed(y);
+        });
+    }
 
-            const indentLevel = item.indent || 0;
-            const paddingLeft = indentLevel * 16; 
+    function ensureYearListed(y) {
+        if (appData.yearList.includes(y)) return;
+        appData.yearList.push(y);
+        appData.yearList.sort((a, b) => a - b);
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)); } catch {}
+        scheduleFileWrite();
+    }
 
-            // Highlight regex
-            const textWithHighlights = item.text.replace(/(#[\w-]+)/g, '<span class="hashtag-highlight">$1</span>');
+    function goToday() {
+        const n = nowParts();
+        commitThen(() => {
+            currentState.selectedYear = n.y;
+            currentState.selectedMonth = n.m;
+            ensureYearListed(n.y);
+        });
+        document.querySelector('[data-today]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
 
-            return `
-                <div class="flex items-start gap-2 group justify-between w-full mb-1.5 relative" 
-                     style="padding-left: ${paddingLeft}px"
-                     onclick="event.stopPropagation()">
-                    
-                    <div class="flex items-start gap-2 min-w-0 flex-1">
-                        <input type="checkbox" 
-                            ${item.done ? 'checked' : ''} 
-                            onchange="toggleTask('${type}', '${key}', ${item.id})"
-                            class="mt-0.5 shrink-0 w-3 h-3 appearance-none border border-gray-500 rounded bg-transparent checked:bg-orange-500 checked:border-orange-500 cursor-pointer">
-                        <span class="text-xs leading-snug text-gray-300 break-words whitespace-normal ${item.done ? 'line-through text-gray-600' : ''}">
-                            ${textWithHighlights}
-                        </span>
-                    </div>
+    function addNewYear() {
+        commitPending();
+        appData.yearList.push(Math.max(...appData.yearList) + 1);
+        saveData();
+        $('years-container').scrollLeft = $('years-container').scrollWidth;
+    }
 
-                    <div class="task-controls flex gap-0.5 opacity-0 transition-opacity shrink-0 bg-gray-800 border border-gray-600 rounded shadow-xl z-10 absolute right-0 top-0 pointer-events-none">
-                        <button onclick="moveItem('${type}', '${key}', ${item.id}, -1)" class="text-gray-400 hover:text-white hover:bg-gray-700 text-[10px] px-1.5 py-0.5 font-mono border-r border-gray-600">↑</button>
-                        <button onclick="moveItem('${type}', '${key}', ${item.id}, 1)" class="text-gray-400 hover:text-white hover:bg-gray-700 text-[10px] px-1.5 py-0.5 font-mono border-r border-gray-600">↓</button>
-                        <button onclick="changeIndent('${type}', '${key}', ${item.id}, -1)" class="text-gray-400 hover:text-white hover:bg-gray-700 text-[10px] px-1.5 py-0.5 font-mono border-r border-gray-600">&lt;</button>
-                        <button onclick="changeIndent('${type}', '${key}', ${item.id}, 1)" class="text-gray-400 hover:text-white hover:bg-gray-700 text-[10px] px-1.5 py-0.5 font-mono border-r border-gray-600">&gt;</button>
-                        <button onclick="deleteTask('${type}', '${key}', ${item.id})" class="text-gray-400 hover:text-red-500 hover:bg-gray-700 text-xs px-2 py-0.5 font-bold">×</button>
-                    </div>
-                </div>
-            `;
+    function removeOldestYear() {
+        commitPending();
+        if (appData.yearList.length <= 1) { renderAll(); return; }
+        snapshot();
+        const removed = appData.yearList.shift();
+        if (currentState.selectedYear === removed) currentState.selectedYear = appData.yearList[0];
+        saveData({ keepUndo: true });
+        showToast(`${removed} hidden (its items are kept)`, true);
+    }
+
+    function describeList(t) {
+        if (t.type === 'life') return 'Life Goals';
+        if (t.type === 'year') return String(t.key);
+        const p = String(t.key).split('-');
+        if (t.type === 'month') return `${MONTHS[+p[1]]} ${p[0]}`;
+        if (t.type === 'week') return `${p[2].replace('W', 'Week ')}, ${MONTHS[+p[1]]}`;
+        return `${p[2]} ${MONTHS[+p[1]]}`;
+    }
+
+    function handleAction(action, el) {
+        switch (action) {
+            case 'add': return openAdd(el.dataset.type, el.dataset.key);
+            case 'collapse': case 'add-sub': case 'indent': case 'outdent': case 'edit': case 'delete':
+                return itemAction(action, itemRef(el));
+            case 'toggle-hide-done':
+                ui.hideDone = !ui.hideDone;
+                saveUi();
+                return commitThen(() => {});
+            case 'year-add':    return addNewYear();
+            case 'year-remove': return removeOldestYear();
+            case 'prev-month':  return shiftMonth(-1);
+            case 'next-month':  return shiftMonth(1);
+            case 'today':       return goToday();
+            case 'undo':        return undo();
+            case 'download':    commitThen(() => {}); return downloadData();
+            case 'load':        return $('file-input').click();
+            case 'link-file':
+                if (pendingHandle) return reconnectFile();
+                if (fileHandle) return unlinkFile();
+                return linkFile();
         }
+    }
 
-        function renderLifeGoals() {
-            document.getElementById('life-goals-container').innerHTML = 
-                appData.life.map(t => createItemHTML(t, 'life', null)).join('');
+    // =========================================================
+    // 8. DRAG & DROP
+    //    Drag a row (or its ⠿ handle) anywhere: within a list, into
+    //    another box (e.g. a month goal onto a calendar day), and
+    //    left/right to change its indent. Children move with it.
+    // =========================================================
+    let drag = null;
+    let suppressNextClick = false;
+    const dropLine = $('drop-line');
+
+    document.addEventListener('pointerdown', e => {
+        if (e.button !== 0 || drag) return;
+        const row = e.target.closest('.item[data-id]');
+        if (!row || row.classList.contains('editing')) return;
+        const onGrip = !!e.target.closest('.grip');
+        if (!onGrip) {
+            if (e.pointerType !== 'mouse') return;   // on touch, only the handle drags (so scrolling still works)
+            if (e.target.closest('button, input, .task-controls')) return;
+        } else {
+            e.preventDefault();
         }
+        drag = {
+            phase: 'pending', pointerId: e.pointerId,
+            startX: e.clientX, startY: e.clientY, x: e.clientX, y: e.clientY,
+            ref: itemRef(row)
+        };
+    });
 
-        function renderYears() {
-            const container = document.getElementById('years-container');
-            const years = appData.yearList;
-            
-            container.innerHTML = years.map(y => {
-                const isSelected = currentState.selectedYear === y;
-                const tasks = appData.years[y] || [];
-                // If filtering, we still show the year box, but maybe it ends up empty.
-                const content = tasks.map(t => createItemHTML(t, 'year', y)).join('');
-                
-                return `
-                <div onclick="selectYear(${y})" 
-                     class="flex-1 glass-panel rounded-lg p-2.5 flex flex-col min-w-[130px] cursor-pointer hover:bg-white/5 ${isSelected ? 'selected-box' : ''}">
-                    <div class="flex justify-between items-center text-gray-400 font-bold mb-1.5 border-b border-gray-700 pb-1 shrink-0">
-                        <span class="text-sm ${isSelected ? 'text-orange-500' : ''}">${y}</span>
-                        <button onclick="event.stopPropagation(); addItem('year', '${y}')" class="text-gray-500 hover:text-white text-xs">+</button>
-                    </div>
-                    <div class="flex-1 overflow-y-auto pr-1 custom-scrollbar">
-                        ${content}
-                    </div>
-                </div>`;
-            }).join('');
+    document.addEventListener('pointermove', e => {
+        if (!drag || e.pointerId !== drag.pointerId) return;
+        drag.x = e.clientX;
+        drag.y = e.clientY;
+        if (drag.phase === 'pending') {
+            if (Math.hypot(drag.x - drag.startX, drag.y - drag.startY) < 5) return;
+            if (!startDrag()) { drag = null; return; }
         }
+        e.preventDefault();
+        moveGhost();
+        updateTarget();
+    });
 
-        function renderMonths() {
-            const container = document.getElementById('months-container');
-            container.innerHTML = monthNames.map((name, idx) => {
-                const isSelected = currentState.selectedMonth === idx;
-                const dataKey = `${currentState.selectedYear}-${idx}`; 
-                const tasks = appData.months[dataKey] || [];
-                const content = tasks.map(t => createItemHTML(t, 'month', dataKey)).join('');
+    document.addEventListener('pointerup', e => {
+        if (!drag || e.pointerId !== drag.pointerId) return;
+        if (drag.phase === 'active') finishDrag(true);
+        else drag = null;
+    });
 
-                return `
-                <div onclick="selectMonth(${idx})" 
-                     class="glass-panel rounded-lg p-2 flex flex-col min-w-0 h-full cursor-pointer hover:bg-white/5 overflow-hidden ${isSelected ? 'selected-box' : ''}">
-                    <div class="flex justify-between items-center text-gray-400 font-bold mb-1.5 border-b border-gray-700 pb-1 shrink-0">
-                        <span class="text-xs uppercase truncate ${isSelected ? 'text-orange-500' : ''}">${name}</span>
-                        <button onclick="event.stopPropagation(); addItem('month', '${dataKey}')" class="text-gray-500 hover:text-white text-xs leading-none">+</button>
-                    </div>
-                    <div class="flex-1 overflow-y-auto pr-1 custom-scrollbar">
-                         ${content}
-                    </div>
-                </div>`;
-            }).join('');
+    document.addEventListener('pointercancel', e => {
+        if (!drag || e.pointerId !== drag.pointerId) return;
+        if (drag.phase === 'active') finishDrag(false);
+        else drag = null;
+    });
+
+    window.addEventListener('blur', () => { if (drag?.phase === 'active') finishDrag(false); });
+
+    function startDrag() {
+        const hadInput = !!document.querySelector('.add-input, .edit-input');
+        if (commitPending()) saveData(); else if (hadInput) renderAll();
+
+        const { ref } = drag;
+        const list = getList(ref.type, ref.key);
+        const i = list.findIndex(x => x.id === ref.id);
+        const row = document.querySelector(rowSelector(ref));
+        if (i < 0 || !row) return false;
+
+        const end = subtreeEnd(list, i);
+        drag.ids = new Set(list.slice(i, end).map(x => x.id));
+        drag.item = list[i];
+
+        const r = row.getBoundingClientRect();
+        const contentLeft = r.left + GRIP_W + ind(drag.item) * INDENT;
+        drag.grabX = drag.startX - contentLeft;
+        drag.grabY = drag.startY - r.top;
+
+        const g = document.createElement('div');
+        g.className = 'drag-ghost';
+        g.style.width = clamp(r.right - contentLeft, 140, 280) + 'px';
+        const n = end - i;
+        g.innerHTML = `<span class="ghost-check ${drag.item.done ? 'done' : ''}"></span><span class="ghost-text">${esc(drag.item.text)}</span>${n > 1 ? `<span class="ghost-count">+${n - 1}</span>` : ''}`;
+        document.body.appendChild(g);
+        drag.ghost = g;
+
+        document.querySelectorAll(`.item[data-type="${ref.type}"][data-key="${ref.key}"]`).forEach(el => {
+            if (drag.ids.has(Number(el.dataset.id))) el.classList.add('drag-source');
+        });
+        document.body.classList.add('is-dragging');
+        window.getSelection()?.removeAllRanges();
+        if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur();
+
+        drag.phase = 'active';
+        drag.raf = requestAnimationFrame(autoScroll);
+        return true;
+    }
+
+    function moveGhost() {
+        drag.ghost.style.transform = `translate(${drag.x - drag.grabX}px, ${drag.y - drag.grabY}px)`;
+    }
+
+    function updateTarget() {
+        const { x, y } = drag;
+        const hit = document.elementFromPoint(x, y);
+        const box = hit ? hit.closest('[data-drop]') : null;
+        if (drag.box && drag.box !== box) drag.box.classList.remove('drop-target');
+        drag.box = box;
+        if (!box) { drag.target = null; dropLine.style.display = 'none'; return; }
+        box.classList.add('drop-target');
+
+        const type = box.dataset.type, key = box.dataset.key;
+        const rowsEl = box.querySelector('[data-rows]');
+        const rows = [...rowsEl.querySelectorAll(':scope > .item[data-id]')].filter(r => !r.classList.contains('drag-source'));
+
+        let idx = rows.findIndex(r => { const rr = r.getBoundingClientRect(); return y < rr.top + rr.height / 2; });
+        if (idx < 0) idx = rows.length;
+        const prevRow = rows[idx - 1], nextRow = rows[idx];
+        const prevItem = prevRow ? findItem({ type, key, id: Number(prevRow.dataset.id) }) : null;
+        const nextItem = nextRow ? findItem({ type, key, id: Number(nextRow.dataset.id) }) : null;
+
+        // Can nest at most one level under the row above, and can't split a group from its children
+        const maxI = prevItem ? Math.min(MAX_INDENT, ind(prevItem) + 1) : 0;
+        const minI = nextItem ? Math.min(ind(nextItem), maxI) : 0;
+
+        const rr = rowsEl.getBoundingClientRect();
+        const want = Math.round((x - drag.grabX - rr.left - GRIP_W) / INDENT);
+        const depth = clamp(want, minI, maxI);
+
+        let lineY;
+        if (nextRow) lineY = nextRow.getBoundingClientRect().top;
+        else if (prevRow) lineY = prevRow.getBoundingClientRect().bottom;
+        else lineY = rr.top + 2;
+        const left = rr.left + GRIP_W + depth * INDENT;
+        dropLine.style.top = (lineY - 1) + 'px';
+        dropLine.style.left = left + 'px';
+        dropLine.style.width = Math.max(24, rr.right - left) + 'px';
+        dropLine.style.display = 'block';
+
+        drag.target = { type, key, beforeId: nextItem ? nextItem.id : null, indent: depth };
+    }
+
+    function autoScroll() {
+        if (!drag || drag.phase !== 'active') return;
+        const y = drag.y;
+        const topEdge = document.querySelector('header').getBoundingClientRect().bottom + 40;
+        const botEdge = window.innerHeight - 50;
+        let dy = 0;
+        if (y < topEdge) dy = -Math.min(25, Math.ceil((topEdge - y) / 4));
+        else if (y > botEdge) dy = Math.min(25, Math.ceil((y - botEdge) / 4));
+        if (dy) window.scrollBy(0, dy);
+
+        let inner = false;
+        const sc = drag.box && drag.box.querySelector('.box-scroll');
+        if (sc && sc.scrollHeight > sc.clientHeight) {
+            const r = sc.getBoundingClientRect();
+            if (y < r.top + 18) { sc.scrollTop -= 6; inner = true; }
+            else if (y > r.bottom - 18) { sc.scrollTop += 6; inner = true; }
         }
+        if (dy || inner) updateTarget();
+        drag.raf = requestAnimationFrame(autoScroll);
+    }
 
-        function renderWeeks() {
-            const container = document.getElementById('weeks-container');
-            const weeks = [1, 2, 3, 4, 5];
-            container.innerHTML = weeks.map(w => {
-                const dataKey = `${currentState.selectedYear}-${currentState.selectedMonth}-W${w}`;
-                const tasks = appData.weeks[dataKey] || [];
-                const content = tasks.map(t => createItemHTML(t, 'week', dataKey)).join('');
-                
-                return `
-                <div class="glass-panel rounded-lg p-2 flex flex-col min-w-0 h-full hover:bg-white/5">
-                    <div class="flex justify-between items-center text-gray-400 font-bold mb-1.5 border-b border-gray-700 pb-1 shrink-0">
-                        <span class="text-xs uppercase">Week ${w}</span>
-                        <button onclick="addItem('week', '${dataKey}')" class="text-gray-500 hover:text-white text-xs leading-none">+</button>
-                    </div>
-                    <div class="flex-1 overflow-y-auto pr-1 custom-scrollbar">
-                         ${content}
-                    </div>
-                </div>`;
-            }).join('');
-        }
+    function finishDrag(apply) {
+        cancelAnimationFrame(drag.raf);
+        drag.ghost?.remove();
+        dropLine.style.display = 'none';
+        drag.box?.classList.remove('drop-target');
+        document.body.classList.remove('is-dragging');
+        document.querySelectorAll('.drag-source').forEach(el => el.classList.remove('drag-source'));
+        // The mouse-up shouldn't also "click" whatever is under it (one click only, briefly)
+        suppressNextClick = true;
+        setTimeout(() => { suppressNextClick = false; }, 100);
 
-        function getWeekNumber(d) {
-            d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-            d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
-            var yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
-            return Math.ceil((((d - yearStart) / 86400000) + 1)/7);
-        }
+        const { target, ref } = drag;
+        drag = null;
+        if (apply && target) performDrop(ref, target);
+    }
 
-        function renderCalendar() {
-            const container = document.getElementById('calendar-grid');
-            const header = document.getElementById('calendar-header');
-            
-            const year = currentState.selectedYear;
-            const month = currentState.selectedMonth;
-            header.innerText = `${monthNames[month]} ${year}`;
+    function performDrop(ref, target) {
+        const src = getList(ref.type, ref.key);
+        const i = src.findIndex(x => x.id === ref.id);
+        if (i < 0) return;
+        const before = JSON.stringify(appData);
+        const same = ref.type === target.type && String(ref.key) === String(target.key);
 
-            const firstDay = new Date(year, month, 1).getDay(); 
-            const startOffset = firstDay === 0 ? 6 : firstDay - 1; 
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const end = subtreeEnd(src, i);
+        const block = src.splice(i, end - i);
+        const delta = target.indent - ind(block[0]);
+        block.forEach(b => { b.indent = clamp(ind(b) + delta, 0, MAX_INDENT); });
 
-            let html = '';
-            let currentDay = 1;
-            let isMonthComplete = false;
+        const dst = same ? src : getList(target.type, target.key, true);
+        let at = target.beforeId == null ? dst.length : dst.findIndex(x => x.id === target.beforeId);
+        if (at < 0) at = dst.length;
+        dst.splice(at, 0, ...block);
 
-            while (!isMonthComplete) {
-                let weekDate = new Date(year, month, currentDay);
-                let weekNum = getWeekNumber(weekDate);
-                html += `<div class="border-r border-b border-gray-800 bg-black/30 flex items-center justify-center text-[10px] text-gray-600 font-mono select-none">W${weekNum}</div>`;
+        expandAncestors(dst, at);
+        syncTree(dst);
+        if (!same) { syncTree(src); pruneEmpty(ref.type, ref.key); }
+        refocus = { type: target.type, key: String(target.key), id: ref.id };
 
-                for (let i = 0; i < 7; i++) {
-                    if (currentDay === 1 && i < startOffset) {
-                        html += `<div class="border-r border-b border-gray-800 bg-black/40"></div>`;
-                    }
-                    else if (currentDay <= daysInMonth) {
-                        const dataKey = `${year}-${month}-${currentDay}`;
-                        const tasks = appData.days[dataKey] || [];
-                        const isRealToday = (currentDay === today.getDate() && month === today.getMonth() && year === today.getFullYear());
-                        const content = tasks.map(t => createItemHTML(t, 'day', dataKey)).join('');
-
-                        html += `
-                            <div class="border-r border-b border-gray-700 p-1 flex flex-col hover:bg-white/5 transition relative group/cell min-h-[80px] overflow-hidden">
-                                <div class="flex justify-between items-start shrink-0 mb-1">
-                                    <span class="${isRealToday ? 'text-orange-500 font-bold' : 'text-gray-500'} text-xs">${currentDay}</span>
-                                    <button onclick="addItem('day', '${dataKey}')" class="text-gray-500 hover:text-white text-xs opacity-0 group-hover/cell:opacity-100">+</button>
-                                </div>
-                                <div class="flex-1 overflow-y-auto pr-0.5 custom-scrollbar">
-                                    ${content}
-                                </div>
-                            </div>
-                        `;
-                        currentDay++;
-                    }
-                    else {
-                        html += `<div class="border-r border-b border-gray-800 bg-black/40"></div>`;
-                        isMonthComplete = true; 
-                    }
-                }
-            }
-            container.innerHTML = html;
-        }
-
-        // --- CORE LOGIC ---
-        function addItem(type, key) {
-            const text = prompt("Enter task (use #tags):");
-            if (!text) return;
-            const newItem = { id: Date.now(), text: text, done: false, indent: 0 }; 
-
-            if (type === 'life') appData.life.push(newItem);
-            else if (type === 'year') {
-                if (!appData.years[key]) appData.years[key] = [];
-                appData.years[key].push(newItem);
-            } else if (type === 'month') {
-                if (!appData.months[key]) appData.months[key] = [];
-                appData.months[key].push(newItem);
-            } else if (type === 'week') {
-                if (!appData.weeks[key]) appData.weeks[key] = [];
-                appData.weeks[key].push(newItem);
-            } else if (type === 'day') {
-                if (!appData.days[key]) appData.days[key] = [];
-                appData.days[key].push(newItem);
-            }
+        if (same) {
             saveData();
+        } else {
+            undoSnapshot = before;
+            saveData({ keepUndo: true });
+            showToast(`Moved to ${describeList(target)}`, true);
         }
+    }
 
-        function deleteTask(type, key, id) {
-            if(!confirm("Delete?")) return;
-            if (type === 'life') appData.life = appData.life.filter(i => i.id !== id);
-            else if (type === 'year') appData.years[key] = appData.years[key].filter(i => i.id !== id);
-            else if (type === 'month') appData.months[key] = appData.months[key].filter(i => i.id !== id);
-            else if (type === 'week') appData.weeks[key] = appData.weeks[key].filter(i => i.id !== id);
-            else if (type === 'day') appData.days[key] = appData.days[key].filter(i => i.id !== id);
+    // =========================================================
+    // 9. EVENTS
+    // =========================================================
+
+    // Swallow the click that follows a drop
+    window.addEventListener('click', e => {
+        if (suppressNextClick) { suppressNextClick = false; e.stopPropagation(); e.preventDefault(); }
+    }, true);
+
+    // Stop buttons/boxes stealing focus from an open input, so one click both
+    // saves what you typed AND does the thing you clicked.
+    document.addEventListener('mousedown', e => {
+        const t = e.target;
+        if (t.closest('input[type=text]')) return;
+        if (t.closest('button, input[type=checkbox]')) { e.preventDefault(); return; }
+        if (t.closest('.item')) return;
+        if (document.querySelector('.add-input, .edit-input') &&
+            t.closest('[data-day], [data-select-year], [data-select-month]')) e.preventDefault();
+    });
+
+    document.addEventListener('click', e => {
+        const t = e.target;
+        const actionEl = t.closest('[data-action]');
+        if (actionEl) { handleAction(actionEl.dataset.action, actionEl); return; }
+        if (t.closest('.item, input')) return;
+
+        const day = t.closest('[data-day]');
+        if (day) { openAdd('day', day.dataset.day); return; }   // click anywhere in a day to add
+
+        const yb = t.closest('[data-select-year]');
+        if (yb) { commitThen(() => { currentState.selectedYear = Number(yb.dataset.selectYear); }); return; }
+
+        const mb = t.closest('[data-select-month]');
+        if (mb) { commitThen(() => { currentState.selectedMonth = Number(mb.dataset.selectMonth); }); return; }
+    });
+
+    document.addEventListener('dblclick', e => {
+        const text = e.target.closest('.item-text');
+        if (!text) return;
+        const ref = itemRef(text);
+        commitThen(() => { currentState.editing = ref; });
+    });
+
+    document.addEventListener('change', e => {
+        const t = e.target;
+        if (t.matches('.task-check')) {
+            const ref = itemRef(t);
+            commitPending();
+            const list = getList(ref.type, ref.key);
+            const i = list.findIndex(x => x.id === ref.id);
+            if (i >= 0) setDone(list, i, t.checked);
             saveData();
+        } else if (t.id === 'file-input') {
+            loadData(t);
         }
+    });
 
-        function moveItem(type, key, id, direction) {
-            let list;
-            if (type === 'life') list = appData.life;
-            else if (type === 'year') list = appData.years[key];
-            else if (type === 'month') list = appData.months[key];
-            else if (type === 'week') list = appData.weeks[key];
-            else if (type === 'day') list = appData.days[key];
+    // Clicking/tapping away from an open input saves it
+    document.addEventListener('focusout', e => {
+        if (rendering || drag || !document.hasFocus()) return;
+        if (!e.target.matches('.add-input, .edit-input')) return;
+        commitThen(() => {});
+    });
 
-            const index = list.findIndex(i => i.id === id);
-            if (index === -1) return;
-            if (direction === -1 && index > 0) [list[index], list[index - 1]] = [list[index - 1], list[index]];
-            else if (direction === 1 && index < list.length - 1) [list[index], list[index + 1]] = [list[index + 1], list[index]];
-            saveData();
-        }
+    // Paste a multi-line list into the add box → one item per line, keeping indentation
+    // (works with "- item", "* item", "1. item" and "[x] item" too)
+    document.addEventListener('paste', e => {
+        const t = e.target;
+        if (!t.matches || !t.matches('.add-input')) return;
+        const a = currentState.adding;
+        if (!a) return;
+        const raw = (e.clipboardData || window.clipboardData).getData('text') || '';
+        if (!/\n/.test(raw.trim())) return;
+        e.preventDefault();
 
-        function changeIndent(type, key, id, delta) {
-            let list;
-            if (type === 'life') list = appData.life;
-            else if (type === 'year') list = appData.years[key];
-            else if (type === 'month') list = appData.months[key];
-            else if (type === 'week') list = appData.weeks[key];
-            else if (type === 'day') list = appData.days[key];
+        const parsed = raw.replace(/\r/g, '').split('\n').map(l => {
+            const m = l.match(/^([ \t]*)(?:[-*•+]\s+|\d+[.)]\s+)?(?:\[([ xX])\]\s*)?(.*)$/);
+            return { lead: m[1].replace(/\t/g, '    ').length, done: !!m[2] && m[2].toLowerCase() === 'x', text: m[3].trim() };
+        }).filter(p => p.text);
+        if (!parsed.length) return;
 
-            const item = list.find(i => i.id === id);
-            if (item) {
-                if (!item.indent) item.indent = 0;
-                item.indent += delta;
-                if (item.indent < 0) item.indent = 0;
-                if (item.indent > 6) item.indent = 6;
+        const minLead = Math.min(...parsed.map(p => p.lead));
+        const steps = [...new Set(parsed.map(p => p.lead - minLead))].filter(n => n > 0).sort((x, y) => x - y);
+        const unit = steps[0] || 2;
+        const base = a.indent || 0;
+        const prefix = t.value.trim();
+        if (prefix) parsed[0].text = prefix + ' ' + parsed[0].text;
+
+        parsed.forEach(p => insertNew(a, p.text, p.done, base + Math.round((p.lead - minLead) / unit)));
+        saveData();
+        showToast(`Added ${parsed.length} items`);
+    });
+
+    function onAddKey(e, input) {
+        const a = currentState.adding;
+        if (!a) return;
+        const list = getList(a.type, a.key);
+        const at = addIndex(list, a);
+        switch (e.key) {
+            case 'Enter': {
+                e.preventDefault();
+                const text = input.value.trim();
+                if (!text) { currentState.adding = null; renderAll(); return; }
+                insertNew(a, text);
+                saveData();   // row stays open below the new item
+                return;
             }
-            saveData();
+            case 'Tab':
+                e.preventDefault();
+                a.indent = clamp(clamp(a.indent || 0, 0, maxIndentAt(list, at)) + (e.shiftKey ? -1 : 1), 0, maxIndentAt(list, at));
+                rerenderKeeping(input.value);
+                return;
+            case 'Backspace':
+                if (input.value) return;
+                e.preventDefault();
+                if ((a.indent || 0) > 0) { a.indent = clamp(a.indent - 1, 0, maxIndentAt(list, at)); rerenderKeeping(''); }
+                else { currentState.adding = null; renderAll(); }
+                return;
+            case 'Escape':
+                e.preventDefault();
+                currentState.adding = null;
+                renderAll();
+                return;
         }
+    }
 
-        function toggleTask(type, key, id) {
-            let list;
-            if (type === 'life') list = appData.life;
-            else if (type === 'year') list = appData.years[key];
-            else if (type === 'month') list = appData.months[key];
-            else if (type === 'week') list = appData.weeks[key];
-            else if (type === 'day') list = appData.days[key];
+    function onEditKey(e, input) {
+        const ed = currentState.editing;
+        if (!ed) return;
+        const list = getList(ed.type, ed.key);
+        const i = list.findIndex(x => x.id === ed.id);
+        if (i < 0) return;
+        const item = list[i];
+        const saveText = () => { const v = input.value.trim(); if (v) item.text = v; };
 
-            const item = list.find(i => i.id === id);
-            if (item) item.done = !item.done;
+        if (e.key === 'Enter') {
+            // Save, then start a new item straight underneath (like a normal to-do list)
+            e.preventDefault();
+            saveText();
+            currentState.editing = null;
+            currentState.adding = { type: ed.type, key: ed.key, afterId: item.id, indent: ind(item) };
             saveData();
+        } else if (e.key === 'Tab') {
+            e.preventDefault();
+            saveText();
+            indentBlock(list, i, e.shiftKey ? -1 : 1);
+            syncTree(list);
+            saveData();   // stays in edit mode
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            currentState.editing = null;
+            renderAll();
         }
+    }
 
-        renderAll();
-    </script>
+    function onItemKey(e, row) {
+        const ref = itemRef(row);
+        const list = getList(ref.type, ref.key);
+        const i = list.findIndex(x => x.id === ref.id);
+        if (i < 0) return false;
+        const hasKids = subtreeEnd(list, i) > i + 1;
+        const k = e.key;
+
+        if (k === 'Enter') { e.preventDefault(); itemAction('edit', ref); return true; }
+        if (k === 'Delete' || k === 'Backspace') { e.preventDefault(); itemAction('delete', ref, { fromKey: true }); return true; }
+        if (k === ' ') { e.preventDefault(); itemAction('toggle', ref); return true; }
+        if (k === 'Tab') { e.preventDefault(); itemAction(e.shiftKey ? 'outdent' : 'indent', ref); return true; }
+        if (k === 'ArrowUp' || k === 'ArrowDown') {
+            e.preventDefault();
+            if (e.altKey) { itemAction(k === 'ArrowUp' ? 'move-up' : 'move-down', ref); return true; }
+            const rows = [...row.closest('[data-rows]').querySelectorAll(':scope > .item[data-id]')];
+            rows[rows.indexOf(row) + (k === 'ArrowDown' ? 1 : -1)]?.focus();
+            return true;
+        }
+        if (k === 'ArrowLeft' && hasKids && !list[i].collapsed) { e.preventDefault(); itemAction('collapse', ref); return true; }
+        if (k === 'ArrowRight' && hasKids && list[i].collapsed) { e.preventDefault(); itemAction('collapse', ref); return true; }
+        return false;
+    }
+
+    document.addEventListener('keydown', e => {
+        if (drag && drag.phase === 'active') {
+            if (e.key === 'Escape') { e.preventDefault(); finishDrag(false); }
+            return;
+        }
+        const t = e.target;
+        if (e.isComposing || !t.matches) return;
+
+        if (t.matches('.add-input')) return onAddKey(e, t);
+        if (t.matches('.edit-input')) return onEditKey(e, t);
+        if (t.matches('input, textarea')) return;
+        if (t.matches('.item[data-id]') && onItemKey(e, t)) return;
+
+        if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z' && undoSnapshot) {
+            e.preventDefault();
+            undo();
+        }
+    });
+
+    // =========================================================
+    // 10. START
+    // =========================================================
+    updateLinkBtn();
+    renderAll();
+    restoreHandle();
+</script>
 </body>
 </html>
