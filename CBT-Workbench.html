@@ -1,0 +1,430 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>CBT Workbench</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a field-notebook workbench — sticky index on the left, one worksheet open at a time on the right; collapses to a section picker on phones */
+:root{
+  --bg:#eef1ef; --surface:#fbfcfb; --sunk:#e3e9e6; --ink:#1c2928; --muted:#586866; --line:#cfd8d5;
+  --accent:#2c6b66; --accent-ink:#ffffff; --accent-soft:#d5e7e3; --ochre:#a8661a; --ochre-soft:#f3e3cc;
+  --good:#2f7a4a; --warn:#a8661a; --bad:#a63d3d;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111817; --surface:#18211f; --sunk:#0d1312; --ink:#e3ebe8; --muted:#94a5a1; --line:#2b3735;
+  --accent:#72b9ae; --accent-ink:#0d1716; --accent-soft:#1f3532; --ochre:#e1a64e; --ochre-soft:#3a2c18;
+  --good:#6cc08a; --warn:#e1a64e; --bad:#e0817d; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111817; --surface:#18211f; --sunk:#0d1312; --ink:#e3ebe8; --muted:#94a5a1; --line:#2b3735;
+  --accent:#72b9ae; --accent-ink:#0d1716; --accent-soft:#1f3532; --ochre:#e1a64e; --ochre-soft:#3a2c18;
+  --good:#6cc08a; --warn:#e1a64e; --bad:#e0817d; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.55}
+.wrap{display:grid;grid-template-columns:250px minmax(0,1fr);gap:32px;max-width:1240px;margin:0 auto;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:24px 64px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:2rem;font-weight:700;letter-spacing:-.01em}
+h2{font-size:1.25rem;font-weight:700}
+h3{font-size:1rem;font-weight:700}
+p{margin:0}
+.lede{color:var(--muted);max-width:65ch}
+.eyebrow{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ochre)}
+
+/* nav */
+nav.side{position:sticky;top:calc(env(safe-area-inset-top, 0px) + 16px);align-self:start;max-height:calc(100vh - 32px);overflow:auto;padding-right:4px}
+.brand{display:flex;flex-direction:column;gap:2px;margin-bottom:18px}
+.brand b{font-family:var(--f-display);font-size:1.35rem}
+.brand span{color:var(--muted);font-size:.85rem}
+.navgroup{margin-bottom:16px}
+.navgroup .eyebrow{display:block;margin:0 0 6px 10px}
+nav.side a{display:block;padding:6px 10px;border-radius:7px;color:var(--ink);text-decoration:none;font-size:.95rem}
+nav.side a:hover{background:var(--sunk)}
+nav.side a.on{background:var(--accent);color:var(--accent-ink);font-weight:700}
+.mobnav{display:none}
+.help{margin-top:20px;padding:12px;border:1px solid var(--line);border-radius:var(--r);font-size:.82rem;color:var(--muted)}
+.help b{color:var(--ink)}
+
+main{min-width:0;display:flex;flex-direction:column;gap:24px}
+.head{display:flex;flex-direction:column;gap:8px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.panel.flat{background:transparent;border-style:dashed}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.grid5{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.stack{display:flex;flex-direction:column;gap:10px;min-width:0}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--muted);min-width:0}
+label.f > span b{color:var(--ink)}
+input[type=text],input[type=time],input[type=date],input[type=number],textarea,select{
+  font:inherit;font-size:.95rem;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%;min-width:0}
+textarea{min-height:64px;resize:vertical}
+input:focus-visible,textarea:focus-visible,select:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+input[type=range]{width:100%;accent-color:var(--accent)}
+input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px}
+button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 14px;font-size:.9rem}
+button:hover{border-color:var(--accent)}
+button.pri{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700}
+button.ghost{background:transparent;border-color:transparent;color:var(--muted);padding:6px 8px}
+button.ghost:hover{color:var(--bad)}
+button.armed{color:var(--bad);border-color:var(--bad)}
+.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.out{font-family:var(--f-mono);font-size:.85rem;color:var(--accent);min-width:3.5ch;text-align:right}
+.slider{display:flex;gap:10px;align-items:center}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:4px 11px;font-size:.85rem;background:var(--bg);color:var(--ink)}
+.chip.on{background:var(--ochre-soft);border-color:var(--ochre);color:var(--ink)}
+.chip.x{cursor:default}
+.chip.x button{border:0;background:none;padding:0 2px;color:var(--muted);font-size:1rem;line-height:1}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-family:var(--f-mono);font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:4px;background:var(--ochre-soft);color:var(--ochre)}
+.entryhead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.date{font-family:var(--f-mono);font-size:.8rem;color:var(--muted)}
+.muted{color:var(--muted)}
+.small{font-size:.85rem}
+.empty{color:var(--muted);font-style:italic}
+.bar{height:8px;background:var(--sunk);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:99px}
+.stat{display:flex;flex-direction:column;gap:2px}
+.stat b{font-family:var(--f-display);font-size:1.6rem}
+.stat span{font-size:.82rem;color:var(--muted)}
+.banner{border-left:4px solid var(--ochre);background:var(--ochre-soft);padding:12px 14px;border-radius:6px}
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{text-align:left;padding:8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;border-radius:0;padding:5px 10px;font-size:.8rem;background:var(--bg)}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button.on{background:var(--accent);color:var(--accent-ink);font-weight:700}
+
+/* cycle map */
+.cycle{display:grid;grid-template-columns:1fr 1fr;gap:12px;position:relative}
+.cycle .q{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px}
+.cycle .q h3{font-size:.9rem;margin-bottom:4px}
+/* junction */
+.junction{display:grid;grid-template-columns:1fr 70px 1fr;gap:10px;align-items:stretch}
+.junction .side{display:flex;flex-direction:column;gap:6px;min-width:0}
+.junction .left h3{color:var(--bad)} .junction .right h3{color:var(--good)}
+.junction svg{width:100%;height:100%;min-height:120px}
+/* breath */
+.pacer{display:flex;flex-direction:column;align-items:center;gap:14px;padding:16px}
+.orb{width:180px;height:180px;max-width:100%;border-radius:50%;background:radial-gradient(circle at 40% 35%,var(--accent-soft),var(--accent));display:grid;place-items:center;color:var(--accent-ink);font-family:var(--f-display);font-size:1.2rem;transform:scale(.55);transition:transform 4s ease-in-out}
+.orb.in{transform:scale(1)}
+svg text{fill:var(--muted);font-family:var(--f-mono);font-size:10px}
+.toast{position:fixed;bottom:calc(16px + env(safe-area-inset-bottom, 0px));right:calc(16px + env(safe-area-inset-right, 0px));background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:8px;font-size:.88rem;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.show{opacity:1}
+ol.steps{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px;max-width:65ch}
+
+@media (max-width:900px){
+  .wrap{grid-template-columns:minmax(0,1fr);gap:16px}
+  nav.side{display:none}
+  .mobnav{display:flex;flex-direction:column;gap:8px}
+  .grid3,.grid5{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:560px){
+  .grid2,.grid3,.grid5,.cycle{grid-template-columns:minmax(0,1fr)}
+  .junction{grid-template-columns:minmax(0,1fr)}
+  .junction svg{display:none}
+  h1{font-size:1.6rem}
+}
+@media (prefers-reduced-motion: reduce){.orb{transition:none}}
+</style>
+
+<div class="wrap">
+  <nav class="side" id="side" aria-label="Sections"></nav>
+  <main id="main"></main>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+/* ---------- content ---------- */
+const TRAPS=[
+ ["Catastrophising","Jumping straight to the worst possible outcome."],
+ ["All-or-nothing","Seeing things as total success or total failure."],
+ ["Over-generalising","Treating one bad event as a pattern that will always repeat."],
+ ["Negative filter","Dwelling on what went wrong and discounting what went right."],
+ ["Jumping to conclusions","Deciding what's true before checking the facts."],
+ ["Mind-reading","Assuming you know what other people think of you."],
+ ["Emotional reasoning","Treating a feeling as proof: I feel useless, so I am useless."],
+ ["Musts and shoulds","Turning wishes into rigid rules for yourself or others."],
+ ["Labelling","Summing up a whole person with one word after one event."],
+ ["Blaming","Pinning every bad outcome on yourself, or on someone else."],
+ ["Change fallacy","Expecting other people or things to change to suit you."],
+ ["Control fallacy","Feeling powerless whenever you're not fully in control."],
+ ["Fairness fallacy","Expecting life to keep a fair score and resenting it when it doesn't."],
+ ["Reward fallacy","Expecting sacrifice to be paid back and feeling bitter when it isn't."]
+];
+const VALUES=["Accepting","Affectionate","Aspiring","Assertive","Authentic","Caring","Challenging","Compassionate","Conforming","Cooperating","Courageous","Creative","Curious","Emotionally aware","Encouraging","Equality","Fairness","Fitness","Flexible","Forgiving","Friendliness","Generosity","Gratitude","Honesty","Humility","Humour","Independent","Industrious","Open-minded","Orderly","Patient","Respectful","Responsible","Safe","Self-aware","Self-disciplined","Tenacious","Tolerant","Trusted"];
+const STRENGTHS=[["skills","Skills"],["knowledge","Knowledge"],["experience","Experience"],["abilities","Abilities"],["qualities","Personal qualities"]];
+const SCALE=[["Worthless","Worthwhile"],["Disrespectful","Respectful"],["Selfish","Helps others"],["Lazy","Works hard"],["Ruthless","Kind"],["Cold","Warm"],["Taking","Giving"],["Unfair","Fair"],["Pitiless","Compassionate"],["Harsh","Caring"],["Offensive","Empathic"],["Insensitive","Sensitive"],["Thoughtless","Considerate"],["Disloyal","Loyal"],["Indifferent","Determined"]];
+const WHEEL=[
+ ["Joy",["Serenity","Joy","Ecstasy"]],["Trust",["Acceptance","Trust","Admiration"]],
+ ["Fear",["Apprehension","Fear","Terror"]],["Surprise",["Distraction","Surprise","Amazement"]],
+ ["Sadness",["Pensiveness","Sadness","Grief"]],["Disgust",["Boredom","Disgust","Loathing"]],
+ ["Anger",["Annoyance","Anger","Rage"]],["Anticipation",["Interest","Anticipation","Vigilance"]],
+ ["Common in CBT",["Anxiety","Guilt","Shame","Hurt","Jealousy","Embarrassment","Frustration","Low mood"]]
+];
+const SLEEPQ=["I usually fall asleep within 30 minutes of going to bed.","I'm asleep for at least 85% of the time I spend in bed.","I wake no more than once a night for longer than 5 minutes.","If I do wake, I'm back asleep within 20 minutes."];
+const SLEEPF=[
+ ["Wind-down routine","Something relaxing before bed, without caffeine, alcohol or nicotine late in the day."],
+ ["Screens","Putting the phone and laptop away for a while before bed."],
+ ["Daytime exercise","Moving during the day, but not hard training right before bed."],
+ ["Light","Daylight early in the day and dimmer lights in the evening to set your body clock."],
+ ["Sleepy, not just tired","Going to bed when you actually feel sleepy."],
+ ["Bed is for sleep","Moving work, scrolling and TV out of the bedroom."],
+ ["Clock-watching","Turning the clock away so you're not counting the hours."],
+ ["Bedroom","Comfortable bed; a room that's quiet, dark, tidy and cool."],
+ ["Lying awake","If you can't sleep, get up and do something calm until sleepy, then go back."]
+];
+const SHEETS={
+ avoidance:{title:"Cost of avoidance",intro:"Look at what avoiding or controlling a difficult thought, feeling or sensation has cost you, and what you'd gain by easing off.",qs:[
+  "What thought, feeling or sensation have you been trying to avoid or control?","Everything you've done to avoid or control it.","What has that cost you? Think confidence, health, relationships, work, chances you've missed.","Which of those strategies are you willing to drop?","What discomfort will you need to make room for if you drop them?","What could you achieve longer term if you focused on what you want instead?","How does that move you toward your goals and values?"]},
+ lettinggo:{title:"Letting go",intro:"Weigh up what it costs to keep holding on to a thought you keep coming back to.",qs:[
+  "The distressing thought you're struggling to let go of.","How do you feel, emotionally and physically, when you're caught up in it?","How does your behaviour change?","What does getting caught up in it cost you or stop you doing?","How does it pull you away from your goals and values?","What would be a more helpful way to respond to it?","What uncomfortable feelings would you need to allow in order to let it go?","If you did, how would that make life healthier or fuller?"]},
+ fears:{title:"Facing a fear",intro:"Pick a fear that's holding you back and plan small, real steps toward it.",qs:[
+  "A fear that limits your goals or how you want to live.","If you gradually overcame it, how would you act differently, and what would change?","Your thoughts and feelings when you face it.","Small steps you could take while allowing some discomfort.","LIST6:Six steps, easiest to hardest.","Once you've done all six, what will that say about your ability to handle this fear?"]},
+ notenough:{title:"Not good enough",intro:"Name the self-criticism your mind keeps replaying, and practise responding to it differently.",qs:[
+  "The 'not good enough' criticisms your mind keeps returning to.","Which one hits hardest?","How do you feel, emotionally and physically, when it shows up?","How does your behaviour change?","How could you hold these criticisms more lightly so they matter less?","What could you focus on right now that adds value, while noticing and letting the criticism pass?","How would you feel, on balance, if you did that now?"]}
+};
+const WORRY2=["What hard evidence supports the worry?","What hard evidence goes against it?","What's the worst that could happen?","What's the best that could happen?","What's the most likely outcome?","What does worrying about it do for you?","What would you say to a mate with this worry?","Practical options open to you","The most useful course of action","What, where, who and when?","How has your view of the worry changed?"];
+
+/* ---------- state ---------- */
+const KEY="cbt-workbench-v1";
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const today=()=>new Date().toISOString().slice(0,10);
+const ago=n=>{const d=new Date();d.setDate(d.getDate()-n);return d.toISOString().slice(0,10)};
+function blank(){return{
+  problems:[{p:"",u:"",h:""}],
+  goals:[0,1,2].map(()=>({title:"",steps:[0,1,2,3].map(()=>({t:"",done:false}))})),
+  strengths:{skills:[],knowledge:[],experience:[],abilities:[],qualities:[]},
+  values:{},valuesOther:"",change:["","","","","",""],
+  balance:{costs:[],benefits:[]},
+  maps:[],junction:[],
+  thoughts:[{id:uid(),example:true,date:ago(1),situation:"Boss asked to 'have a quick word' at the end of shift.",emotions:[{n:"Anxiety",b:80,a:35}],nat:"I've stuffed something up and I'm about to get let go.",traps:["Catastrophising","Mind-reading"],for:"I left early on Tuesday.",against:"I cleared it beforehand. Last two 'quick words' were about overtime.",balanced:"It could be anything. I'll find out in an hour, and I've been reliable.",}],
+  worryTime:"16:30",worries:[],
+  schedule:[{id:uid(),example:true,date:ago(2),p:"Finished study module 3",r:"Board game night",c:"Called home",mood:65},{id:uid(),example:true,date:ago(1),p:"Meal prep for the week",r:"Gym, legs",c:"Cooked dinner for us",mood:72}],
+  ladder:Array.from({length:8},()=>({fear:"",pred:"",pd:5,ad:"",happened:"",done:false})),
+  sheets:{avoidance:[],lettinggo:[],fears:[],notenough:[]},
+  scale:{},scaleSnaps:[],
+  emotionLog:[],
+  sleep:{checks:[false,false,false,false],f:{}},
+  log:[{c:"",l:"",a:""}]
+}}
+function load(){try{const r=localStorage.getItem(KEY);if(r){return Object.assign(blank(),JSON.parse(r))}}catch(e){}return blank()}
+let S=load();
+let saveT;
+function save(){clearTimeout(saveT);saveT=setTimeout(()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}},250)}
+function getP(o,p){return p.split(".").reduce((a,k)=>a==null?a:a[k],o)}
+function setP(o,p,v){const ks=p.split(".");const last=ks.pop();const t=ks.reduce((a,k)=>a[k],o);t[last]=v}
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt=d=>{try{return new Date(d+"T00:00").toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short"})}catch(e){return d}};
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1800)}
+
+/* ---------- field helpers ---------- */
+let fid=0;
+const T=(path,label,ph="",rows=0)=>{const id="f"+(fid++);const v=esc(getP(S,path));return `<label class="f" for="${id}"><span>${label}</span>${rows?`<textarea id="${id}" data-bind="${path}" rows="${rows}" placeholder="${esc(ph)}">${v}</textarea>`:`<input type="text" id="${id}" data-bind="${path}" value="${v}" placeholder="${esc(ph)}">`}</label>`};
+const R=(path,label,max=100,suffix="")=>{const id="f"+(fid++);const v=getP(S,path)??0;return `<label class="f" for="${id}"><span>${label}</span><span class="slider"><input type="range" id="${id}" min="0" max="${max}" step="${max>10?5:1}" data-bind="${path}" data-num="1" value="${v}"><output class="out" data-out="${path}">${v}${suffix}</output></span></label>`};
+const D=(path)=>{const id="f"+(fid++);return `<input type="date" id="${id}" aria-label="Date" data-bind="${path}" value="${esc(getP(S,path))}" style="width:auto">`};
+const DEL=(act,args)=>`<button class="ghost" data-act="${act}" ${args} data-confirm="1">Delete</button>`;
+const ex=o=>o.example?`<span class="tag">Example · delete when you start</span>`:"";
+function head(eyebrow,title,lede){return `<header class="head"><span class="eyebrow">${eyebrow}</span><h1>${title}</h1>${lede?`<p class="lede">${lede}</p>`:""}</header>`}
+
+/* ---------- charts ---------- */
+function lineChart(pts,max,labels){
+  if(pts.length<2)return `<p class="empty small">Log at least two days to see a trend.</p>`;
+  const W=600,H=140,pl=30,pr=10,pt=10,pb=22;const x=i=>pl+i*(W-pl-pr)/(pts.length-1);const y=v=>pt+(1-v/max)*(H-pt-pb);
+  const d=pts.map((v,i)=>`${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
+  const grid=[0,50,100].map(g=>`<line x1="${pl}" x2="${W-pr}" y1="${y(g)}" y2="${y(g)}" stroke="var(--line)"/><text x="${pl-6}" y="${y(g)+3}" text-anchor="end">${g}</text>`).join("");
+  const lab=labels.map((l,i)=>(i===0||i===labels.length-1||pts.length<8)?`<text x="${x(i)}" y="${H-6}" text-anchor="middle">${esc(l)}</text>`:"").join("");
+  const area=`${pl},${y(0)} ${d} ${x(pts.length-1)},${y(0)}`;
+  return `<div class="tablewrap"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Mood over time" style="width:100%;min-width:320px;height:auto">${grid}<polygon points="${area}" fill="var(--accent-soft)" opacity=".7"/><polyline points="${d}" fill="none" stroke="var(--accent)" stroke-width="2"/><circle cx="${x(pts.length-1)}" cy="${y(pts[pts.length-1])}" r="4" fill="var(--accent)"/>${lab}</svg></div>`;
+}
+function ladderChart(){
+  const rows=S.ladder.map((r,i)=>({i,r})).filter(o=>o.r.fear.trim());
+  if(!rows.length)return `<p class="empty small">Add a feared situation to see predicted versus actual distress.</p>`;
+  const W=600,rowH=26,pl=30,H=rows.length*rowH+24,sx=v=>pl+v*(W-pl-10)/10;
+  let s=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;min-width:320px;height:auto" role="img" aria-label="Predicted versus actual distress">`;
+  [0,5,10].forEach(g=>s+=`<line x1="${sx(g)}" x2="${sx(g)}" y1="0" y2="${H-18}" stroke="var(--line)"/><text x="${sx(g)}" y="${H-4}" text-anchor="middle">${g}</text>`);
+  rows.forEach((o,k)=>{const y=k*rowH+4;s+=`<text x="${pl-8}" y="${y+14}" text-anchor="end">${o.i+1}</text><rect x="${pl}" y="${y}" width="${sx(+o.r.pd)-pl}" height="9" rx="2" fill="var(--ochre)" opacity=".75"/>`;
+    if(o.r.ad!==""&&o.r.ad!=null)s+=`<rect x="${pl}" y="${y+11}" width="${sx(+o.r.ad)-pl}" height="9" rx="2" fill="var(--accent)"/>`});
+  return `<div class="row small"><span class="chip"><span style="width:10px;height:10px;background:var(--ochre);border-radius:2px;display:inline-block"></span>Predicted</span><span class="chip"><span style="width:10px;height:10px;background:var(--accent);border-radius:2px;display:inline-block"></span>Actual</span></div><div class="tablewrap">${s}</svg></div>`;
+}
+
+/* ---------- views ---------- */
+const V={};
+V.today=()=>{
+  const g=S.goals.flatMap(x=>x.steps.filter(s=>s.t.trim()));const gd=g.filter(s=>s.done).length;
+  const lad=S.ladder.filter(r=>r.fear.trim());const ld=lad.filter(r=>r.done).length;
+  const parked=S.worries.filter(w=>!w.done);
+  const now=new Date();const [hh,mm]=(S.worryTime||"16:30").split(":").map(Number);const wt=new Date();wt.setHours(hh,mm,0,0);
+  const tr=S.thoughts.filter(t=>t.emotions?.length);const drop=tr.length?Math.round(tr.reduce((a,t)=>a+t.emotions.reduce((s,e)=>s+(e.b-(e.a??e.b)),0)/t.emotions.length,0)/tr.length):null;
+  const sch=[...S.schedule].sort((a,b)=>a.date<b.date?-1:1);
+  const recent=[...S.thoughts].slice(-3).reverse();
+  return head("Today · "+fmt(today()),"Your workbench","Turn what you understand about thoughts, feelings and behaviour into small things you actually do. Start anywhere; everything saves on this device as you type.")+
+  (parked.length&&now>=wt?`<div class="banner"><b>It's past your worry time (${esc(S.worryTime)}).</b> You have ${parked.length} parked worr${parked.length>1?"ies":"y"} to work through. <a href="#worry">Open worry time</a></div>`:"")+
+  `<section class="panel"><div class="grid5">
+    <div class="stat"><b class="num">${gd}/${g.length||0}</b><span>goal steps done</span></div>
+    <div class="stat"><b class="num">${S.thoughts.length}</b><span>thought records</span></div>
+    <div class="stat"><b class="num">${drop==null?"–":drop+"%"}</b><span>average drop in distress after a record</span></div>
+    <div class="stat"><b class="num">${parked.length}</b><span>worries parked for ${esc(S.worryTime)}</span></div>
+    <div class="stat"><b class="num">${ld}/${lad.length}</b><span>exposure steps faced</span></div>
+  </div></section>
+  <section class="panel"><div class="entryhead"><h2>Something's bothering you right now?</h2></div>
+    <div class="row"><button class="pri" data-act="newThought">Catch a thought</button><button data-act="goto" data-to="worry">Park a worry</button><button data-act="goto" data-to="map">Map what's happening</button><button data-act="goto" data-to="breathe">Two minutes of breathing</button></div>
+  </section>
+  <div class="grid2">
+   <section class="panel"><h2>Mood this fortnight</h2>${lineChart(sch.slice(-14).map(s=>+s.mood),100,sch.slice(-14).map(s=>fmt(s.date)))}<div><button data-act="goto" data-to="schedule">Plan today</button></div></section>
+   <section class="panel"><h2>Recent thought records</h2>${recent.length?recent.map(t=>`<div class="stack" style="gap:2px"><span class="date">${fmt(t.date)} ${t.example?"· example":""}</span><span>${esc(t.nat||t.situation||"Untitled")}</span>${t.balanced?`<span class="small muted">→ ${esc(t.balanced)}</span>`:""}</div>`).join(""):`<p class="empty">None yet.</p>`}<div><button data-act="goto" data-to="thoughts">All records</button></div></section>
+  </div>
+  <section class="panel flat"><h2>How the pieces fit</h2><p class="lede">A trigger sets off thoughts, emotions, body sensations and behaviours, and each one feeds the others. You can't always change the trigger, but you can change what you think and what you do, and that breaks the loop. The <b>Set up</b> section is for getting clear on where you're headed. <b>Daily tools</b> are the reps. <b>Go deeper</b> is for the patterns that keep coming back.</p></section>`;
+};
+V.problems=()=>head("Set up · 1","Problem list","For each problem, note what you currently do that doesn't really work, and what you could do instead that fits your goals and values.")+
+  S.problems.map((p,i)=>`<section class="panel"><div class="entryhead"><h3>Problem ${i+1}</h3>${DEL("delRow",`data-list="problems" data-i="${i}"`)}</div><div class="grid3">${T(`problems.${i}.p`,"<b>The problem</b>","e.g. Lying awake running through work stuff",3)}${T(`problems.${i}.u`,"<b>Unhelpful coping</b>","e.g. Scrolling in bed until 1am",3)}${T(`problems.${i}.h`,"<b>Helpful coping</b>","e.g. Write tomorrow's list, phone out of the room",3)}</div></section>`).join("")+
+  `<div><button data-act="addRow" data-list="problems">Add a problem</button></div>`;
+V.goals=()=>head("Set up · 2","Goals","Three goals, each broken into four small steps you can actually tick off.")+
+  S.goals.map((g,i)=>{const n=g.steps.filter(s=>s.t.trim()).length,d=g.steps.filter(s=>s.t.trim()&&s.done).length;return `<section class="panel">${T(`goals.${i}.title`,`<b>Goal ${i+1}</b>`,"e.g. Sleep 7 hours on work nights")}<div class="bar" aria-label="${d} of ${n} steps"><i style="width:${n?d/n*100:0}%"></i></div><div class="grid2">${g.steps.map((s,j)=>`<div class="row" style="flex-wrap:nowrap"><input type="checkbox" aria-label="Step done" data-bind="goals.${i}.steps.${j}.done" ${s.done?"checked":""} data-rerender="1"><input type="text" aria-label="Step ${j+1}" data-bind="goals.${i}.steps.${j}.t" value="${esc(s.t)}" placeholder="Small step ${j+1}"></div>`).join("")}</div></section>`}).join("");
+V.strengths=()=>head("Set up · 3","Strengths and resources","What you bring to this. Include what you see in yourself and what other people say about you. Press Enter to add each one.")+
+  `<section class="panel"><div class="grid5">${STRENGTHS.map(([k,l])=>`<div class="stack"><h3>${l}</h3><input type="text" placeholder="Add…" aria-label="Add to ${l}" data-add="strengths.${k}"><div class="chips">${S.strengths[k].map((x,i)=>`<span class="chip x">${esc(x)}<button aria-label="Remove" data-act="rmItem" data-list="strengths.${k}" data-i="${i}">×</button></span>`).join("")||`<span class="empty small">Nothing yet</span>`}</div></div>`).join("")}</div></section>`;
+V.values=()=>{const hi=VALUES.filter(v=>S.values[v]==="H");return head("Set up · 4","Values","Rate how much each value matters to you, then pick the six that will do the most to drive change. They may differ from what you prioritise right now.")+
+  `<section class="panel"><h2>Your six change values</h2><div class="grid3">${S.change.map((c,i)=>`<label class="f"><span>Priority ${i+1}</span><select data-bind="change.${i}"><option value="">Choose…</option>${(hi.length?hi:VALUES).concat(S.valuesOther?[S.valuesOther]:[]).map(v=>`<option ${v===c?"selected":""}>${esc(v)}</option>`).join("")}</select></label>`).join("")}</div><p class="small muted">${hi.length?"Showing the values you've rated highly.":"Rate values below and this list narrows to your high ones."}</p></section>
+  <section class="panel"><div class="tablewrap"><table><thead><tr><th>Value</th><th>How important?</th></tr></thead><tbody>${VALUES.map(v=>`<tr><td>${v}</td><td><span class="seg">${[["H","High"],["M","Medium"],["L","Low"]].map(([k,l])=>`<button class="${S.values[v]===k?"on":""}" data-act="val" data-v="${v}" data-k="${k}">${l}</button>`).join("")}</span></td></tr>`).join("")}</tbody></table></div>${T("valuesOther","Another value that matters to you")}</section>`};
+V.balance=()=>head("Set up · 5","Costs and benefits of changing","What you'll have to put up with or give up in the short term, against what you stand to gain. Press Enter to add each one.")+
+  `<section class="panel"><div class="grid2">${[["costs","Costs","e.g. Feeling anxious when I stop avoiding it"],["benefits","Benefits","e.g. More energy for training and study"]].map(([k,l,ph])=>`<div class="stack"><h2>${l} <span class="num muted">${S.balance[k].length}</span></h2><input type="text" aria-label="Add a ${l}" placeholder="${ph}" data-add="balance.${k}"><div class="stack">${S.balance[k].map((x,i)=>`<div class="entryhead" style="border-bottom:1px solid var(--line);padding-bottom:6px"><span>${esc(x)}</span><button class="ghost" data-act="rmItem" data-list="balance.${k}" data-i="${i}">Remove</button></div>`).join("")||`<p class="empty small">None yet</p>`}</div></div>`).join("")}</div></section>`;
+V.map=()=>head("Daily tools","Map what's happening","Break a moment down into its parts. Seeing them side by side shows how they keep each other going.")+
+  `<div><button class="pri" data-act="newEntry" data-list="maps">New map</button></div>`+
+  (S.maps.length?S.maps.map((m,i)=>({m,i})).reverse().map(({m,i})=>`<section class="panel"><div class="entryhead">${D(`maps.${i}.date`)}${DEL("delRow",`data-list="maps" data-i="${i}"`)}</div>${T(`maps.${i}.trigger`,"<b>Trigger</b>","What happened?")}<div class="cycle">${[["thoughts","Thoughts","What went through your head? What did you fear would happen?"],["emotions","Emotions","Anxious, angry, low, ashamed, frustrated…"],["behaviours","Behaviours","What did you do, or avoid doing?"],["body","Body","Tension, racing heart, tired, hot, shaky…"]].map(([k,l,ph])=>`<div class="q">${T(`maps.${i}.${k}`,`<b>${l}</b>`,ph,3)}</div>`).join("")}</div>${T(`maps.${i}.change`,"<b>Where could you break the loop?</b>","One thought to question, or one thing to do differently",2)}</section>`).join(""):`<section class="panel flat"><p class="empty">No maps yet. Start one the next time something knocks you off course.</p></section>`);
+V.thoughts=()=>head("Daily tools","Thought records","Catch the automatic thought, test it against the evidence, and find a more balanced one. Rate the emotion before and after.")+
+  `<div><button class="pri" data-act="newThought">New thought record</button></div>`+
+  S.thoughts.map((t,i)=>({t,i})).reverse().map(({t,i})=>`<section class="panel"><div class="entryhead"><div class="row">${D(`thoughts.${i}.date`)}${ex(t)}</div>${DEL("delRow",`data-list="thoughts" data-i="${i}"`)}</div>
+    ${T(`thoughts.${i}.situation`,"<b>1 · Situation</b>","Where were you, what happened?",2)}
+    <div class="stack"><span class="small muted"><b style="color:var(--ink)">2 · Emotions</b> rated now and again at the end</span>${t.emotions.map((e,j)=>`<div class="grid3" style="align-items:end"><label class="f"><span>Emotion</span><input type="text" data-bind="thoughts.${i}.emotions.${j}.n" value="${esc(e.n)}" placeholder="e.g. Anxiety"></label>${R(`thoughts.${i}.emotions.${j}.b`,"Before","100","%")}${R(`thoughts.${i}.emotions.${j}.a`,"After","100","%")}</div>`).join("")}<div><button data-act="addEmo" data-i="${i}">Add emotion</button></div></div>
+    ${T(`thoughts.${i}.nat`,"<b>3 · Automatic thought</b>","The thought that popped up",2)}
+    <div class="stack"><span class="small muted"><b style="color:var(--ink)">Thinking traps</b> it might fall into</span><div class="chips">${TRAPS.map(([n,d])=>`<button class="chip ${t.traps.includes(n)?"on":""}" title="${esc(d)}" data-act="trap" data-i="${i}" data-t="${n}">${n}</button>`).join("")}</div></div>
+    <div class="grid2">${T(`thoughts.${i}.for`,"<b>4 · Evidence for</b>","Facts, not feelings",3)}${T(`thoughts.${i}.against`,"<b>5 · Evidence against</b>","What doesn't fit the thought?",3)}</div>
+    ${T(`thoughts.${i}.balanced`,"<b>6 · Balanced thought</b>","A more realistic or helpful way to see it",2)}
+  </section>`).join("")+`<section class="panel flat small muted">When you're stuck: step back and just notice the thought. Is it helping? Is it a fact or just a thought? What would you tell a mate? You can tolerate not knowing for now.</section>`;
+V.traps=()=>head("Daily tools","Thinking traps","Common ways the mind bends things. Learn to spot them, and the thought loses some of its grip. The tally counts how often you've tagged each one in your thought records.")+
+  `<section class="panel"><div class="tablewrap"><table><thead><tr><th>Trap</th><th>What it looks like</th><th>Tagged</th></tr></thead><tbody>${TRAPS.map(([n,d])=>{const c=S.thoughts.filter(t=>t.traps.includes(n)).length;return `<tr><td><b>${n}</b></td><td>${d}</td><td class="num">${c||"–"}</td></tr>`}).join("")}</tbody></table></div></section>`;
+V.worry=()=>{const open=S.worries.map((w,i)=>({w,i})).filter(o=>!o.w.done).reverse(),closed=S.worries.map((w,i)=>({w,i})).filter(o=>o.w.done).reverse();
+ return head("Daily tools","Worry time","Most of what we worry about never happens, and worrying doesn't change the outcome. When a worry shows up, park it here and deal with it at a set time each day, not right before bed.")+
+ `<section class="panel"><div class="row"><label class="f" style="width:auto"><span>My daily worry time</span><input type="time" data-bind="worryTime" value="${esc(S.worryTime)}" style="width:auto"></label><p class="small muted" style="flex:1;min-width:200px">Pick a time you'll keep, like 4:30pm after work. Outside that time, a quick note here is enough.</p></div></section>
+ <section class="panel"><h2>Park a worry</h2><div class="grid2"><label class="f"><span>The worry</span><input type="text" id="wq" placeholder="e.g. I won't pass the Cert IV assessment"></label><label class="f"><span>What I'm predicting will happen</span><input type="text" id="wp" placeholder="e.g. I'll have to repeat and lose months"></label></div><label class="f"><span>How distressing right now (0–10)</span><span class="slider"><input type="range" id="wd" min="0" max="10" value="6" oninput="this.nextElementSibling.textContent=this.value"><output class="out">6</output></span></label><div><button class="pri" data-act="parkWorry">Park it until ${esc(S.worryTime)}</button></div></section>
+ ${open.map(({w,i})=>`<section class="panel"><div class="entryhead"><div class="stack" style="gap:2px"><span class="date">Parked ${fmt(w.date)} · distress ${w.d}/10</span><h3>${esc(w.q)}</h3>${w.p?`<span class="small muted">Predicting: ${esc(w.p)}</span>`:""}</div>${DEL("delRow",`data-list="worries" data-i="${i}"`)}</div>
+   <details ${w.open?"open":""}><summary style="cursor:pointer;color:var(--accent);font-weight:700">Work through it</summary><div class="stack" style="margin-top:10px">${WORRY2.slice(0,7).map((q,k)=>T(`worries.${i}.a.${k}`,q,"",1)).join("")}<div class="banner small">Can you let it go now? If yes, re-rate and close it. If not, keep going below.</div>${WORRY2.slice(7).map((q,k)=>T(`worries.${i}.a.${k+7}`,q,"",1)).join("")}${R(`worries.${i}.after`,"How distressing now?",10,"/10")}<div><button class="pri" data-act="closeWorry" data-i="${i}">Let it go</button></div></div></details></section>`).join("")||`<section class="panel flat"><p class="empty">Nothing parked. Good.</p></section>`}
+ ${closed.length?`<section class="panel"><h2>Let go</h2><div class="tablewrap"><table><thead><tr><th>Worry</th><th>Before</th><th>After</th></tr></thead><tbody>${closed.map(({w})=>`<tr><td>${esc(w.q)}</td><td class="num">${w.d}</td><td class="num">${w.after??"–"}</td></tr>`).join("")}</tbody></table></div></section>`:""}`};
+V.schedule=()=>{const rows=S.schedule.map((s,i)=>({s,i})).sort((a,b)=>a.s.date<b.s.date?1:-1);const ch=[...S.schedule].sort((a,b)=>a.date<b.date?-1:1);
+ return head("Daily tools","Plan your day","Plan one thing in each column ahead of time, then rate your mood at the end of the day. Over time you'll see which kinds of days lift you.")+
+ `<section class="panel"><h2>Mood</h2>${lineChart(ch.slice(-30).map(s=>+s.mood),100,ch.slice(-30).map(s=>fmt(s.date)))}</section><div><button class="pri" data-act="addDay">Add a day</button></div>`+
+ rows.map(({s,i})=>`<section class="panel"><div class="entryhead"><div class="row">${D(`schedule.${i}.date`)}${ex(s)}</div>${DEL("delRow",`data-list="schedule" data-i="${i}"`)}</div><div class="grid3">${T(`schedule.${i}.p`,"<b>Purposeful</b> · achievement","e.g. Finish an assessment")}${T(`schedule.${i}.r`,"<b>Rewarding</b> · enjoyment","e.g. Training session")}${T(`schedule.${i}.c`,"<b>Compassionate</b> · connection","e.g. Call a mate")}</div>${R(`schedule.${i}.mood`,"Mood at the end of the day",100,"%")}</section>`).join("")};
+V.ladder=()=>head("Daily tools","Exposure ladder","To feel differently you usually have to act differently. List eight situations you avoid, easiest first. Predict how bad it'll be, do it, then record what actually happened.")+
+ `<section class="panel"><h2>Predicted versus actual</h2>${ladderChart()}</section>`+
+ S.ladder.map((r,i)=>`<section class="panel"><div class="entryhead"><h3>Step ${i+1}</h3><label class="row small"><input type="checkbox" data-bind="ladder.${i}.done" data-rerender="1" ${r.done?"checked":""}> Done</label></div><div class="grid2">${T(`ladder.${i}.fear`,"<b>Situation or activity</b>",i===0?"e.g. Ask a question in class":"")}${T(`ladder.${i}.pred`,"<b>What I predict will happen</b>")}</div><div class="grid2">${R(`ladder.${i}.pd`,"Predicted distress",10,"/10")}<label class="f"><span>Actual distress (0–10)</span><input type="number" min="0" max="10" data-bind="ladder.${i}.ad" data-numn="1" data-rerender-blur="1" value="${esc(r.ad)}" placeholder="After you've done it"></label></div>${T(`ladder.${i}.happened`,"<b>What actually happened, and what that tells you</b>","",2)}</section>`).join("");
+V.junction=()=>head("Go deeper","Choice point","When something triggers you, there are two roads. One follows mood and old habits. The other follows your goals and values. Map both so the better one is easier to spot next time.")+
+ `<div><button class="pri" data-act="newEntry" data-list="junction">New choice point</button></div>`+
+ (S.junction.length?S.junction.map((j,i)=>({j,i})).reverse().map(({j,i})=>`<section class="panel"><div class="entryhead">${D(`junction.${i}.date`)}${DEL("delRow",`data-list="junction" data-i="${i}"`)}</div><div class="junction"><div class="side left"><h3>Away · unhelpful</h3><p class="small muted">Thoughts you get hooked by, feelings you fight, avoidance</p>${T(`junction.${i}.away`,"Away moves","",5)}</div><svg viewBox="0 0 70 160" aria-hidden="true"><path d="M35 155 V80 L8 20 M35 80 L62 20" fill="none" stroke="var(--muted)" stroke-width="2"/><path d="M8 20 l2 10 M8 20 l9 4" stroke="var(--bad)" stroke-width="2" fill="none"/><path d="M62 20 l-2 10 M62 20 l-9 4" stroke="var(--good)" stroke-width="2" fill="none"/><text x="35" y="100" text-anchor="middle">choice</text></svg><div class="side right"><h3>Toward · helpful</h3><p class="small muted">Purpose, values, strengths, something different to try</p>${T(`junction.${i}.toward`,"Toward moves","",5)}</div></div>${T(`junction.${i}.trigger`,"<b>Trigger</b>","What sets this off?")}</section>`).join(""):`<section class="panel flat"><p class="empty">No choice points yet.</p></section>`);
+function sheetView(key){const sh=SHEETS[key];return ()=>head("Go deeper",sh.title,sh.intro)+`<div><button class="pri" data-act="newSheet" data-k="${key}">Start a new one</button></div>`+
+ (S.sheets[key].length?S.sheets[key].map((e,i)=>({e,i})).reverse().map(({e,i})=>`<section class="panel"><div class="entryhead"><span class="date">${fmt(e.date)}</span>${DEL("delSheet",`data-k="${key}" data-i="${i}"`)}</div>${sh.qs.map((q,k)=>q.startsWith("LIST6:")?`<div class="stack"><span class="small muted"><b style="color:var(--ink)">${k+1} · ${q.slice(6)}</b></span><div class="grid2">${[0,1,2,3,4,5].map(n=>`<div class="row" style="flex-wrap:nowrap"><span class="num muted">${n+1}</span><input type="text" aria-label="Step ${n+1}" data-bind="sheets.${key}.${i}.a.${k}_${n}" value="${esc(e.a[k+"_"+n])}"></div>`).join("")}</div></div>`:T(`sheets.${key}.${i}.a.${k}`,`<b>${k+1}</b> · ${q}`,"",2)).join("")}</section>`).join(""):`<section class="panel flat"><p class="empty">Nothing here yet.</p></section>`)}
+V.avoidance=sheetView("avoidance");V.lettinggo=sheetView("lettinggo");V.fears=sheetView("fears");V.notenough=sheetView("notenough");
+V.scale=()=>{const vals=SCALE.map((_,i)=>+(S.scale[i]??50));const avg=Math.round(vals.reduce((a,b)=>a+b,0)/vals.length);
+ return head("Go deeper","Self-perception scales","When you're low it's easy to see yourself at one extreme. Place yourself honestly on each scale, the way someone who knows you well would.")+
+ `<section class="panel"><div class="entryhead"><span>Average <b class="num">${avg}%</b></span><button data-act="snap">Save today's snapshot</button></div>${SCALE.map(([a,b],i)=>`<div class="stack" style="gap:2px"><div class="entryhead small"><span>${a}</span><span>${b}</span></div><span class="slider"><input type="range" min="0" max="100" step="5" aria-label="${a} to ${b}" data-bind="scale.${i}" data-num="1" value="${vals[i]}"><output class="out" data-out="scale.${i}">${vals[i]}%</output></span></div>`).join("")}</section>
+ ${S.scaleSnaps.length?`<section class="panel"><h2>Snapshots</h2><div class="tablewrap"><table><thead><tr><th>Date</th><th>Average</th>${SCALE.map(s=>`<th>${s[1]}</th>`).join("")}</tr></thead><tbody>${S.scaleSnaps.map(s=>`<tr><td class="date">${fmt(s.date)}</td><td class="num"><b>${s.avg}</b></td>${s.v.map(v=>`<td class="num">${v}</td>`).join("")}</tr>`).join("")}</tbody></table></div></section>`:""}`};
+V.emotions=()=>head("Go deeper","Name the feeling","Finding the right word for a feeling makes it easier to handle. Tap the closest one, then link it to what you were thinking and what you did. Each family runs from mild to intense.")+
+ `<section class="panel"><div class="grid3">${WHEEL.map(([fam,list])=>`<div class="stack" style="gap:6px"><h3>${fam}</h3><div class="chips">${list.map(e=>`<button class="chip" data-act="feel" data-e="${e}">${e}</button>`).join("")}</div></div>`).join("")}</div></section>`+
+ (S.emotionLog.length?S.emotionLog.map((e,i)=>({e,i})).reverse().map(({e,i})=>`<section class="panel"><div class="entryhead"><div class="row"><span class="tag">${esc(e.f)}</span><span class="date">${fmt(e.date)}</span></div>${DEL("delRow",`data-list="emotionLog" data-i="${i}"`)}</div><div class="grid2">${T(`emotionLog.${i}.t`,"<b>Thoughts</b>","",2)}${T(`emotionLog.${i}.a`,"<b>Actions</b>","",2)}</div></section>`).join(""):"");
+V.breathe=()=>head("Calm and sleep","Breathing practice","Five to ten minutes a day. Use the pacer, or follow one of the practices below at your own pace.")+
+ `<section class="panel"><div class="pacer"><div class="orb" id="orb">Ready</div><div class="row"><button class="pri" id="breathBtn" data-act="breath">Start pacer</button><select id="pattern" aria-label="Breathing pattern" style="width:auto"><option value="4,6">In 4 · out 6</option><option value="4,4">In 4 · out 4</option><option value="5,7">In 5 · out 7</option></select></div><p class="small muted" id="breathCount">A longer out-breath helps the body settle.</p></div></section>
+ <div class="grid3">
+ <section class="panel"><h2>Belly breathing</h2><ol class="steps small"><li>Sit comfortably, feet flat, spine long, shoulders dropped.</li><li>Rest your hands on your belly.</li><li>Let the belly rise as you breathe in and fall as you breathe out.</li><li>Feel the ribs widen at the sides.</li><li>Don't force it; let the breath move by itself.</li><li>Let tension go on every out-breath.</li></ol><p class="small muted">Twice a day.</p></section>
+ <section class="panel"><h2>Aware breathing</h2><ol class="steps small"><li>Bring attention to the breath at your nostrils.</li><li>Notice it's slightly cool coming in, warmer going out.</li><li>Keep it even and relaxed.</li><li>When your mind wanders, notice, and come back to the breath.</li><li>Widen attention to sensations through the body, with curiosity.</li></ol></section>
+ <section class="panel"><h2>Five-minute recharge</h2><ol class="steps small"><li>Lie down somewhere quiet.</li><li>A few big fake yawns to loosen the jaw.</li><li>Close your eyes; soft belly breathing.</li><li>Release body tension and worries on each out-breath.</li><li>Stretch or shift if you need to.</li><li>Move from thinking to just noticing. Let the floor hold you.</li></ol></section>
+ </div>
+ <section class="panel flat small muted">Mindfulness also works in everyday moments: the temperature of the water when you wash up, the feel of your legs while you walk, or what you can see, hear, smell, feel and taste right now.</section>`;
+V.sleep=()=>{const yes=S.sleep.checks.filter(Boolean).length;return head("Calm and sleep","Sleep check","Four quick questions, then go through the basics of good sleep: what you do now and what you'll change.")+
+ `<section class="panel"><h2>Do you sleep well?</h2>${SLEEPQ.map((q,i)=>`<label class="row" style="flex-wrap:nowrap"><input type="checkbox" data-bind="sleep.checks.${i}" data-rerender="1" ${S.sleep.checks[i]?"checked":""}><span>${q}</span></label>`).join("")}<div class="banner small">${yes===4?"All four, and if you wake up feeling rested, you're probably sleeping well.":`${yes} of 4. Working through the factors below may help.`}</div></section>
+ <section class="panel"><h2>Sleep basics</h2>${SLEEPF.map(([n,d],i)=>`<div class="stack" style="border-top:1px solid var(--line);padding-top:12px"><div><b>${n}</b> <span class="small muted">${d}</span></div><div class="grid2">${T(`sleep.f.${i}_now`,"What I do now")}${T(`sleep.f.${i}_ch`,"What I'll change")}</div></div>`).join("")}</section>`};
+V.log=()=>head("Review","Learning log","After each session or exercise, write down what you covered, what stuck, and what you'll practise next. It becomes your own manual.")+
+ S.log.map((l,i)=>`<section class="panel"><div class="entryhead"><h3>Session ${i+1}</h3>${DEL("delRow",`data-list="log" data-i="${i}"`)}</div><div class="grid3">${T(`log.${i}.c`,"<b>What we covered</b>","",3)}${T(`log.${i}.l`,"<b>Key learning</b>","",3)}${T(`log.${i}.a`,"<b>Assignment</b>","",3)}</div></section>`).join("")+`<div><button data-act="addRow" data-list="log">Add a session</button></div>`;
+V.backup=()=>head("Review","Backup and move","Everything is stored only in this browser on this device. Copy the backup text somewhere safe (a note, an email to yourself) to keep it or move it to another device.")+
+ `<section class="panel"><h2>Your backup</h2><textarea id="bk" rows="6" readonly>${esc(JSON.stringify(S))}</textarea><div class="row"><button class="pri" data-act="copyBk">Copy backup</button><span class="small muted num">${(JSON.stringify(S).length/1024).toFixed(1)} KB</span></div></section>
+ <section class="panel"><h2>Restore</h2><textarea id="imp" rows="4" placeholder="Paste a backup here"></textarea><div class="row"><button data-act="import" data-confirm="1">Replace my data with this backup</button></div></section>
+ <section class="panel"><h2>Start fresh</h2><p class="small muted">Removes every entry, including the examples.</p><div><button data-act="wipe" data-confirm="1">Clear everything</button></div></section>`;
+
+const NAV=[["Start",[["today","Today"]]],["Set up",[["problems","Problem list"],["goals","Goals"],["strengths","Strengths"],["values","Values"],["balance","Costs and benefits"]]],
+ ["Daily tools",[["map","Map what's happening"],["thoughts","Thought records"],["traps","Thinking traps"],["worry","Worry time"],["schedule","Plan your day"],["ladder","Exposure ladder"]]],
+ ["Go deeper",[["junction","Choice point"],["avoidance","Cost of avoidance"],["lettinggo","Letting go"],["fears","Facing a fear"],["notenough","Not good enough"],["scale","Self-perception"],["emotions","Name the feeling"]]],
+ ["Calm and sleep",[["breathe","Breathing"],["sleep","Sleep check"]]],["Review",[["log","Learning log"],["backup","Backup"]]]];
+const HELP=`<div class="help"><b>Need to talk to someone?</b><br>This is a self-help tool, not a replacement for a therapist or GP. In Australia: Lifeline <span class="num">13 11 14</span>, Beyond Blue <span class="num">1300 22 4636</span>, emergencies <span class="num">000</span>. Adapted from the Think CBT Workbook (2017).</div>`;
+
+/* ---------- render ---------- */
+function current(){const h=location.hash.slice(1);return V[h]?h:"today"}
+function render(keepScroll){
+  const v=current();fid=0;
+  document.getElementById("side").innerHTML=`<div class="brand"><b>CBT Workbench</b><span>Think it, then do it</span></div>`+NAV.map(([g,items])=>`<div class="navgroup"><span class="eyebrow">${g}</span>${items.map(([id,l])=>`<a href="#${id}" class="${id===v?"on":""}">${l}</a>`).join("")}</div>`).join("")+HELP;
+  const mob=`<div class="mobnav"><b style="font-family:var(--f-display);font-size:1.2rem">CBT Workbench</b><select id="navsel" aria-label="Section">${NAV.map(([g,items])=>`<optgroup label="${g}">${items.map(([id,l])=>`<option value="${id}" ${id===v?"selected":""}>${l}</option>`).join("")}</optgroup>`).join("")}</select></div>`;
+  const y=window.scrollY;
+  document.getElementById("main").innerHTML=mob+V[v]()+`<div class="mobnav">${HELP}</div>`;
+  if(keepScroll)window.scrollTo(0,y);
+}
+window.addEventListener("hashchange",()=>{stopBreath();render();window.scrollTo(0,0)});
+
+document.addEventListener("input",e=>{
+  const el=e.target;if(el.id==="navsel"){location.hash=el.value;return}
+  const p=el.dataset.bind;if(!p)return;
+  let v=el.type==="checkbox"?el.checked:el.value;
+  if(el.dataset.num)v=+v;
+  if(el.dataset.numn)v=v===""?"":Math.max(0,Math.min(10,+v));
+  setP(S,p,v);save();
+  const o=document.querySelector(`[data-out="${CSS.escape(p)}"]`);if(o)o.textContent=v+(p.startsWith("scale")||/\.(b|a|mood)$/.test(p)?"%":p.endsWith(".pd")||p.endsWith(".after")?"/10":"");
+  if(el.dataset.rerender)render(true);
+});
+document.addEventListener("change",e=>{if(e.target.dataset.rerenderBlur)render(true);if(e.target.id==="navsel")location.hash=e.target.value});
+document.addEventListener("keydown",e=>{
+  const el=e.target;if(e.key!=="Enter"||!el.dataset.add)return;e.preventDefault();
+  const val=el.value.trim();if(!val)return;getP(S,el.dataset.add).push(val);save();render(true);
+  const again=document.querySelector(`[data-add="${el.dataset.add}"]`);again&&again.focus();
+});
+document.addEventListener("click",e=>{
+  const b=e.target.closest("[data-act]");if(!b)return;
+  if(b.dataset.confirm&&!b.classList.contains("armed")){b.classList.add("armed");const old=b.textContent;b.textContent="Tap again to confirm";setTimeout(()=>{if(b.isConnected){b.classList.remove("armed");b.textContent=old}},3000);return}
+  const a=b.dataset.act,i=+b.dataset.i;
+  const A={
+    goto:()=>{location.hash=b.dataset.to},
+    addRow:()=>{const l=b.dataset.list;S[l].push(l==="problems"?{p:"",u:"",h:""}:{c:"",l:"",a:""})},
+    delRow:()=>{S[b.dataset.list].splice(i,1);toast("Deleted")},
+    rmItem:()=>{getP(S,b.dataset.list).splice(i,1)},
+    newEntry:()=>{S[b.dataset.list].push({id:uid(),date:today()})},
+    newThought:()=>{S.thoughts.push({id:uid(),date:today(),situation:"",emotions:[{n:"",b:60,a:60}],nat:"",traps:[],for:"",against:"",balanced:""});if(current()!=="thoughts"){save();location.hash="thoughts";return "skip"}},
+    addEmo:()=>{S.thoughts[i].emotions.push({n:"",b:50,a:50})},
+    trap:()=>{const t=S.thoughts[i].traps,n=b.dataset.t;const k=t.indexOf(n);k<0?t.push(n):t.splice(k,1)},
+    val:()=>{S.values[b.dataset.v]=S.values[b.dataset.v]===b.dataset.k?undefined:b.dataset.k},
+    parkWorry:()=>{const q=document.getElementById("wq").value.trim();if(!q){toast("Write the worry first");return "skip"}S.worries.push({id:uid(),date:today(),q,p:document.getElementById("wp").value.trim(),d:+document.getElementById("wd").value,a:{},after:null,done:false});toast("Parked until "+S.worryTime)},
+    closeWorry:()=>{const w=S.worries[i];if(w.after==null)w.after=w.d;w.done=true;toast("Let go")},
+    addDay:()=>{S.schedule.push({id:uid(),date:today(),p:"",r:"",c:"",mood:50})},
+    newSheet:()=>{S.sheets[b.dataset.k].push({id:uid(),date:today(),a:{}})},
+    delSheet:()=>{S.sheets[b.dataset.k].splice(i,1);toast("Deleted")},
+    snap:()=>{const v=SCALE.map((_,k)=>+(S.scale[k]??50));S.scaleSnaps.push({date:today(),v,avg:Math.round(v.reduce((x,y)=>x+y,0)/v.length)});toast("Snapshot saved")},
+    feel:()=>{S.emotionLog.push({date:today(),f:b.dataset.e,t:"",a:""});toast(b.dataset.e+" added below")},
+    breath:()=>{breathing?stopBreath():startBreath();return "skip"},
+    copyBk:()=>{const t=document.getElementById("bk");const done=()=>toast("Backup copied");navigator.clipboard?.writeText(t.value).then(done).catch(()=>{t.select();toast("Selected; copy it manually")});return "skip"},
+    import:()=>{try{const d=JSON.parse(document.getElementById("imp").value);S=Object.assign(blank(),d);toast("Backup restored")}catch(err){toast("That text isn't a valid backup. Paste the whole thing.");return "skip"}},
+    wipe:()=>{S=blank();S.thoughts=[];S.schedule=[];toast("Cleared")}
+  };
+  const r=A[a]&&A[a]();if(r==="skip")return;save();render(true);
+});
+
+/* breathing pacer */
+let breathing=false,bt;
+function startBreath(){const [inn,out]=document.getElementById("pattern").value.split(",").map(Number);const orb=document.getElementById("orb"),cnt=document.getElementById("breathCount"),btn=document.getElementById("breathBtn");breathing=true;btn.textContent="Stop";let cycles=0;
+  const phase=(isIn)=>{if(!breathing)return;const s=isIn?inn:out;orb.style.transitionDuration=s+"s";orb.classList.toggle("in",isIn);let left=s;orb.textContent=(isIn?"Breathe in ":"Breathe out ")+left;
+    const tick=()=>{if(!breathing)return;left--;if(left>0){orb.textContent=(isIn?"Breathe in ":"Breathe out ")+left;bt=setTimeout(tick,1000)}else{if(!isIn){cycles++;cnt.textContent=cycles+" breath"+(cycles>1?"s":"")+" · "+Math.round(cycles*(inn+out)/6)/10+" min"}phase(!isIn)}};bt=setTimeout(tick,1000)};phase(true)}
+function stopBreath(){breathing=false;clearTimeout(bt);const o=document.getElementById("orb");if(o){o.classList.remove("in");o.textContent="Ready"}const b=document.getElementById("breathBtn");if(b)b.textContent="Start pacer"}
+
+render();
+</script>
+
+</body></html>
