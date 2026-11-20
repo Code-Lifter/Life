@@ -1,708 +1,381 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WealthOS v4: The Diagnostic Engine</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Teko:wght@400;600&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #e2e8f0; }
-        h1, h2, h3, .brand-font { font-family: 'Teko', sans-serif; }
-        
-        input[type="number"]::-webkit-inner-spin-button, 
-        input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-        
-        .card-bg { background-color: #1e293b; border: 1px solid #334155; }
-        .input-dark { background-color: #0f172a; border: 1px solid #334155; color: white; }
-        .input-dark:focus { border-color: #fbbf24; outline: none; }
-        
-        .tab-active { border-bottom: 2px solid #fbbf24; color: #fbbf24; }
-        .tab-inactive { color: #94a3b8; border-bottom: 2px solid transparent; }
-        
-        .gold-glow { text-shadow: 0 0 20px rgba(251, 191, 36, 0.3); }
-        .egg-fill { transition: height 1s ease-in-out; }
-        
-        .logic-scroll::-webkit-scrollbar { width: 6px; }
-        .logic-scroll::-webkit-scrollbar-track { background: #1e293b; }
-        .logic-scroll::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
-        .logic-scroll::-webkit-scrollbar-thumb:hover { background: #64748b; }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Money Mentor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: a calm, straight-talking mentor; numbers first, then one clear next move
+   IDEA: an atlas plate for your money: one axis, today to retirement
+   PICTURE: live wealth projection with the 25x freedom line, beside the inputs
+   COLOUR and TYPE: deep sea ground, sky for on-track, signal pink for work-on; Hanken Grotesk 300 large
+   LAYOUT: three strips: inputs + verdict, the projection, the rulebook */
+:root{color-scheme:dark;--bg:#0a2540;--panel:#0f3052;--line:rgba(143,211,255,.22);--ink:#fff;--soft:#b9cde0;--sky:#8fd3ff;--pink:#ff5c8a;--amber:#ffd27a}
+:root[data-theme=light],:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Hanken Grotesk",system-ui,sans-serif;overflow-x:clip}
+.band{padding:clamp(24px,4vw,56px) max(5vw,16px)}
+.wrap{max-width:1240px;margin:0 auto}
+h1{font-weight:300;font-size:clamp(34px,5vw,52px);line-height:1.05;margin:0 0 6px;text-wrap:balance}
+h2{font-weight:600;font-size:22px;margin:0 0 4px}
+.sub{color:var(--soft);margin:0 0 24px;max-width:62ch}
+.top{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:28px;align-items:start}
+form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px 14px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
+fieldset{grid-column:1/-1;border:0;padding:0;margin:6px 0 0;display:contents}
+.grp{grid-column:1/-1;font-weight:600;color:var(--sky);font-size:14px;margin-top:6px}
+label{display:flex;flex-direction:column;gap:4px;font-size:14px;color:var(--soft)}
+.in{display:flex;align-items:center;background:#0a2643;border:1px solid var(--line);border-radius:9px}
+.in span{padding:0 0 0 10px;color:var(--soft);font-size:14px;white-space:nowrap}
+.in span.u{padding:0 10px 0 0}
+input{width:100%;font:inherit;font-size:16px;color:var(--ink);background:transparent;border:0;padding:10px;min-height:44px;outline:none}
+.in:focus-within{border-color:var(--sky);box-shadow:0 0 0 3px rgba(143,211,255,.25)}
+.left{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:12px;font-size:15px}
+.left b{font-size:22px;white-space:nowrap}
+button{font:inherit;font-size:14px;color:var(--sky);background:transparent;border:1px solid var(--line);border-radius:9px;min-height:44px;padding:0 14px;cursor:pointer}
+button:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
+.verdict{display:flex;flex-direction:column;gap:16px}
+.next{background:var(--sky);color:#062038;border-radius:14px;padding:20px 22px}
+.next small{font-weight:600;font-size:14px;display:block;margin-bottom:4px}
+.next p{margin:0;font-size:clamp(20px,2.4vw,26px);line-height:1.25;font-weight:600;text-wrap:balance}
+.next .why{font-size:15px;font-weight:400;margin-top:8px;line-height:1.45}
+.earn{border:2px solid var(--pink);border-radius:14px;padding:16px 20px}
+.earn small{font-weight:600;font-size:14px;color:var(--pink);display:block;margin-bottom:6px}
+.erow{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.erow b{display:block;font-weight:300;font-size:clamp(26px,3.4vw,38px);line-height:1.1;white-space:nowrap}
+.erow span{color:var(--soft);font-size:14px}
+.earn p{margin:10px 0 0;font-size:15px;color:var(--soft)}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.stat{border-top:2px solid var(--line);padding-top:8px}
+.stat b{display:block;font-weight:300;font-size:clamp(26px,3.4vw,40px);line-height:1.1;white-space:nowrap}
+.stat span{color:var(--soft);font-size:14px}
+.fig{position:relative;min-height:300px;background:var(--panel);border:1px solid var(--line);border-radius:14px}
+.fig>svg{position:absolute;inset:0;width:100%;height:100%}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:14px;color:var(--soft);margin-top:8px}
+.legend i{display:inline-block;width:14px;height:4px;border-radius:2px;margin-right:6px;vertical-align:middle}
+.rules{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:16px;margin-top:18px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:8px}
+.card header{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.card h3{margin:0;font-size:18px;font-weight:600}
+.pill{font-size:13px;font-weight:600;border-radius:99px;padding:3px 10px;white-space:nowrap}
+.good{background:rgba(143,211,255,.18);color:var(--sky)}
+.ok{background:rgba(255,210,122,.16);color:var(--amber)}
+.work{background:rgba(255,92,138,.18);color:var(--pink)}
+.info{background:rgba(255,255,255,.1);color:#fff}
+.card .big{font-size:30px;font-weight:300;line-height:1.1;white-space:nowrap}
+.card p{margin:0;color:var(--soft);font-size:15px}
+.card p.tip{color:var(--ink)}
+.card .what{font-size:14px}
+.bar{display:flex;height:12px;border-radius:6px;overflow:hidden;background:#0a2643}
+.bar div{height:100%}
+.mark{position:relative;height:12px;border-radius:6px;background:#0a2643;overflow:hidden}
+.mark div{height:100%;background:var(--sky);border-radius:6px}
+.foot{color:var(--soft);font-size:13px;max-width:80ch}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+dialog{width:min(620px,calc(100vw - 24px));max-height:calc(100vh - 24px);overflow:auto;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:16px;padding:20px}
+dialog::backdrop{background:rgba(3,14,26,.7)}
+.jhead{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.jhead button{min-width:44px;padding:0}
+.jsub{color:var(--soft);font-size:15px;margin:6px 0 14px}
+.drop{position:relative;border:2px dashed var(--line);border-radius:12px;padding:10px;transition:border-color .2s,background .2s}
+.drop.over{border-color:var(--sky);background:rgba(143,211,255,.08)}
+.drop textarea{width:100%;min-height:260px;resize:vertical;background:#0a2643;color:var(--ink);border:0;border-radius:8px;padding:12px;font:14px/1.5 ui-monospace,Menlo,Consolas,monospace}
+.drop textarea:focus{outline:2px solid var(--sky)}
+.dropHint{color:var(--soft);font-size:13px;text-align:center;margin-top:8px}
+.jmsg{min-height:1.5em;margin:10px 0;font-size:15px}
+.jmsg.err{color:var(--pink)}.jmsg.okm{color:var(--sky)}
+.jbtns{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.fileBtn{position:relative;display:inline-flex;align-items:center;font-size:14px;color:var(--sky);border:1px solid var(--line);border-radius:9px;min-height:44px;padding:0 14px;cursor:pointer}
+.fileBtn input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.fileBtn:focus-within{outline:3px solid var(--sky);outline-offset:2px}
+button.primary{background:var(--sky);color:#062038;border-color:var(--sky);font-weight:600}
+@media(max-width:860px){.top{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:600px){form{grid-template-columns:minmax(0,1fr)}.stats{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.stat:last-child{grid-column:1/-1}}
+@media(prefers-reduced-motion:no-preference){.mark div,.bar div{transition:width .4s ease}}
+</style>
 </head>
-<body class="min-h-screen pb-20">
-
-    <nav class="sticky top-0 z-50 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 shadow-2xl">
-        <div class="max-w-7xl mx-auto px-4 py-4">
-            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                
-                <div class="flex items-center gap-2">
-                    <span class="text-2xl">🏛️</span>
-                    <h1 class="text-2xl font-semibold tracking-wide text-white brand-font uppercase">Wealth<span class="text-amber-500">OS</span> <span class="text-xs text-slate-500 align-top">v4</span></h1>
-                </div>
-
-                <div class="flex items-center gap-2 bg-slate-800 p-1.5 rounded-lg border border-slate-700 shadow-inner">
-                    <div class="flex flex-col px-2">
-                        <label class="text-[9px] uppercase tracking-widest text-slate-500 font-bold">Age</label>
-                        <input type="number" id="in-age" value="30" oninput="updateSystem()" class="w-12 bg-transparent font-bold text-center text-white outline-none brand-font text-xl">
-                    </div>
-                    <div class="h-8 w-px bg-slate-700"></div>
-                    <div class="flex flex-col px-2">
-                        <label class="text-[9px] uppercase tracking-widest text-amber-500 font-bold">Retire</label>
-                        <input type="number" id="in-retire" value="55" oninput="updateSystem()" class="w-12 bg-transparent font-bold text-center text-amber-500 outline-none brand-font text-xl">
-                    </div>
-                    <div class="h-8 w-px bg-slate-700"></div>
-                    <div class="flex flex-col px-2">
-                        <label class="text-[9px] uppercase tracking-widest text-slate-500 font-bold">Legacy</label>
-                        <input type="number" id="in-death" value="90" oninput="updateSystem()" class="w-12 bg-transparent font-bold text-center text-slate-400 outline-none brand-font text-xl">
-                    </div>
-                </div>
-
-                <div id="impact-badge" class="hidden md:flex items-center gap-3 bg-slate-950 border border-slate-800 px-4 py-2 rounded-lg">
-                    <div class="text-right">
-                        <div class="text-[9px] uppercase tracking-widest text-slate-500 font-bold">Freedom Crossover</div>
-                        <div class="text-xs text-slate-400">Projected: Age <span id="val-crossover-age" class="text-emerald-500 font-bold font-mono text-base">--</span></div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </nav>
-
-    <div class="max-w-7xl mx-auto px-4 mt-8">
-
-        <div class="grid grid-cols-2 md:grid-cols-6 gap-4 mb-8">
-            
-            <div class="card-bg p-4 rounded-xl shadow-lg border-b-2 border-purple-500/50">
-                <label class="flex items-center text-[10px] uppercase tracking-widest text-purple-500 font-bold mb-1">
-                    Gross Income
-                    <div class="relative group ml-1.5">
-                        <span class="text-purple-500/70 cursor-help text-[9px] w-3.5 h-3.5 inline-flex items-center justify-center rounded-full border border-purple-500/50 hover:bg-purple-500/20">i</span>
-                        <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2.5 bg-slate-800 text-slate-300 text-[10px] leading-relaxed rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-xl border border-slate-700 normal-case tracking-normal">
-                            Your total annual salary before taxes. The engine will automatically calculate your Stage 3 tax drag and take-home pay.
-                        </div>
-                    </div>
-                </label>
-                <div class="flex items-center text-purple-400 text-xl font-bold font-mono">
-                    $<input type="number" id="in-income" value="120000" oninput="updateSystem()" class="bg-transparent w-full outline-none placeholder-purple-900">
-                </div>
-            </div>
-
-            <div class="card-bg p-4 rounded-xl shadow-lg">
-                <label class="flex items-center text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-1">
-                    Liquid Worth
-                    <div class="relative group ml-1.5">
-                        <span class="text-slate-500/70 cursor-help text-[9px] w-3.5 h-3.5 inline-flex items-center justify-center rounded-full border border-slate-500/50 hover:bg-slate-500/20">i</span>
-                        <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2.5 bg-slate-800 text-slate-300 text-[10px] leading-relaxed rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-xl border border-slate-700 normal-case tracking-normal">
-                            Cash, ETFs, and accessible investments. Do NOT include your family home (illiquid) or superannuation (locked).
-                        </div>
-                    </div>
-                </label>
-                <div class="flex items-center text-white text-xl font-bold font-mono">
-                    $<input type="number" id="in-worth" value="50000" oninput="updateSystem()" class="bg-transparent w-full outline-none placeholder-slate-700">
-                </div>
-            </div>
-
-            <div class="card-bg p-4 rounded-xl shadow-lg border-b-2 border-cyan-500/50">
-                <label class="flex items-center text-[10px] uppercase tracking-widest text-cyan-500 font-bold mb-1">
-                    Super Balance
-                    <div class="relative group ml-1.5">
-                        <span class="text-cyan-500/70 cursor-help text-[9px] w-3.5 h-3.5 inline-flex items-center justify-center rounded-full border border-cyan-500/50 hover:bg-cyan-500/20">i</span>
-                        <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2.5 bg-slate-800 text-slate-300 text-[10px] leading-relaxed rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-xl border border-slate-700 normal-case tracking-normal">
-                            Your current total superannuation balance. The engine treats this as locked capital until age 60.
-                        </div>
-                    </div>
-                </label>
-                <div class="flex items-center text-cyan-400 text-xl font-bold font-mono">
-                    $<input type="number" id="in-super" value="65000" oninput="updateSystem()" class="bg-transparent w-full outline-none placeholder-cyan-900">
-                </div>
-            </div>
-
-            <div class="card-bg p-4 rounded-xl shadow-lg border-b-2 border-red-500/50">
-                <label class="flex items-center text-[10px] uppercase tracking-widest text-red-500 font-bold mb-1">
-                    Monthly Spend
-                    <div class="relative group ml-1.5">
-                        <span class="text-red-500/70 cursor-help text-[9px] w-3.5 h-3.5 inline-flex items-center justify-center rounded-full border border-red-500/50 hover:bg-red-500/20">i</span>
-                        <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2.5 bg-slate-800 text-slate-300 text-[10px] leading-relaxed rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-xl border border-slate-700 normal-case tracking-normal">
-                            All your living expenses: rent/mortgage, bills, groceries, and fun. The math uses this to determine your required retirement nest egg.
-                        </div>
-                    </div>
-                </label>
-                <div class="flex items-center text-red-400 text-xl font-bold font-mono">
-                    -$<input type="number" id="in-spend" value="4000" oninput="updateSystem()" class="bg-transparent w-full outline-none placeholder-red-900">
-                </div>
-            </div>
-
-            <div class="card-bg p-4 rounded-xl shadow-lg">
-                <label class="flex items-center text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-1">
-                    Nominal Return
-                    <div class="relative group ml-1.5">
-                        <span class="text-slate-500/70 cursor-help text-[9px] w-3.5 h-3.5 inline-flex items-center justify-center rounded-full border border-slate-500/50 hover:bg-slate-500/20">i</span>
-                        <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2.5 bg-slate-800 text-slate-300 text-[10px] leading-relaxed rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-xl border border-slate-700 normal-case tracking-normal">
-                            Expected average annual growth of investments. Historically, diversified index funds average 7-10% over decades.
-                        </div>
-                    </div>
-                </label>
-                <div class="flex items-center text-blue-400 text-xl font-bold font-mono">
-                    %<input type="number" id="in-return" value="7" oninput="updateSystem()" class="bg-transparent w-full outline-none placeholder-blue-900">
-                </div>
-            </div>
-
-            <div class="card-bg p-4 rounded-xl shadow-lg border-amber-500/30 bg-amber-900/10">
-                <label class="flex items-center text-[10px] uppercase tracking-widest text-amber-500 font-bold mb-1">
-                    Inflation
-                    <div class="relative group ml-1.5">
-                        <span class="text-amber-500/70 cursor-help text-[9px] w-3.5 h-3.5 inline-flex items-center justify-center rounded-full border border-amber-500/50 hover:bg-amber-500/20">i</span>
-                        <div class="absolute bottom-full right-0 md:left-1/2 md:-translate-x-1/2 mb-2 w-48 p-2.5 bg-slate-800 text-slate-300 text-[10px] leading-relaxed rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-xl border border-slate-700 normal-case tracking-normal">
-                            The rate at which life gets more expensive. The RBA targets 2-3%. We use this to adjust your future wealth into 'today's dollars'.
-                        </div>
-                    </div>
-                </label>
-                <div class="flex items-center text-amber-400 text-xl font-bold font-mono">
-                    %<input type="number" id="in-inflation" value="3" oninput="updateSystem()" class="bg-transparent w-full outline-none placeholder-amber-900">
-                </div>
-            </div>
-
-        </div>
-
-        <div class="flex border-b border-slate-800 mb-8 overflow-x-auto hide-scrollbar">
-            <button onclick="switchTab('action')" id="tab-btn-action" class="tab-active px-6 py-3 font-bold uppercase text-sm tracking-wider transition-colors whitespace-nowrap">
-                🎯 Action Plan
-            </button>
-            <button onclick="switchTab('egg')" id="tab-btn-egg" class="tab-inactive px-6 py-3 font-bold uppercase text-sm tracking-wider transition-colors whitespace-nowrap">
-                🥚 The Golden Egg
-            </button>
-            <button onclick="switchTab('growth')" id="tab-btn-growth" class="tab-inactive px-6 py-3 font-bold uppercase text-sm tracking-wider transition-colors whitespace-nowrap">
-                📈 Growth Engine
-            </button>
-            <button onclick="switchTab('drawdown')" id="tab-btn-drawdown" class="tab-inactive px-6 py-3 font-bold uppercase text-sm tracking-wider transition-colors whitespace-nowrap">
-                📉 The Reality Check
-            </button>
-        </div>
-
-        <div id="view-action" class="fade-in">
-            <div class="max-w-4xl mx-auto space-y-6">
-                
-                <div class="text-center mb-8">
-                    <h2 class="text-4xl text-white font-bold brand-font mb-2">The Diagnosis</h2>
-                    <p class="text-slate-400">Your numbers have been analyzed. Here is your primary directive.</p>
-                </div>
-
-                <div id="diagnosis-container" class="card-bg p-8 rounded-3xl border-2 relative overflow-hidden shadow-2xl">
-                    <div id="diagnosis-bg-glow" class="absolute -top-32 -right-32 w-96 h-96 rounded-full blur-3xl opacity-20 pointer-events-none"></div>
-                    
-                    <div class="relative z-10">
-                        <div class="flex items-center gap-4 mb-4">
-                            <div id="diagnosis-icon" class="text-5xl">🔍</div>
-                            <div>
-                                <h3 id="diagnosis-title" class="text-3xl text-white font-bold brand-font tracking-wide uppercase">Analyzing...</h3>
-                                <div id="diagnosis-subtitle" class="text-xs font-bold uppercase tracking-widest mt-1">Status Report</div>
-                            </div>
-                        </div>
-                        
-                        <div class="h-px w-full bg-slate-700/50 my-6"></div>
-                        
-                        <p id="diagnosis-body" class="text-lg text-slate-300 leading-relaxed">
-                            Awaiting data input...
-                        </p>
-
-                        <div id="diagnosis-metrics" class="mt-8 grid grid-cols-2 gap-4 hidden">
-                            </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
-        <div id="view-egg" class="hidden fade-in space-y-8">
-            <div class="grid md:grid-cols-3 gap-8 items-start">
-                <div class="col-span-1 flex flex-col items-center justify-center card-bg rounded-2xl p-8 relative shadow-lg">
-                    <div class="w-48 h-60 rounded-[50%/60%_60%_40%_40%] border-4 border-slate-700 relative overflow-hidden bg-slate-900 shadow-inner">
-                        <div id="egg-fill" class="absolute bottom-0 w-full bg-gradient-to-t from-amber-600 to-amber-400 egg-fill flex items-center justify-center" style="height: 0%">
-                            <div class="w-full h-1 bg-white/20 absolute top-0"></div>
-                        </div>
-                        <div class="absolute inset-0 flex items-center justify-center z-10 mix-blend-difference">
-                            <span id="egg-percent" class="text-4xl font-black text-white brand-font">0%</span>
-                        </div>
-                    </div>
-                    <p class="text-xs text-slate-500 mt-4 uppercase tracking-widest font-bold">Progress to Target</p>
-                </div>
-
-                <div class="col-span-2 card-bg p-6 rounded-2xl h-[360px] flex flex-col shadow-lg">
-                    <div class="flex justify-between items-start mb-4">
-                        <div>
-                            <h2 class="text-2xl text-white font-bold brand-font">Freedom Trajectory</h2>
-                            <p class="text-slate-400 text-xs mt-1">Green Line = Your Wealth. Gold Line = 25x Annual Spend (Moving Target).</p>
-                        </div>
-                        <div class="text-right hidden md:block">
-                            <span class="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Target at Age <span id="txt-retire-age-chart">55</span></span>
-                            <div id="val-chart-target" class="text-xl font-mono font-bold text-amber-500">$0</div>
-                        </div>
-                    </div>
-                    <div class="flex-grow relative">
-                        <canvas id="freedomChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <div class="grid md:grid-cols-2 gap-8">
-                <div class="space-y-4">
-                    <div class="card-bg p-6 rounded-2xl border-l-4 border-amber-500 shadow-lg">
-                        <div class="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-1">Adjusted Freedom Number</div>
-                        <div class="flex items-baseline gap-2">
-                            <span id="val-target" class="text-4xl font-black text-white brand-font tracking-tight gold-glow">$0</span>
-                        </div>
-                        <div class="text-xs text-slate-500 mt-2">
-                            To spend <b>$<span id="txt-spend">4,000</span></b> (today's value) when you retire, you will need this amount to account for <span id="txt-years-to-retire">0</span> years of inflation.
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="card-bg p-4 rounded-xl shadow-lg">
-                            <span class="block text-[10px] uppercase text-slate-500 font-bold">Current</span>
-                            <span id="val-current" class="text-xl text-white font-mono font-bold">$0</span>
-                        </div>
-                        <div class="card-bg p-4 rounded-xl shadow-lg">
-                            <span class="block text-[10px] uppercase text-slate-500 font-bold">The Gap</span>
-                            <span id="val-gap" class="text-xl text-red-400 font-mono font-bold">$0</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card-bg p-6 rounded-2xl h-64 overflow-y-auto logic-scroll shadow-lg border border-slate-700/50">
-                    <h3 class="text-white font-bold brand-font text-lg mb-3 flex items-center gap-2">
-                        <span class="text-lg">🦉</span> The 4% Rule: No Fluff
-                    </h3>
-                    <div class="space-y-4 text-xs text-slate-400 leading-relaxed">
-                        <div>
-                            <strong class="text-slate-200 block mb-1">1. The Core Idea</strong>
-                            It's a heuristic, not a law. You invest a lump sum (The Egg). You withdraw 4% in Year 1. You increase that amount by inflation every year. Historically, this lasts 30 years.
-                        </div>
-                        <div>
-                            <strong class="text-slate-200 block mb-1">2. The "Golden Egg"</strong>
-                            The egg is the capital. You eat the growth, not the goose. If you kill the goose (withdraw too much early), the math fails.
-                        </div>
-                        <div>
-                            <strong class="text-slate-200 block mb-1">3. The Assumptions</strong>
-                            <ul class="list-disc pl-4 mt-1 space-y-1">
-                                <li><strong>Asset Allocation:</strong> Typically 50-75% stocks, the rest bonds. No cash under the mattress.</li>
-                                <li><strong>Horizon:</strong> Designed for 30 years. If you are FIRE (40+ years), 4% is risky. Many use 3.5%.</li>
-                            </ul>
-                        </div>
-                        <div>
-                            <strong class="text-slate-200 block mb-1">4. The Takeaway</strong>
-                            Annual Spend x 25 = Required Capital. <br>
-                            It is a starting assumption, not a promise. Flexibility is the only guarantee.
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="view-growth" class="hidden fade-in space-y-6">
-            <div class="flex justify-between items-end">
-                <div>
-                    <h2 class="text-2xl text-white font-bold brand-font">Compound Growth vs Inflation</h2>
-                    <p class="text-slate-400 text-sm">Blue line must beat the dotted line (Inflation) to build real wealth.</p>
-                </div>
-                <div class="text-right">
-                    <div class="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Projected Nominal Total</div>
-                    <div id="val-projected" class="text-3xl font-black text-emerald-400 brand-font">$0</div>
-                </div>
-            </div>
-            <div class="card-bg p-4 rounded-xl h-[400px] shadow-lg">
-                <canvas id="growthChart"></canvas>
-            </div>
-        </div>
-
-        <div id="view-drawdown" class="hidden fade-in space-y-6">
-             <div class="flex justify-between items-end">
-                <div>
-                    <h2 class="text-2xl text-white font-bold brand-font">Legacy Simulator</h2>
-                    <p class="text-slate-400 text-sm">Simulating spending increasing by <span id="txt-inflation-rate">3</span>% every year.</p>
-                </div>
-                 <div class="text-right">
-                    <div class="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Safety Margin</div>
-                    <div id="val-safety" class="text-xl font-bold text-white brand-font">--</div>
-                </div>
-            </div>
-             <div class="card-bg p-4 rounded-xl h-[300px] shadow-lg">
-                <canvas id="drawdownChart"></canvas>
-            </div>
-            <div id="alert-zone" class="hidden bg-red-900/20 border border-red-500/50 p-4 rounded-lg flex items-start gap-3 shadow-lg">
-                <span class="text-2xl">⚠️</span>
-                <div>
-                    <h4 class="text-red-400 font-bold uppercase text-sm tracking-wide">Ran Out of Money</h4>
-                    <p class="text-red-200/70 text-xs mt-1">Inflation ate your savings at Age <span id="val-broke-age" class="font-bold text-white">0</span>.</p>
-                </div>
-            </div>
-        </div>
-
+<body>
+<section class="band"><div class="wrap">
+  <h1>Money mentor</h1>
+  <p class="sub">Put in your monthly numbers and it checks you against the rules people use to get stable for the long term, then tells you the one thing to do next.</p>
+  <div class="top">
+    <form id="f" autocomplete="off">
+      <div class="grp">You</div>
+      <label>Your age<div class="in"><input id="age" type="number" inputmode="numeric" min="16" max="80"><span class="u">yrs</span></div></label>
+      <label>Age you want to be free by<div class="in"><input id="target" type="number" inputmode="numeric" min="30" max="85"><span class="u">yrs</span></div></label>
+      <div class="grp">Each month</div>
+      <label>Take-home pay<div class="in"><span>$</span><input id="pay" type="number" inputmode="decimal" min="0"></div></label>
+      <label>Rent or mortgage<div class="in"><span>$</span><input id="house" type="number" inputmode="decimal" min="0"></div></label>
+      <label>Other needs (bills, food, transport)<div class="in"><span>$</span><input id="needs" type="number" inputmode="decimal" min="0"></div></label>
+      <label>Wants (eating out, fun, subs)<div class="in"><span>$</span><input id="wants" type="number" inputmode="decimal" min="0"></div></label>
+      <label>Employer super paid in<div class="in"><span>$</span><input id="supmo" type="number" inputmode="decimal" min="0"></div></label>
+      <label>Expected growth after inflation<div class="in"><input id="ret" type="number" inputmode="decimal" step="0.5" min="0" max="15"><span class="u">% a year</span></div></label>
+      <div class="grp">What you have now</div>
+      <label>Emergency savings<div class="in"><span>$</span><input id="ef" type="number" inputmode="decimal" min="0"></div></label>
+      <label>Investments outside super<div class="in"><span>$</span><input id="inv" type="number" inputmode="decimal" min="0"></div></label>
+      <label>Super balance<div class="in"><span>$</span><input id="sup" type="number" inputmode="decimal" min="0"></div></label>
+      <label>Debt (cards, loans, BNPL)<div class="in"><span>$</span><input id="debt" type="number" inputmode="decimal" min="0"></div></label>
+      <label>Interest on that debt<div class="in"><input id="drate" type="number" inputmode="decimal" step="0.5" min="0" max="40"><span class="u">% a year</span></div></label>
+      <div class="left"><span>Left over to save each month</span><b id="leftover">$0</b></div>
+      <div class="left" style="border:0;padding-top:0"><span class="foot" id="samplenote">These are sample numbers. Swap in your own; the page remembers them on this device.</span><span class="btns"><button type="button" id="jsonBtn">JSON</button><button type="button" id="reset">Reset to sample</button></span></div>
+    </form>
+    <div class="verdict">
+      <div class="next" aria-live="polite"><small>Your next move</small><p id="move"></p><p class="why" id="why"></p></div>
+      <div class="earn" aria-live="polite">
+        <small id="eHead">Income you need for your goal</small>
+        <div class="erow"><div><b id="eMonth"></b><span>take-home a month</span></div><div><b id="eYear"></b><span>a year before tax (approx.)</span></div></div>
+        <p id="eNote"></p>
+      </div>
+      <div class="stats">
+        <div class="stat"><b id="sScore"></b><span>rules on track</span></div>
+        <div class="stat"><b id="sRate"></b><span>of pay saved</span></div>
+        <div class="stat"><b id="sFree"></b><span>earliest age you can stop and last to 100</span></div>
+      </div>
+      <div>
+        <div class="fig"><svg id="chart" role="img" aria-label="Projected wealth by age"></svg></div>
+        <div class="legend"><span><i style="background:var(--sky)"></i>Outside super + super</span><span><i style="background:#5b8db8"></i>Super only</span><span><i style="background:var(--pink)"></i>Pot needed at your goal age to last to 100</span></div>
+      </div>
     </div>
+  </div>
+</div></section>
 
-    <script>
-        let chartInstance = null;
-        let drawdownChartInstance = null;
-        let freedomChartInstance = null;
+<section class="band" style="padding-top:0"><div class="wrap">
+  <h2>The rulebook</h2>
+  <p class="sub" style="margin-bottom:0">Each rule with where you stand and what a mentor would tell you. Ordered the way most people tackle them.</p>
+  <div class="rules" id="rules"></div>
+  <p class="foot" style="margin-top:24px">Rules of thumb for thinking about your money, not personal financial advice. All figures are in today's dollars, using the growth rate you set after inflation. Projections assume your leftover pays off debt first, then gets invested; from your goal age you stop work and live on your current spending until age 100, drawing outside-super money first. Super is generally locked until your preservation age (60 for most people now), so early freedom needs money outside super too. The before-tax income is a rough estimate using 2026–27 Australian resident tax rates, the 2% Medicare levy and the low income tax offset; it ignores HELP debt and other offsets.</p>
+</div></section>
 
-        window.onload = function() { updateSystem(); };
+<dialog id="jd" aria-labelledby="jdTitle">
+  <div class="jhead"><h2 id="jdTitle">Save or load your numbers</h2><button type="button" id="jClose" aria-label="Close">✕</button></div>
+  <p class="jsub">To save: copy the text below and keep it somewhere safe. To load: drop a .json file here, choose one, or paste the text, then press Load.</p>
+  <div id="drop" class="drop" tabindex="0">
+    <textarea id="jText" spellcheck="false" aria-label="JSON for your inputs"></textarea>
+    <div class="dropHint">Drop a .json file anywhere in this box</div>
+  </div>
+  <p id="jMsg" class="jmsg" role="status"></p>
+  <div class="jbtns">
+    <button type="button" id="jCopy">Copy JSON</button>
+    <label class="fileBtn">Choose file<input type="file" id="jFile" accept=".json,application/json,text/plain"></label>
+    <button type="button" id="jLoad" class="primary">Load into form</button>
+  </div>
+</dialog>
+<script>
+{
+const SAMPLE={age:30,target:55,pay:5200,house:1800,needs:1100,wants:900,supmo:650,ret:5,ef:4000,inv:8000,sup:45000,debt:2500,drate:20};
+const KEYS=Object.keys(SAMPLE);
+const $=id=>document.getElementById(id);
+const fmt=n=>(n<0?'-':'')+'$'+Math.round(Math.abs(n)).toLocaleString('en-AU');
+const short=n=>{const a=Math.abs(n);return a>=1e6?'$'+(n/1e6).toFixed(a>=1e7?0:1)+'m':a>=1e3?'$'+Math.round(n/1e3)+'k':fmt(n)};
+const pct=x=>Math.round(x*100)+'%';
+let saved=null;
+try{saved=JSON.parse(localStorage.getItem('moneyMentor')||'null')}catch(e){}
+function fill(o){KEYS.forEach(k=>{$(k).value=o[k]})}
+fill(saved||SAMPLE);
+function read(){const v={};KEYS.forEach(k=>{const n=parseFloat($(k).value);v[k]=isFinite(n)?n:0});return v}
 
-        // --- CORE FISCAL LOGIC (AUSTRALIA 2025/2026) ---
+const LIFE=100,SUPER_AGE=60;
+// Work and invest until retireAt, then live off the pot until 100. Super can only be drawn from age 60.
+function run(v,extra,retireAt){
+  const r=(1+v.ret/100)**(1/12)-1,dr=v.drate/100/12,save=v.pay-v.house-v.needs-v.wants+extra,spendMo=v.house+v.needs+v.wants;
+  let inv=v.inv,sup=v.sup,debt=v.debt,debtMonths=v.debt>0?null:0,runsOut=null,atRetire=null;const pts=[];
+  const months=Math.max((LIFE-v.age)*12,0);
+  for(let m=0;m<=months;m++){
+    const a=v.age+m/12;
+    if(m%12===0)pts.push({age:a,inv,sup});
+    if(m===months)break;
+    if(a<retireAt){
+      let pay=Math.max(save,0);
+      if(debt>0){debt*=1+dr;const p=Math.min(debt,pay);debt-=p;pay-=p;if(debt<=0.5&&debtMonths===null){debt=0;debtMonths=m+1}}
+      inv=inv*(1+r)+pay;sup=sup*(1+r)+v.supmo;
+    }else{
+      if(!atRetire)atRetire={inv,sup};
+      inv*=1+r;sup*=1+r;let need=spendMo;
+      const fromInv=Math.min(inv,need);inv-=fromInv;need-=fromInv;
+      if(need>0&&a>=SUPER_AGE){const fromSup=Math.min(sup,need);sup-=fromSup;need-=fromSup}
+      if(need>0.5&&runsOut===null)runsOut=a;
+    }
+  }
+  return{pts,debtMonths,runsOut,atRetire:atRetire||{inv,sup}};
+}
+const lasts=(v,extra,A)=>run(v,extra,A).runsOut===null;
+function sim(v,extra){
+  const spendMo=v.house+v.needs+v.wants,r=(1+v.ret/100)**(1/12)-1,N=Math.max((LIFE-v.target)*12,0);
+  // Pot needed at your goal age to pay your spending every month until 100 (ignores the super lock)
+  const fi=r>0?spendMo*(1-(1+r)**-N)/r*(1+r):spendMo*N;
+  let fiAge=null;for(let A=v.age;A<LIFE;A++){if(lasts(v,extra,A)){fiAge=A;break}}
+  const plan=run(v,extra,v.target);
+  return{pts:plan.pts,fi,fiAge,debtMonths:run(v,extra,LIFE).debtMonths,runsOut:plan.runsOut,atRetire:plan.atRetire,years:LIFE-v.target};
+}
 
-        function calculateAussieTax(grossIncome) {
-            let tax = 0;
-            // Stage 3 Tax Brackets
-            if (grossIncome > 190000) {
-                tax = 51638 + (grossIncome - 190000) * 0.45;
-            } else if (grossIncome > 135000) {
-                tax = 31288 + (grossIncome - 135000) * 0.37;
-            } else if (grossIncome > 45000) {
-                tax = 4288 + (grossIncome - 45000) * 0.30;
-            } else if (grossIncome > 18200) {
-                tax = (grossIncome - 18200) * 0.16;
-            }
-            
-            // Medicare Levy (Simplified 2%)
-            let medicare = grossIncome > 32500 ? grossIncome * 0.02 : 0; 
-            
-            return tax + medicare;
-        }
+function neededExtra(v){
+  const ok=x=>lasts(v,x,v.target);
+  if(ok(0))return 0;if(!ok(30000))return null;
+  let lo=0,hi=30000;for(let i=0;i<30;i++){const mid=(lo+hi)/2;ok(mid)?hi=mid:lo=mid}
+  return Math.ceil(hi/10)*10;
+}
 
-        function calculateRealReturn(nominal, inflation) {
-            // Converts Nominal to Today's Dollars
-            return ((1 + nominal) / (1 + inflation)) - 1;
-        }
+// Rough Australian resident tax for 2026–27: brackets, 2% Medicare levy, low income tax offset. No HELP or other offsets.
+function netOf(g){
+  let t=0;const B=[[18200,0],[45000,.15],[135000,.30],[190000,.37],[Infinity,.45]];let prev=0;
+  for(const [cap,r] of B){if(g>prev)t+=(Math.min(g,cap)-prev)*r;prev=cap}
+  let lito=g<=37500?700:g<=45000?700-(g-37500)*.05:g<=66667?325-(g-45000)*.015:0;
+  t=Math.max(t-Math.max(lito,0),0)+(g>27000?g*.02:0);
+  return g-t;
+}
+function grossFor(net){let lo=0,hi=net*2+50000;for(let i=0;i<50;i++){const m=(lo+hi)/2;netOf(m)<net?lo=m:hi=m}return Math.round(hi/100)*100}
 
-        function getInputs() {
-            return {
-                age: parseInt(document.getElementById('in-age').value) || 0,
-                retire: parseInt(document.getElementById('in-retire').value) || 0,
-                death: parseInt(document.getElementById('in-death').value) || 0,
-                income: parseFloat(document.getElementById('in-income').value) || 0,
-                worth: parseFloat(document.getElementById('in-worth').value) || 0, // Now represents Liquid
-                superBal: parseFloat(document.getElementById('in-super').value) || 0, // Now represents Locked Super
-                spend: parseFloat(document.getElementById('in-spend').value) || 0,
-                roi: parseFloat(document.getElementById('in-return').value) / 100 || 0,
-                inf: parseFloat(document.getElementById('in-inflation').value) / 100 || 0,
-            };
-        }
+let last=null;
+function draw(){
+  const s=$('chart');if(!last)return;const {pts,fi,fiAge}=last;
+  const W=s.clientWidth,H=s.clientHeight;if(!W||!H)return;
+  const narrow=W<520,pl=narrow?44:58,pr=14,pt=16,pb=30;
+  const maxY=Math.max(fi*1.1,...pts.map(p=>p.inv+p.sup))||1;
+  const a0=pts[0].age,a1=pts[pts.length-1].age;
+  const x=a=>pl+(a-a0)/(a1-a0||1)*(W-pl-pr),y=n=>pt+(1-n/maxY)*(H-pt-pb);
+  const line=f=>pts.map((p,i)=>(i?'L':'M')+x(p.age).toFixed(1)+','+y(f(p)).toFixed(1)).join('');
+  const area=line(p=>p.inv+p.sup)+`L${x(a1)},${y(0)}L${x(a0)},${y(0)}Z`;
+  let g='';
+  const ticks=narrow?3:5;
+  for(let i=0;i<=ticks;i++){const v=maxY*i/ticks;g+=`<line x1="${pl}" x2="${W-pr}" y1="${y(v)}" y2="${y(v)}" stroke="rgba(143,211,255,.12)"/><text x="${pl-8}" y="${y(v)+4}" text-anchor="end" font-size="12" fill="#b9cde0">${short(v)}</text>`}
+  const step=(a1-a0)>30?10:5;
+  for(let a=Math.ceil(a0/step)*step;a<=a1;a+=step)g+=`<text x="${x(a)}" y="${H-8}" text-anchor="middle" font-size="12" fill="#b9cde0">${a}</text>`;
+  g+=`<path d="${area}" fill="rgba(143,211,255,.14)"/><path d="${line(p=>p.sup)}" fill="none" stroke="#5b8db8" stroke-width="2"/><path d="${line(p=>p.inv+p.sup)}" fill="none" stroke="#8fd3ff" stroke-width="3"/>`;
+  const tx=x(last.target),fy=y(fi);
+  g+=`<line x1="${pl}" x2="${tx}" y1="${fy}" y2="${fy}" stroke="#ff5c8a" stroke-width="2" stroke-dasharray="6 5"/><circle cx="${tx}" cy="${fy}" r="7" fill="#ff5c8a" stroke="#0a2540" stroke-width="3"/>`;
+  g+=`<text x="${pl+8}" y="${fy-8}" font-size="13" font-weight="600" fill="#ff5c8a">Need ${short(fi)}</text>`;
+  if(last.runsOut!==null){const rx=x(last.runsOut),ry=y(0);g+=`<circle cx="${rx}" cy="${ry}" r="7" fill="#ff5c8a" stroke="#0a2540" stroke-width="3"/><text x="${Math.min(Math.max(rx,pl+50),W-pr-50)}" y="${ry-14}" font-size="13" font-weight="600" fill="#fff" text-anchor="middle">runs out at ${Math.floor(last.runsOut)}</text>`}
+  else g+=`<text x="${W-pr-4}" y="${y(pts[pts.length-1].inv+pts[pts.length-1].sup)-10}" font-size="13" font-weight="600" fill="#fff" text-anchor="end">lasts to ${LIFE}</text>`;if(last.target<=a1)g+=`<line x1="${tx}" x2="${tx}" y1="${pt}" y2="${H-pb}" stroke="rgba(255,255,255,.35)" stroke-dasharray="2 4"/><text x="${tx-6}" y="${pt+12}" text-anchor="end" font-size="12" fill="#fff">goal ${last.target}</text>`;
+  s.innerHTML=g;
+}
+const ro=new ResizeObserver(draw);ro.observe($('chart'));
 
-        function formatMoney(num) {
-            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(num);
-        }
+function card(c){
+  const extra=c.bar||'';
+  return `<article class="card"><header><h3>${c.t}</h3><span class="pill ${c.s}">${{good:'On track',ok:'Getting there',work:'Work on this',info:'Know this'}[c.s]}</span></header><p class="what">${c.what}</p><div class="big">${c.big}</div>${extra}<p class="tip">${c.tip}</p></article>`;
+}
 
-        function updateSystem() {
-            const data = getInputs();
-            const yearsToGrow = Math.max(0, data.retire - data.age);
-            
-            // --- NEW: Calculate True Derived Savings based on Income & Tax ---
-            const annualTax = calculateAussieTax(data.income);
-            const monthlyNetIncome = (data.income - annualTax) / 12;
-            const derivedMonthlySave = monthlyNetIncome - data.spend;
-            
-            // We append this derived value back onto the data object so the rest of the legacy logic doesn't crash 
-            // before we rewrite the full Bridge/Super loop in Phase 2.
-            data.save = derivedMonthlySave > 0 ? derivedMonthlySave : 0;
-            
-            // We also combine Liquid Worth and Super Balance for the old loop for now to prevent breaking charts
-            let totalCurrentWorth = data.worth + data.superBal;
+function update(){
+  const v=read();
+  try{localStorage.setItem('moneyMentor',JSON.stringify(v))}catch(e){}
+  const isSample=KEYS.every(k=>v[k]===SAMPLE[k]);$('samplenote').textContent=isSample?'These are sample numbers. Swap in your own; the page remembers them on this device.':'Saved on this device as you type.';
+  const save=v.pay-v.house-v.needs-v.wants,pay=v.pay||1,core=v.house+v.needs,spend=core+v.wants;
+  $('leftover').textContent=fmt(save);$('leftover').style.color=save<0?'var(--pink)':'';
+  const rate=save/pay,s=sim(v,0);last={...s,target:v.target};
+  const efM=core>0?v.ef/core:0,needR=core/pay,wantR=v.wants/pay,houseR=v.house/pay;
+  const gotTo=s.pts.find(p=>p.age>=v.target)||s.pts[s.pts.length-1];
+  const extraNeed=neededExtra(v);
+  const rules=[];
 
-            // Core Math
-            const inflationMultiplier = Math.pow(1 + data.inf, yearsToGrow);
-            const futureMonthlySpend = data.spend * inflationMultiplier;
-            const futureAnnualSpend = futureMonthlySpend * 12;
-            const freedomNumber = futureAnnualSpend * 25; 
+  rules.push({t:'Golden egg: pay yourself first',what:'From <em>The Richest Man in Babylon</em>: keep at least one tenth of all you earn, and move it out the day you are paid, before you spend.',
+    big:pct(Math.max(rate,0))+' kept',s:rate>=0.1?'good':rate>0?'ok':'work',
+    bar:`<div class="mark"><div style="width:${Math.min(Math.max(rate,0)/0.2,1)*100}%"></div></div>`,
+    tip:rate>=0.1?`You keep ${fmt(save)} a month. Set up an automatic transfer on payday so it never sits in your spending account.`:rate>0?`You're keeping ${fmt(save)}. Getting to 10% means ${fmt(pay*0.1-save)} more a month.`:`Nothing is left to keep yet. Start with 1% on autopilot and raise it each pay rise.`});
 
-            let simWorth = totalCurrentWorth;
-            for(let i=0; i<yearsToGrow; i++) {
-                const currentMonthlySave = data.save * Math.pow(1 + data.inf, i);
-                simWorth = (simWorth + (currentMonthlySave * 12)) * (1 + data.roi);
-            }
+  const r5=needR<=0.5&&wantR<=0.3&&rate>=0.2;
+  rules.push({t:'50/30/20 budget',what:'About 50% of take-home on needs, 30% on wants, 20% to savings and debt.',
+    big:`${pct(needR)} / ${pct(wantR)} / ${pct(Math.max(rate,0))}`,s:r5?'good':rate>=0.1?'ok':'work',
+    bar:`<div class="bar"><div style="width:${Math.min(needR,1)*100}%;background:#5b8db8"></div><div style="width:${Math.min(wantR,1)*100}%;background:#ffd27a"></div><div style="width:${Math.min(Math.max(rate,0),1)*100}%;background:#8fd3ff"></div></div>`,
+    tip:r5?'Balanced. If you want to speed up, push savings past 20% before letting wants grow.':needR>0.5?`Needs are ${pct(needR)} of pay. Housing is usually the lever; ${fmt(core-pay*0.5)} a month over the 50% mark.`:wantR>0.3?`Wants are ${pct(wantR)}. Trimming ${fmt(v.wants-pay*0.3)} a month brings them to 30%.`:`To hit 20% saved you need ${fmt(pay*0.2-save)} more a month.`});
 
-            const pct = Math.min(100, Math.max(0, (simWorth / freedomNumber) * 100));
-            const gap = freedomNumber - simWorth;
+  rules.push({t:'30% housing rule',what:'Keep rent or mortgage under 30% of income. Banks measure this on pre-tax pay; this checks the stricter take-home version.',
+    big:pct(houseR)+' of pay',s:houseR<=0.3?'good':houseR<=0.4?'ok':'work',
+    bar:`<div class="mark"><div style="width:${Math.min(houseR/0.5,1)*100}%;background:${houseR<=0.3?'var(--sky)':'var(--pink)'}"></div></div>`,
+    tip:houseR<=0.3?'Comfortable. This headroom is what makes every other rule easier.':`30% would be ${fmt(pay*0.3)} a month. A housemate, cheaper suburb or renegotiated rent are the big wins here.`});
 
-            // Update Diagnosic Engine (Action Plan)
-            runDiagnosticEngine(data, simWorth, freedomNumber, yearsToGrow, gap);
+  rules.push({t:'Emergency fund',what:'Hold 3 to 6 months of essential costs in cash, in a separate high-interest account, for job loss, car or health shocks.',
+    big:efM.toFixed(1)+' months',s:efM>=3?'good':efM>=1?'ok':'work',
+    bar:`<div class="mark"><div style="width:${Math.min(efM/6,1)*100}%"></div></div>`,
+    tip:efM>=6?'Fully stocked. Anything above 6 months is better put to work investing.':efM>=3?`Solid. Six months would be ${fmt(core*6)}.`:`Three months for you is ${fmt(core*3)}, so ${fmt(core*3-v.ef)} to go. Get one month (${fmt(core)}) first.`});
 
-            // Update Egg Tab Text
-            document.getElementById('txt-spend').innerText = data.spend.toLocaleString();
-            document.getElementById('txt-years-to-retire').innerText = yearsToGrow;
-            document.getElementById('txt-retire-age-chart').innerText = data.retire;
-            document.getElementById('val-target').innerText = formatMoney(freedomNumber);
-            document.getElementById('val-chart-target').innerText = formatMoney(freedomNumber);
-            document.getElementById('val-current').innerText = formatMoney(simWorth);
-            document.getElementById('val-gap').innerText = gap > 0 ? formatMoney(gap) : "$0";
-            document.getElementById('egg-fill').style.height = `${pct}%`;
-            document.getElementById('egg-percent').innerText = `${Math.round(pct)}%`;
+  rules.push({t:'Kill high-interest debt',what:'Pay debts from the highest interest rate down (avalanche). Clearing a 20% card is a guaranteed 20% return.',
+    big:v.debt>0?fmt(v.debt):'Debt free',s:v.debt<=0?'good':v.drate>=10?'work':'ok',
+    tip:v.debt<=0?'No consumer debt. Keep cards paid in full each month and avoid buy-now-pay-later creep.':s.debtMonths!==null?`Putting your whole leftover at it clears it in about ${s.debtMonths} month${s.debtMonths===1?'':'s'}. Cut up the card once it's done.`:`At your current numbers it won't clear. Free up cash in the budget first, then attack the highest-rate debt.`});
 
-            // Charts Math
-            const freedomLabels = [];
-            const wealthSeries = [];
-            const targetSeries = [];
-            let chartWorth = totalCurrentWorth;
-            let crossoverAge = null;
-            const chartYears = (data.retire - data.age) + 5; 
+  rules.push({t:'Rule of 72',what:'Divide 72 by your yearly growth rate to see how many years money takes to double.',
+    big:v.ret>0?(72/v.ret).toFixed(1)+' years':'Set a growth rate',s:'info',
+    tip:v.ret>0?`At ${v.ret}% your ${short(v.inv+v.sup)} doubles to ${short((v.inv+v.sup)*2)} by about age ${Math.round(v.age+72/v.ret)}, without adding a cent. Starting early is the whole trick.`:'Enter an expected growth rate to see doubling time.'});
 
-            for(let i=0; i <= chartYears; i++) {
-                const currentAge = data.age + i;
-                freedomLabels.push(currentAge);
-                wealthSeries.push(chartWorth);
-                
-                const yearSpend = (data.spend * 12) * Math.pow(1 + data.inf, i);
-                const yearTarget = yearSpend * 25;
-                targetSeries.push(yearTarget);
+  const mult=spend>0?s.fi/(spend*12):0;
+  rules.push({t:`Make it last to ${LIFE}`,what:`The classic 4% rule (save 25× a year of spending) is built for about 30 years. Stopping at ${v.target} and living to ${LIFE} is ${s.years} years, so this works out the pot that pays your spending every month until then.`,
+    big:short(s.fi),s:s.runsOut===null?'good':s.fiAge!==null?'ok':'work',
+    bar:`<div class="mark"><div style="width:${s.fi?Math.min((v.inv+v.sup)/s.fi,1)*100:0}%"></div></div>`,
+    tip:`That's ${mult.toFixed(1)}× your yearly spending, and you're ${s.fi?pct((v.inv+v.sup)/s.fi):'0%'} of the way. `+(s.runsOut===null?`Stopping at ${v.target}, your money lasts to ${LIFE}.`:`Stopping at ${v.target}, it runs out at about ${Math.floor(s.runsOut)}.`)+` At ${v.target} you'd have ${short(s.atRetire.inv)} outside super and ${short(s.atRetire.sup)} in super`+(v.target<SUPER_AGE?`; only the outside-super part can carry you to ${SUPER_AGE}.`:'.')});
 
-                if (chartWorth >= yearTarget && crossoverAge === null) crossoverAge = currentAge;
+  $('rules').innerHTML=rules.map(card).join('');
+  const scored=rules.filter(r=>r.s!=='info'),good=scored.filter(r=>r.s==='good').length;
+  $('sScore').textContent=`${good} of ${scored.length}`;
+  $('sRate').textContent=pct(Math.max(rate,0));
+  $('sFree').textContent=s.fiAge!==null?Math.ceil(s.fiAge):'—';
 
-                if (currentAge < data.retire) {
-                    const yearSave = (data.save * 12) * Math.pow(1 + data.inf, i);
-                    chartWorth = (chartWorth + yearSave) * (1 + data.roi);
-                } else {
-                    chartWorth = (chartWorth - yearSpend) * (1 + data.roi);
-                }
-            }
+  let m,w;
+  if(save<0){m=`Stop the leak: you're spending ${fmt(-save)} a month more than you earn.`;w='Nothing else works until money is left over. Start with wants, then subscriptions, then the big bills.'}
+  else if(efM<1){m=`Build a starter emergency fund of ${fmt(core)}.`;w=`That's one month of essentials. At ${fmt(save)} a month you'd have it in about ${save>0?Math.ceil((core-v.ef)/save):'∞'} months.`}
+  else if(v.debt>0&&v.drate>=7){m=`Wipe out your ${fmt(v.debt)} debt.`;w=s.debtMonths!==null?`Every spare dollar at it clears it in about ${s.debtMonths} months and saves ${v.drate}% a year in interest.`:'Free up money in the budget so you can start paying it down.'}
+  else if(efM<3){m=`Grow your emergency fund to 3 months: ${fmt(core*3)}.`;w=`You have ${efM.toFixed(1)} months covered. Park it in a separate high-interest savings account.`}
+  else if(rate<0.2){m=`Lift your saving to 20%: ${fmt(pay*0.2-save)} more a month.`;w='Take it from wants first. Automate it on payday so you never see it.'}
+  else if(extraNeed===null||extraNeed>0){m=extraNeed?`Invest about ${fmt(extraNeed)} more a month to be free by ${v.target}.`:`Freedom by ${v.target} isn't reachable on these numbers.`;w=extraNeed?`Or push your goal back: on your current path it's around age ${s.fiAge!==null?Math.ceil(s.fiAge):'—'}.`:'Try a later goal age, more income, or lower spending.'}
+  else{m='You\'re on track. Keep feeding the golden goose.';w=`Automate your ${fmt(save)} a month into investments, and send half of every future pay rise there too.`}
+  $('move').textContent=m;$('why').textContent=w;
 
-            const crossEl = document.getElementById('val-crossover-age');
-            if(crossoverAge) {
-                crossEl.innerText = crossoverAge;
-                if(crossoverAge <= data.retire) crossEl.className = "text-emerald-500 font-bold font-mono text-base";
-                else crossEl.className = "text-amber-500 font-bold font-mono text-base";
-            } else {
-                crossEl.innerText = "Never";
-                crossEl.className = "text-red-500 font-bold font-mono text-base";
-            }
+  $('eHead').textContent=`Income you need to be free by ${v.target}`;
+  if(extraNeed===null){
+    $('eMonth').textContent='—';$('eYear').textContent='—';
+    $('eNote').textContent=`Even a much bigger pay packet won't get there by ${v.target} on these numbers. Try a later goal age or lower spending.`;
+  }else{
+    const need=v.pay+extraNeed,diff=extraNeed;
+    $('eMonth').textContent=fmt(need);$('eYear').textContent=fmt(grossFor(need*12));
+    $('eNote').textContent=diff>0
+      ?`That's ${fmt(diff)} a month more than now (about ${fmt(grossFor(need*12)-grossFor(v.pay*12))} a year more before tax), keeping your spending where it is and investing every extra dollar.`
+      :`You already earn enough. Keep spending at ${fmt(spend)} a month and invest the rest, and you could stop as early as ${s.fiAge}.`;
+  }
+  draw();
+}
+$('f').addEventListener('input',update);
+$('f').addEventListener('submit',e=>e.preventDefault());
+$('reset').addEventListener('click',()=>{fill(SAMPLE);update()});
 
-            renderFreedomChart(freedomLabels, wealthSeries, targetSeries, data.retire);
-
-            const growthLabels = [];
-            const growthData = [];
-            const infData = [];
-            let gWorth = totalCurrentWorth;
-
-            for(let i = 0; i <= yearsToGrow; i++) {
-                growthLabels.push(data.age + i);
-                growthData.push(gWorth);
-                const yearSave = (data.save * 12) * Math.pow(1 + data.inf, i);
-                gWorth = (gWorth + yearSave) * (1 + data.roi);
-                infData.push((data.spend * 12 * Math.pow(1+data.inf, i)) * 25);
-            }
-            document.getElementById('val-projected').innerText = formatMoney(gWorth);
-            renderGrowthChart(growthLabels, growthData, infData);
-
-            const drawLabels = [];
-            const drawData = [];
-            const yearsToLive = data.death - data.retire;
-            let dWorth = gWorth;
-            let brokeAge = null;
-            let dSpend = futureAnnualSpend;
-
-            for(let i = 0; i <= yearsToLive; i++) {
-                const age = data.retire + i;
-                drawLabels.push(age);
-                drawData.push(Math.max(0, dWorth));
-                if (dWorth <= 0 && brokeAge === null) brokeAge = age;
-                
-                dWorth = (dWorth - dSpend) * (1 + data.roi);
-                dSpend = dSpend * (1 + data.inf);
-            }
-
-            document.getElementById('txt-inflation-rate').innerText = data.inf * 100;
-            renderDrawdownChart(drawLabels, drawData);
-            
-             if (brokeAge) {
-                document.getElementById('val-safety').innerText = "FAILED";
-                document.getElementById('val-safety').className = "text-xl font-bold text-red-500 brand-font";
-                document.getElementById('alert-zone').classList.remove('hidden');
-                document.getElementById('val-broke-age').innerText = brokeAge;
-            } else {
-                document.getElementById('val-safety').innerText = "SECURE";
-                document.getElementById('val-safety').className = "text-xl font-bold text-emerald-500 brand-font";
-                document.getElementById('alert-zone').classList.add('hidden');
-            }
-        }
-
-        // --- DIAGNOSTIC ENGINE LOGIC ---
-        function runDiagnosticEngine(data, simWorth, freedomNumber, yearsToGrow, gap) {
-            const container = document.getElementById('diagnosis-container');
-            const icon = document.getElementById('diagnosis-icon');
-            const title = document.getElementById('diagnosis-title');
-            const subtitle = document.getElementById('diagnosis-subtitle');
-            const body = document.getElementById('diagnosis-body');
-            const glow = document.getElementById('diagnosis-bg-glow');
-            const metrics = document.getElementById('diagnosis-metrics');
-            
-            metrics.innerHTML = ""; // reset
-            metrics.classList.remove('hidden');
-
-            // NEW DIAGNOSTIC: Bleeding Cash
-            if (data.save <= 0) {
-                container.className = "card-bg p-8 rounded-3xl border-2 border-red-500/50 relative overflow-hidden shadow-[0_0_30px_rgba(239,68,68,0.15)]";
-                glow.className = "absolute -top-32 -right-32 w-96 h-96 rounded-full blur-3xl opacity-20 pointer-events-none bg-red-500";
-                icon.innerText = "🛑";
-                title.innerText = "Negative Cash Flow";
-                title.className = "text-3xl text-red-400 font-bold brand-font tracking-wide uppercase";
-                subtitle.innerText = "Status: Critical Warning";
-                subtitle.className = "text-xs font-bold uppercase tracking-widest mt-1 text-red-500/70";
-                
-                body.innerHTML = `Your monthly spending is greater than your after-tax income. You are burning capital just to survive. <br><br><b>Primary Directive:</b> Immediate structural overhaul. You must either drastically reduce your lifestyle footprint or increase your gross income immediately. Investing is impossible right now.`;
-                return;
-            }
-
-            // 1. CLEAR FOR TAKEOFF (On track)
-            if (gap <= 0) {
-                container.className = "card-bg p-8 rounded-3xl border-2 border-emerald-500/50 relative overflow-hidden shadow-[0_0_30px_rgba(16,185,129,0.15)]";
-                glow.className = "absolute -top-32 -right-32 w-96 h-96 rounded-full blur-3xl opacity-20 pointer-events-none bg-emerald-500";
-                icon.innerText = "🚀";
-                title.innerText = "Clear for Takeoff";
-                title.className = "text-3xl text-emerald-400 font-bold brand-font tracking-wide uppercase";
-                subtitle.innerText = "Status: On Track";
-                subtitle.className = "text-xs font-bold uppercase tracking-widest mt-1 text-emerald-500/70";
-                
-                body.innerHTML = `Your current trajectory exceeds your required freedom number. You are projected to hit <b>${formatMoney(simWorth)}</b> by age ${data.retire}. <br><br><b>Primary Directive:</b> Keep doing exactly what you are doing. Your biggest risk right now is lifestyle creep. Do not increase your monthly spending without a massive proportional increase in income.`;
-                return;
-            }
-
-            // 2. THE HORIZON PROBLEM (Saving aggressively, but timeline too short)
-            if (yearsToGrow < 10 && data.save >= (data.spend * 0.5)) {
-                container.className = "card-bg p-8 rounded-3xl border-2 border-blue-500/50 relative overflow-hidden shadow-[0_0_30px_rgba(59,130,246,0.15)]";
-                glow.className = "absolute -top-32 -right-32 w-96 h-96 rounded-full blur-3xl opacity-20 pointer-events-none bg-blue-500";
-                icon.innerText = "⏳";
-                title.innerText = "The Horizon Problem";
-                title.className = "text-3xl text-blue-400 font-bold brand-font tracking-wide uppercase";
-                subtitle.innerText = "Status: Math Check";
-                subtitle.className = "text-xs font-bold uppercase tracking-widest mt-1 text-blue-500/70";
-
-                body.innerHTML = `You are saving aggressively (<b>${formatMoney(data.save)}/mo</b>), but you are trying to force compounding without giving it time. You cannot out-earn a ${yearsToGrow}-year timeline without massive risk.<br><br><b>Primary Directive:</b> Delay your freedom gate. Let compounding do the heavy lifting for you.`;
-                return;
-            }
-
-            // 3. THE BURN RATE (High spend, double-whammy opportunity)
-            if (data.spend > 4000 || data.save < (data.spend * 0.3)) {
-                container.className = "card-bg p-8 rounded-3xl border-2 border-amber-500/50 relative overflow-hidden shadow-[0_0_30px_rgba(251,191,36,0.15)]";
-                glow.className = "absolute -top-32 -right-32 w-96 h-96 rounded-full blur-3xl opacity-20 pointer-events-none bg-amber-500";
-                icon.innerText = "🔥";
-                title.innerText = "The Burn Rate";
-                title.className = "text-3xl text-amber-400 font-bold brand-font tracking-wide uppercase";
-                subtitle.innerText = "Status: Efficiency Leak";
-                subtitle.className = "text-xs font-bold uppercase tracking-widest mt-1 text-amber-500/70";
-
-                const cutAmount = data.spend * 0.10; // 10% cut
-                const newFutureSpend = (data.spend - cutAmount) * Math.pow(1 + data.inf, yearsToGrow);
-                const newTarget = newFutureSpend * 12 * 25;
-                const targetReduction = freedomNumber - newTarget;
-
-                body.innerHTML = `Your target egg is massive because your lifestyle is expensive. You need a "Double Whammy" effect. <br><br><b>Primary Directive:</b> Cut your monthly spend by just 10% (<b>${formatMoney(cutAmount)}</b>) and add it to your savings. Look at the math below—this one small cut dramatically slashes your required goal.`;
-                
-                metrics.innerHTML = `
-                    <div class="bg-slate-900 border border-slate-700 p-4 rounded-xl">
-                        <span class="block text-[10px] uppercase text-slate-500 font-bold">New Monthly Spend</span>
-                        <span class="text-2xl text-white font-mono font-bold">${formatMoney(data.spend - cutAmount)}</span>
-                    </div>
-                    <div class="bg-amber-900/20 border border-amber-500/30 p-4 rounded-xl">
-                        <span class="block text-[10px] uppercase text-amber-500/70 font-bold">Target Drops By</span>
-                        <span class="text-2xl text-amber-400 font-mono font-bold">${formatMoney(targetReduction)}</span>
-                    </div>
-                `;
-                return;
-            }
-
-            // 4. THE SPADE (Lean spend, but low income/savings)
-            if (data.spend <= 4000 && data.save < 2000) {
-                container.className = "card-bg p-8 rounded-3xl border-2 border-purple-500/50 relative overflow-hidden shadow-[0_0_30px_rgba(168,85,247,0.15)]";
-                glow.className = "absolute -top-32 -right-32 w-96 h-96 rounded-full blur-3xl opacity-20 pointer-events-none bg-purple-500";
-                icon.innerText = "⛏️";
-                title.innerText = "The Spade";
-                title.className = "text-3xl text-purple-400 font-bold brand-font tracking-wide uppercase";
-                subtitle.innerText = "Status: Income Ceiling";
-                subtitle.className = "text-xs font-bold uppercase tracking-widest mt-1 text-purple-500/70";
-
-                body.innerHTML = `You can't frugality your way out of this gap. Your spending is already relatively lean (<b>${formatMoney(data.spend)}/mo</b>), but your contribution rate is too low. <br><br><b>Primary Directive:</b> Stop clipping coupons. Your sole focus must be increasing your top-line income (a new job, promotion, or side-hustle) and sweeping 100% of the new money directly into investments. You need a bigger shovel.`;
-                return;
-            }
-
-            // Fallback
-            container.className = "card-bg p-8 rounded-3xl border-2 border-slate-500/50 relative overflow-hidden";
-            glow.className = "absolute -top-32 -right-32 w-96 h-96 rounded-full blur-3xl opacity-20 pointer-events-none bg-slate-500";
-            icon.innerText = "⚙️";
-            title.innerText = "Increase Velocity";
-            title.className = "text-3xl text-slate-200 font-bold brand-font tracking-wide uppercase";
-            subtitle.innerText = "Status: Grind Phase";
-            subtitle.className = "text-xs font-bold uppercase tracking-widest mt-1 text-slate-500";
-            body.innerHTML = "You are in the accumulation grind. Keep increasing your savings rate with every pay raise, and keep your investments automated.";
-        }
-
-        // --- Renderers ---
-
-        function renderFreedomChart(labels, wealth, target, retireAge) {
-            const ctx = document.getElementById('freedomChart').getContext('2d');
-            if (freedomChartInstance) freedomChartInstance.destroy();
-
-            freedomChartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        { label: 'Your Wealth', data: wealth, borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)', borderWidth: 3, tension: 0.4, pointRadius: 0, fill: true },
-                        { label: 'Moving Target', data: target, borderColor: '#fbbf24', borderWidth: 3, borderDash: [5, 5], tension: 0.4, pointRadius: 0 }
-                    ]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
-                    plugins: { legend: { labels: { color: '#94a3b8', font: {size: 10} } } },
-                    scales: { x: { grid: { color: '#1e293b' }, ticks: { color: '#64748b' } }, y: { grid: { color: '#1e293b' }, ticks: { color: '#64748b', callback: (val) => '$' + val/1000 + 'k' } } }
-                }
-            });
-        }
-
-        function renderGrowthChart(labels, totalData, targetData) {
-            const ctx = document.getElementById('growthChart').getContext('2d');
-            if (chartInstance) chartInstance.destroy();
-
-            chartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        { label: 'Projected Wealth', data: totalData, borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', borderWidth: 3, fill: true, tension: 0.4, pointRadius: 0 },
-                        { label: 'Inflation Baseline', data: targetData, borderColor: '#ef4444', borderWidth: 1, borderDash: [2, 2], pointRadius: 0 }
-                    ]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
-                    scales: { x: { grid: { color: '#1e293b' } }, y: { grid: { color: '#1e293b' } } },
-                    plugins: { legend: { labels: { color: '#94a3b8' } } }
-                }
-            });
-        }
-
-        function renderDrawdownChart(labels, data) {
-            const ctx = document.getElementById('drawdownChart').getContext('2d');
-            if (drawdownChartInstance) drawdownChartInstance.destroy();
-            const hitsZero = data.includes(0);
-            drawdownChartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Portfolio', data: data, borderColor: hitsZero ? '#ef4444' : '#10b981', backgroundColor: hitsZero ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)', borderWidth: 3, fill: true, tension: 0.4, pointRadius: 0
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
-                    scales: { x: { grid: { color: '#1e293b' } }, y: { grid: { color: '#1e293b' } } },
-                    plugins: { legend: { display: false } }
-                }
-            });
-        }
-
-        function switchTab(tabName) {
-            document.querySelectorAll('[id^="view-"]').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('[id^="tab-btn-"]').forEach(el => el.className = "tab-inactive px-6 py-3 font-bold uppercase text-sm tracking-wider transition-colors whitespace-nowrap cursor-pointer");
-            document.getElementById(`view-${tabName}`).classList.remove('hidden');
-            document.getElementById(`tab-btn-${tabName}`).className = "tab-active px-6 py-3 font-bold uppercase text-sm tracking-wider transition-colors whitespace-nowrap cursor-pointer";
-            
-            setTimeout(updateSystem, 50);
-        }
-    </script>
+// JSON save / load
+const jd=$('jd'),jText=$('jText'),jMsg=$('jMsg'),drop=$('drop');
+const say=(t,bad)=>{jMsg.textContent=t;jMsg.className='jmsg '+(bad?'err':'okm')};
+const current=()=>JSON.stringify({app:'money-mentor',version:1,savedAt:new Date().toISOString().slice(0,10),inputs:read()},null,2);
+$('jsonBtn').addEventListener('click',()=>{jText.value=current();say('');try{jd.showModal()}catch(e){jd.setAttribute('open','')}});
+$('jClose').addEventListener('click',()=>jd.close());
+jd.addEventListener('click',e=>{if(e.target===jd)jd.close()});
+$('jCopy').addEventListener('click',async()=>{
+  try{await navigator.clipboard.writeText(jText.value);say('Copied. Paste it into a note or a .json file to keep it.')}
+  catch(e){jText.focus();jText.select();say('Copy was blocked here. The text is selected, so press Ctrl+C (or Cmd+C).',true)}
+});
+function loadText(txt){
+  let o;
+  try{o=JSON.parse(txt)}catch(e){say('That isn\'t valid JSON. Check for a missing bracket or comma.',true);return false}
+  const src=o&&typeof o==='object'&&o.inputs&&typeof o.inputs==='object'?o.inputs:o;
+  if(!src||typeof src!=='object'||Array.isArray(src)){say('Expected an object of inputs, like {"age": 30, "pay": 5200}.',true);return false}
+  const got=[],bad=[];
+  KEYS.forEach(k=>{if(k in src){const n=parseFloat(src[k]);if(isFinite(n)){$(k).value=n;got.push(k)}else bad.push(k)}});
+  if(!got.length){say('No matching fields found. Use keys like '+KEYS.slice(0,4).join(', ')+'.',true);return false}
+  update();
+  const missing=KEYS.length-got.length-bad.length;
+  say(`Loaded ${got.length} field${got.length===1?'':'s'}`+(missing?`; ${missing} not in the file kept their current values`:'')+(bad.length?`; skipped ${bad.join(', ')} (not numbers)`:'')+'.',false);
+  return true;
+}
+$('jLoad').addEventListener('click',()=>{if(loadText(jText.value))setTimeout(()=>jd.close(),900)});
+function readFile(file){
+  if(!file)return;
+  if(file.size>200000){say('That file is too big to be a Money Mentor save.',true);return}
+  const fr=new FileReader();
+  fr.onload=()=>{jText.value=String(fr.result);loadText(jText.value)};
+  fr.onerror=()=>say('Couldn\'t read that file.',true);
+  fr.readAsText(file);
+}
+$('jFile').addEventListener('change',e=>{readFile(e.target.files[0]);e.target.value=''});
+['dragenter','dragover'].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.add('over')}));
+['dragleave','dragend'].forEach(t=>drop.addEventListener(t,()=>drop.classList.remove('over')));
+drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('over');const f=e.dataTransfer.files[0];if(f)readFile(f);else{const t=e.dataTransfer.getData('text');if(t){jText.value=t;loadText(t)}}});
+update();
+}
+</script>
 </body>
 </html>
