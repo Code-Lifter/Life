@@ -9,38 +9,79 @@
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
 /* VOICE: a calm, straight-talking mentor; numbers first, then one clear next move
-   IDEA: an atlas plate for your money: one axis, today to retirement
-   PICTURE: live wealth projection with the 25x freedom line, beside the inputs
-   COLOUR and TYPE: deep sea ground, sky for on-track, signal pink for work-on; Hanken Grotesk 300 large
-   LAYOUT: three strips: inputs + verdict, the projection, the rulebook */
-:root{color-scheme:dark;--bg:#0a2540;--panel:#0f3052;--line:rgba(143,211,255,.22);--ink:#fff;--soft:#b9cde0;--sky:#8fd3ff;--pink:#ff5c8a;--amber:#ffd27a}
+   IDEA: an atlas plate for your money: one axis, today to 100
+   PICTURE: a fan of possible futures with the pot-needed line, beside the inputs
+   COLOUR and TYPE: deep sea ground, sky for on-track, signal pink for work-on, amber for caution; Hanken Grotesk 300 large
+   LAYOUT: three strips: inputs + verdict, the projection, the rulebook
+   v2: Australian rules 2026-27, Monte Carlo, mentor ladder, ASIC generic-calculator compliance */
+:root{color-scheme:dark;--bg:#0a2540;--panel:#0f3052;--deep:#0a2643;--line:rgba(143,211,255,.22);--ink:#fff;--soft:#b9cde0;--sky:#8fd3ff;--steel:#5b8db8;--pink:#ff5c8a;--amber:#ffd27a}
 :root[data-theme=light],:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}
+[hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Hanken Grotesk",system-ui,sans-serif;overflow-x:clip}
+.disc{position:sticky;top:0;z-index:20;background:#071d33;border-bottom:1px solid var(--line);font-size:13px;color:var(--soft);padding:7px max(5vw,16px);display:flex;gap:6px 14px;flex-wrap:wrap;justify-content:space-between}
+.disc b{color:var(--ink);font-weight:600}.disc a{color:var(--sky)}
 .band{padding:clamp(24px,4vw,56px) max(5vw,16px)}
 .wrap{max-width:1240px;margin:0 auto}
 h1{font-weight:300;font-size:clamp(34px,5vw,52px);line-height:1.05;margin:0 0 6px;text-wrap:balance}
 h2{font-weight:600;font-size:22px;margin:0 0 4px}
-.sub{color:var(--soft);margin:0 0 24px;max-width:62ch}
+h3{font-weight:600}
+.sub{color:var(--soft);margin:0 0 24px;max-width:66ch}
+.real{display:inline-block;font-size:13px;font-weight:600;color:var(--amber);border:1px solid rgba(255,210,122,.4);border-radius:99px;padding:2px 10px;margin-left:6px;vertical-align:middle;white-space:nowrap}
 .top{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:28px;align-items:start}
-form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px 14px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
-fieldset{grid-column:1/-1;border:0;padding:0;margin:6px 0 0;display:contents}
-.grp{grid-column:1/-1;font-weight:600;color:var(--sky);font-size:14px;margin-top:6px}
+form{display:flex;flex-direction:column;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
+.g{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px 14px}
+.g .full{grid-column:1/-1}
+details.sec{border-top:1px solid var(--line);padding-top:6px}
+details.sec:first-of-type{border-top:0;padding-top:0}
+details.sec>summary{cursor:pointer;list-style:none;font-weight:600;color:var(--sky);font-size:14px;padding:8px 0;display:flex;justify-content:space-between;align-items:center;min-height:36px}
+details.sec>summary::-webkit-details-marker{display:none}
+details.sec>summary::after{content:'+';font-size:18px;color:var(--soft)}
+details.sec[open]>summary::after{content:'–'}
+details.sec>summary:focus-visible{outline:3px solid var(--sky);outline-offset:2px;border-radius:4px}
+details.sec>.g{padding:2px 0 12px}
 label{display:flex;flex-direction:column;gap:4px;font-size:14px;color:var(--soft)}
-.in{display:flex;align-items:center;background:#0a2643;border:1px solid var(--line);border-radius:9px}
+label.chk{flex-direction:row;align-items:center;gap:10px;min-height:44px;color:var(--ink)}
+label.chk input{width:20px;height:20px;min-height:0;accent-color:var(--sky);flex:none}
+.in{display:flex;align-items:center;background:var(--deep);border:1px solid var(--line);border-radius:9px}
 .in span{padding:0 0 0 10px;color:var(--soft);font-size:14px;white-space:nowrap}
 .in span.u{padding:0 10px 0 0}
-input{width:100%;font:inherit;font-size:16px;color:var(--ink);background:transparent;border:0;padding:10px;min-height:44px;outline:none}
+input,select{width:100%;font:inherit;font-size:16px;color:var(--ink);background:transparent;border:0;padding:10px;min-height:44px;outline:none}
+input:disabled{color:var(--soft)}
+select{appearance:none;background:transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23b9cde0' stroke-width='2'/%3E%3C/svg%3E") no-repeat right 12px center;padding-right:32px;cursor:pointer}
+option{background:var(--panel);color:var(--ink)}
 .in:focus-within{border-color:var(--sky);box-shadow:0 0 0 3px rgba(143,211,255,.25)}
-.left{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:12px;font-size:15px}
+input[type=range]{padding:0;min-height:32px;accent-color:var(--sky)}
+.note{font-size:14px;color:var(--soft);background:var(--deep);border-radius:9px;padding:10px 12px;line-height:1.45}
+.note b{color:var(--ink);font-weight:600}.note .warn{color:var(--pink);font-weight:600}.note .amb{color:var(--amber);font-weight:600}
+.left{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:12px;font-size:15px}
 .left b{font-size:22px;white-space:nowrap}
 button{font:inherit;font-size:14px;color:var(--sky);background:transparent;border:1px solid var(--line);border-radius:9px;min-height:44px;padding:0 14px;cursor:pointer}
+button:hover{border-color:var(--sky)}
 button:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
+button[aria-pressed=true]{background:rgba(255,210,122,.16);border-color:var(--amber);color:var(--amber)}
+.debt{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,.8fr) minmax(0,1fr) 44px;gap:6px;margin-bottom:6px}
+.debt .in span{padding-left:8px}.debt input{padding:10px 6px}
+.debt button{padding:0;color:var(--soft)}
+.dhead{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,.8fr) minmax(0,1fr) 44px;gap:6px;font-size:12px;color:var(--soft)}
 .verdict{display:flex;flex-direction:column;gap:16px}
+.sliders{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 18px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 20px}
+.sliders small{grid-column:1/-1;font-weight:600;font-size:14px;color:var(--sky)}
+.sl{display:flex;flex-direction:column;font-size:14px;color:var(--soft)}
+.sl div{display:flex;justify-content:space-between;gap:8px}.sl b{color:var(--ink);font-weight:600;white-space:nowrap}
 .next{background:var(--sky);color:#062038;border-radius:14px;padding:20px 22px}
 .next small{font-weight:600;font-size:14px;display:block;margin-bottom:4px}
 .next p{margin:0;font-size:clamp(20px,2.4vw,26px);line-height:1.25;font-weight:600;text-wrap:balance}
 .next .why{font-size:15px;font-weight:400;margin-top:8px;line-height:1.45}
+.next .pay{font-size:15px;font-weight:600;margin-top:8px;line-height:1.4;border-top:1px solid rgba(6,32,56,.2);padding-top:8px}
+.odds{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 20px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 16px;align-items:center}
+.odds small{font-weight:600;font-size:14px;color:var(--soft)}
+.odds .big{font-weight:300;font-size:clamp(26px,3.4vw,38px);line-height:1.1}
+.dots{display:flex;gap:6px;grid-column:1/-1;flex-wrap:wrap}
+.dots i{width:22px;height:22px;border-radius:50%;border:2px solid var(--sky)}
+.dots i.on{background:var(--sky)}
+.odds p{grid-column:1/-1;margin:0;font-size:15px;color:var(--soft)}
+.odds p.act{color:var(--ink);font-weight:600}
 .earn{border:2px solid var(--pink);border-radius:14px;padding:16px 20px}
 .earn small{font-weight:600;font-size:14px;color:var(--pink);display:block;margin-bottom:6px}
 .erow{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
@@ -51,10 +92,39 @@ button:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
 .stat{border-top:2px solid var(--line);padding-top:8px}
 .stat b{display:block;font-weight:300;font-size:clamp(26px,3.4vw,40px);line-height:1.1;white-space:nowrap}
 .stat span{color:var(--soft);font-size:14px}
-.fig{position:relative;min-height:300px;background:var(--panel);border:1px solid var(--line);border-radius:14px}
+.fig{position:relative;min-height:320px;background:var(--panel);border:1px solid var(--line);border-radius:14px}
 .fig>svg{position:absolute;inset:0;width:100%;height:100%}
-.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:14px;color:var(--soft);margin-top:8px}
-.legend i{display:inline-block;width:14px;height:4px;border-radius:2px;margin-right:6px;vertical-align:middle}
+.fig.sm{min-height:260px}
+.tip{position:absolute;pointer-events:none;background:#071d33;border:1px solid var(--line);border-radius:9px;padding:8px 10px;font-size:13px;line-height:1.45;color:var(--soft);white-space:nowrap;z-index:3}
+.tip b{color:var(--ink)}
+.legend{display:flex;gap:6px 16px;flex-wrap:wrap;font-size:14px;color:var(--soft);margin-top:8px}
+.legend i{display:inline-block;width:18px;height:0;border-top:3px solid;margin-right:6px;vertical-align:middle}
+.legend i.area{height:10px;border:0;background:rgba(143,211,255,.25)}
+.keyline{font-size:15px;color:var(--soft);margin:10px 0 0}.keyline b{color:var(--ink)}
+.stressbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px;font-size:14px;color:var(--soft)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
+.panel h3{margin:0 0 4px;font-size:18px}
+.panel>p{margin:0 0 12px;color:var(--soft);font-size:15px}
+.duo{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:16px}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th{text-align:left;font-weight:600;color:var(--soft);font-size:13px;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:bottom;line-height:1.3}
+td{padding:8px;border-bottom:1px solid rgba(143,211,255,.1);white-space:nowrap}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+tr.cur td{background:rgba(143,211,255,.08)}tr.cur td:first-child{box-shadow:inset 3px 0 var(--sky)}
+td button{min-height:36px;padding:0 10px;font-size:13px}
+.track{position:relative;height:56px;margin:8px 14px 4px}
+.track::before{content:'';position:absolute;left:0;right:0;top:20px;height:3px;background:var(--line);border-radius:2px}
+.track .fill{position:absolute;left:0;top:20px;height:3px;background:var(--sky);border-radius:2px}
+.track .dot{position:absolute;top:10px;width:24px;height:24px;margin-left:-12px;border-radius:50%;border:2px solid var(--sky);background:var(--panel);color:var(--sky);font-size:12px;font-weight:700;display:grid;place-items:center}
+.track .dot.done{background:var(--sky);color:#062038}
+.track .ax{position:absolute;top:38px;font-size:12px;color:var(--soft);transform:translateX(-50%)}
+.mlist{list-style:none;margin:8px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr));gap:8px}
+.mlist li{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:8px;align-items:start;font-size:14px;color:var(--soft);padding:6px 0;border-top:1px solid rgba(143,211,255,.1)}
+.mlist li .k{width:22px;height:22px;border-radius:50%;border:2px solid var(--sky);color:var(--sky);font-size:11px;font-weight:700;display:grid;place-items:center}
+.mlist li.done .k{background:var(--sky);color:#062038}
+.mlist li b{color:var(--ink);font-weight:600;display:block}
+.mlist li .a{color:var(--ink);font-weight:600;white-space:nowrap}
 .rules{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:16px;margin-top:18px}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:8px}
 .card header{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
@@ -66,14 +136,24 @@ button:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
 .info{background:rgba(255,255,255,.1);color:#fff}
 .card .big{font-size:30px;font-weight:300;line-height:1.1;white-space:nowrap}
 .card p{margin:0;color:var(--soft);font-size:15px}
-.card p.tip{color:var(--ink)}
+.card p.tip2{color:var(--ink)}
 .card .what{font-size:14px}
-.bar{display:flex;height:12px;border-radius:6px;overflow:hidden;background:#0a2643}
+.card ul{margin:0;padding-left:18px;color:var(--soft);font-size:14px}
+.bar{display:flex;height:12px;border-radius:6px;overflow:hidden;background:var(--deep)}
 .bar div{height:100%}
-.mark{position:relative;height:12px;border-radius:6px;background:#0a2643;overflow:hidden}
+.mark{position:relative;height:12px;border-radius:6px;background:var(--deep);overflow:hidden}
 .mark div{height:100%;background:var(--sky);border-radius:6px}
-.foot{color:var(--soft);font-size:13px;max-width:80ch}
+.foot{color:var(--soft);font-size:13px;max-width:86ch}
 .btns{display:flex;gap:8px;flex-wrap:wrap}
+details.assume{margin-top:24px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:4px 18px}
+details.assume>summary{cursor:pointer;font-weight:600;padding:12px 0;min-height:44px}
+details.assume>summary:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
+details.assume h4{margin:16px 0 6px;font-size:15px;color:var(--sky)}
+details.assume td{white-space:normal;font-size:14px;vertical-align:top}
+details.assume ul{color:var(--soft);font-size:14px;padding-left:18px}
+.legal{margin-top:20px;border-left:3px solid var(--amber);padding:4px 0 4px 14px;color:var(--soft);font-size:14px;max-width:86ch}
+.legal b{color:var(--ink)}
+.busy{font-size:13px;color:var(--soft)}
 dialog{width:min(620px,calc(100vw - 24px));max-height:calc(100vh - 24px);overflow:auto;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:16px;padding:20px}
 dialog::backdrop{background:rgba(3,14,26,.7)}
 .jhead{display:flex;justify-content:space-between;align-items:center;gap:10px}
@@ -81,7 +161,7 @@ dialog::backdrop{background:rgba(3,14,26,.7)}
 .jsub{color:var(--soft);font-size:15px;margin:6px 0 14px}
 .drop{position:relative;border:2px dashed var(--line);border-radius:12px;padding:10px;transition:border-color .2s,background .2s}
 .drop.over{border-color:var(--sky);background:rgba(143,211,255,.08)}
-.drop textarea{width:100%;min-height:260px;resize:vertical;background:#0a2643;color:var(--ink);border:0;border-radius:8px;padding:12px;font:14px/1.5 ui-monospace,Menlo,Consolas,monospace}
+.drop textarea{width:100%;min-height:260px;resize:vertical;background:var(--deep);color:var(--ink);border:0;border-radius:8px;padding:12px;font:14px/1.5 ui-monospace,Menlo,Consolas,monospace}
 .drop textarea:focus{outline:2px solid var(--sky)}
 .dropHint{color:var(--soft);font-size:13px;text-align:center;margin-top:8px}
 .jmsg{min-height:1.5em;margin:10px 0;font-size:15px}
@@ -91,38 +171,136 @@ dialog::backdrop{background:rgba(3,14,26,.7)}
 .fileBtn input{position:absolute;inset:0;opacity:0;cursor:pointer}
 .fileBtn:focus-within{outline:3px solid var(--sky);outline-offset:2px}
 button.primary{background:var(--sky);color:#062038;border-color:var(--sky);font-weight:600}
-@media(max-width:860px){.top{grid-template-columns:minmax(0,1fr)}}
-@media(max-width:600px){form{grid-template-columns:minmax(0,1fr)}.stats{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.stat:last-child{grid-column:1/-1}}
+.yr{border:2px solid var(--amber);border-radius:14px;padding:16px 20px}
+.yr>small{font-weight:600;font-size:14px;color:var(--amber);display:block;margin-bottom:6px}
+.yr .goal{font-size:15px;color:var(--soft);margin:0}
+.yr .goal b{display:block;font-weight:300;font-size:clamp(26px,3.4vw,38px);line-height:1.1;color:var(--ink)}
+.cps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0 4px}
+.cp{background:var(--deep);border-radius:9px;padding:8px 10px;font-size:13px;color:var(--soft)}
+.cp b{display:block;font-size:17px;font-weight:600;color:var(--ink);white-space:nowrap}
+.cp i{display:block;font-style:normal;color:var(--amber);white-space:nowrap}
+.steps{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column}
+.steps li{border-top:1px solid rgba(143,211,255,.12)}
+.steps label{flex-direction:row;align-items:flex-start;gap:12px;padding:10px 0;color:var(--ink);font-size:15px;cursor:pointer}
+.steps input{width:20px;height:20px;min-height:0;margin:2px 0 0;padding:0;accent-color:var(--amber);flex:none}
+.steps span b{font-weight:600;display:block}.steps span em{font-style:normal;color:var(--soft);font-size:14px}
+.steps label>span:nth-of-type(1){flex:1 1 auto}.steps .when{flex:none;margin-left:auto;font-size:13px;font-weight:600;color:var(--amber);white-space:nowrap;padding-left:8px}
+.steps li.done span b{text-decoration:line-through;color:var(--soft)}
+.yrfoot{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px;font-size:13px;color:var(--soft)}
+.yrfoot button{min-height:36px;font-size:13px}
+@media(max-width:600px){.cps{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:860px){.top,.duo{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:600px){.g,.sliders{grid-template-columns:minmax(0,1fr)}.stats{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.stat:last-child{grid-column:1/-1}
+  .debt,.dhead{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 44px}.dhead{display:none}.debt .dn{grid-column:1/-2}.debt .dm{grid-column:1/-2}.debt button{grid-row:1}.debt>*:nth-child(5){grid-column:3;grid-row:1}}
 @media(prefers-reduced-motion:no-preference){.mark div,.bar div{transition:width .4s ease}}
 </style>
 </head>
 <body>
+<div class="disc" role="note"><span><b>General information only — not personal financial advice.</b> Results are estimates in today's dollars, not a guarantee.</span><a href="#assume">Assumptions &amp; limitations</a></div>
 <section class="band"><div class="wrap">
   <h1>Money mentor</h1>
-  <p class="sub">Put in your monthly numbers and it checks you against the rules people use to get stable for the long term, then tells you the one thing to do next.</p>
+  <p class="sub">Put in your monthly numbers. It checks you against the rules people use to get stable for the long term, runs 2,000 possible futures under 2026–27 Australian tax, super and Age Pension rules, then suggests the one thing to look at next. <span class="real">All figures in today's dollars</span></p>
   <div class="top">
-    <form id="f" autocomplete="off">
-      <div class="grp">You</div>
-      <label>Your age<div class="in"><input id="age" type="number" inputmode="numeric" min="16" max="80"><span class="u">yrs</span></div></label>
-      <label>Age you want to be free by<div class="in"><input id="target" type="number" inputmode="numeric" min="30" max="85"><span class="u">yrs</span></div></label>
-      <div class="grp">Each month</div>
-      <label>Take-home pay<div class="in"><span>$</span><input id="pay" type="number" inputmode="decimal" min="0"></div></label>
-      <label>Rent or mortgage<div class="in"><span>$</span><input id="house" type="number" inputmode="decimal" min="0"></div></label>
-      <label>Other needs (bills, food, transport)<div class="in"><span>$</span><input id="needs" type="number" inputmode="decimal" min="0"></div></label>
-      <label>Wants (eating out, fun, subs)<div class="in"><span>$</span><input id="wants" type="number" inputmode="decimal" min="0"></div></label>
-      <label>Employer super paid in<div class="in"><span>$</span><input id="supmo" type="number" inputmode="decimal" min="0"></div></label>
-      <label>Expected growth after inflation<div class="in"><input id="ret" type="number" inputmode="decimal" step="0.5" min="0" max="15"><span class="u">% a year</span></div></label>
-      <div class="grp">What you have now</div>
-      <label>Emergency savings<div class="in"><span>$</span><input id="ef" type="number" inputmode="decimal" min="0"></div></label>
-      <label>Investments outside super<div class="in"><span>$</span><input id="inv" type="number" inputmode="decimal" min="0"></div></label>
-      <label>Super balance<div class="in"><span>$</span><input id="sup" type="number" inputmode="decimal" min="0"></div></label>
-      <label>Debt (cards, loans, BNPL)<div class="in"><span>$</span><input id="debt" type="number" inputmode="decimal" min="0"></div></label>
-      <label>Interest on that debt<div class="in"><input id="drate" type="number" inputmode="decimal" step="0.5" min="0" max="40"><span class="u">% a year</span></div></label>
+    <form id="f" autocomplete="off" novalidate>
+      <details class="sec" open><summary>You</summary><div class="g">
+        <label>Your age<div class="in"><input id="age" type="number" inputmode="numeric" min="16" max="80"><span class="u">yrs</span></div></label>
+        <label>Age you want to be free by<div class="in"><input id="target" type="number" inputmode="numeric" min="30" max="85"><span class="u">yrs</span></div></label>
+        <label>Household<div class="in"><select id="household"><option value="single">Single</option><option value="couple">Couple</option></select></div></label>
+        <label>Own your home?<div class="in"><select id="home"><option value="no">No, renting</option><option value="yes">Yes, homeowner</option></select></div></label>
+        <label class="full">Employment type<div class="in"><select id="emp"><option value="employee">Employee (12% super guarantee)</option><option value="self">Self-employed / freelancer (no SG)</option></select></div></label>
+      </div></details>
+
+      <details class="sec" open><summary>Each month, in today's dollars</summary><div class="g">
+        <label>Take-home pay<div class="in"><span>$</span><input id="pay" type="number" inputmode="decimal" min="0"></div></label>
+        <label>Rent or mortgage<div class="in"><span>$</span><input id="house" type="number" inputmode="decimal" min="0"></div></label>
+        <label>Other needs (bills, food, transport)<div class="in"><span>$</span><input id="needs" type="number" inputmode="decimal" min="0"></div></label>
+        <label>Wants (eating out, fun, subs)<div class="in"><span>$</span><input id="wants" type="number" inputmode="decimal" min="0"></div></label>
+        <label id="mortBalL">Mortgage balance<div class="in"><span>$</span><input id="mortBal" type="number" inputmode="decimal" min="0"></div></label>
+        <label id="mortRateL">Mortgage rate<div class="in"><input id="mortRate" type="number" inputmode="decimal" step="0.05" min="0" max="20"><span class="u">% a year</span></div></label>
+      </div></details>
+
+      <details class="sec" open><summary>Super</summary><div class="g">
+        <label class="chk full" id="sgAutoL"><input id="sgAuto" type="checkbox">Work out my super guarantee from my pay</label>
+        <label id="supmoL">Employer super paid in<div class="in"><span>$</span><input id="supmo" type="number" inputmode="decimal" min="0"><span class="u">/mo</span></div></label>
+        <label id="concL"><span id="concLabel">Extra salary sacrifice</span><div class="in"><span>$</span><input id="concMo" type="number" inputmode="decimal" min="0"><span class="u">/mo</span></div></label>
+        <div class="note full" id="superNote" aria-live="polite"></div>
+      </div></details>
+
+      <details class="sec" open><summary>What you have now</summary><div class="g">
+        <label>Emergency savings<div class="in"><span>$</span><input id="ef" type="number" inputmode="decimal" min="0"></div></label>
+        <label>Investments outside super<div class="in"><span>$</span><input id="inv" type="number" inputmode="decimal" min="0"></div></label>
+        <label>Super balance<div class="in"><span>$</span><input id="sup" type="number" inputmode="decimal" min="0"></div></label>
+        <label>Extra invested each month (side income)<div class="in"><span>$</span><input id="extraMo" type="number" inputmode="decimal" min="0"></div></label>
+      </div></details>
+
+      <details class="sec" open><summary>Debts (cards, loans, BNPL)</summary><div class="g">
+        <div class="full">
+          <div class="dhead" aria-hidden="true"><span>Name</span><span>Balance</span><span>Rate</span><span>Min payment</span><span></span></div>
+          <div id="debtList"></div>
+          <div class="btns"><button type="button" id="addDebt">+ Add a debt</button></div>
+        </div>
+        <label class="full">Payoff order<div class="in"><select id="debtStrat"><option value="avalanche">Avalanche: highest rate first (default)</option><option value="snowball">Snowball: smallest balance first</option></select></div></label>
+      </div></details>
+
+      <details class="sec"><summary>Investing, fees and returns</summary><div class="g">
+        <label class="full">Portfolio<div class="in"><select id="preset"><option value="high">High Growth: 4.0% real, 15% volatility</option><option value="balanced">Balanced: 3.5% real, 11% volatility</option><option value="custom">Custom</option></select></div></label>
+        <label>Expected growth after inflation<div class="in"><input id="ret" type="number" inputmode="decimal" step="0.1" min="0" max="12"><span class="u">% a year</span></div></label>
+        <label>Volatility<div class="in"><input id="vol" type="number" inputmode="decimal" step="0.5" min="0" max="40"><span class="u">% a year</span></div></label>
+        <label>Fees<div class="in"><input id="fees" type="number" inputmode="decimal" step="0.05" min="0" max="5"><span class="u">% a year</span></div></label>
+        <label>Tax drag outside super<div class="in"><input id="drag" type="number" inputmode="decimal" step="0.05" min="0" max="5"><span class="u">% a year</span></div></label>
+      </div></details>
+
+      <details class="sec"><summary>Retirement and Age Pension</summary><div class="g">
+        <label>Success target<div class="in"><select id="succ"><option value="85">85% of futures</option><option value="90">90% of futures</option><option value="95">95% of futures</option></select></div></label>
+        <label>Withdrawal rule<div class="in"><select id="rule"><option value="fixed">Fixed real spending</option><option value="gk">Guardrails (Guyton-Klinger)</option><option value="pct">% of portfolio</option></select></div></label>
+        <label id="wrPctL">Draw this % of the portfolio each year<div class="in"><input id="wrPct" type="number" inputmode="decimal" step="0.25" min="1" max="10"><span class="u">%</span></div></label>
+        <label id="floorL">Lowest spending you'd accept<div class="in"><input id="floor" type="number" inputmode="decimal" step="5" min="30" max="100"><span class="u">% of plan</span></div></label>
+        <label class="chk full"><input id="apOn" type="checkbox">Include the Age Pension from 67</label>
+        <label class="full" id="haircutL">Policy-risk haircut on the Age Pension: <b id="haircutV" style="color:var(--ink)"></b><input id="haircut" type="range" min="0" max="100" step="5"></label>
+      </div></details>
+
+      <details class="sec"><summary>Tax settings</summary><div class="g">
+        <label class="chk full"><input id="help" type="checkbox">I have a HELP (student) debt</label>
+        <label class="chk full" id="mlsL"><input id="mls" type="checkbox">No private hospital cover (Medicare levy surcharge)</label>
+        <label class="chk full"><input id="y2027" type="checkbox">Use the 14% second bracket legislated from 1 July 2027</label>
+      </div></details>
+
+      <details class="sec"><summary>Assumptions you can change</summary><div class="g">
+        <label>Plan to age<div class="in"><input id="life" type="number" inputmode="numeric" min="85" max="110"><span class="u">yrs</span></div></label>
+        <label>Inflation (for nominal figures)<div class="in"><input id="infl" type="number" inputmode="decimal" step="0.1" min="0" max="10"><span class="u">% a year</span></div></label>
+        <label>"High-interest" debt from<div class="in"><input id="highRate" type="number" inputmode="decimal" step="0.5" min="0" max="30"><span class="u">%</span></div></label>
+        <label>Starter emergency fund<div class="in"><span>$</span><input id="efStarter" type="number" inputmode="decimal" min="0"></div></label>
+        <label>Full fund, employee<div class="in"><input id="efMonthsEmp" type="number" inputmode="decimal" step="0.5" min="1" max="12"><span class="u">months</span></div></label>
+        <label>Full fund, self-employed<div class="in"><input id="efMonthsSelf" type="number" inputmode="decimal" step="0.5" min="1" max="12"><span class="u">months</span></div></label>
+      </div></details>
+
       <div class="left"><span>Left over to save each month</span><b id="leftover">$0</b></div>
-      <div class="left" style="border:0;padding-top:0"><span class="foot" id="samplenote">These are sample numbers. Swap in your own; the page remembers them on this device.</span><span class="btns"><button type="button" id="jsonBtn">JSON</button><button type="button" id="reset">Reset to sample</button></span></div>
+      <div class="left" style="border:0;padding-top:0"><span class="foot" id="samplenote"></span><span class="btns"><button type="button" id="jsonBtn">JSON</button><button type="button" id="reset">Reset to sample</button></span></div>
     </form>
+
     <div class="verdict">
-      <div class="next" aria-live="polite"><small>Your next move</small><p id="move"></p><p class="why" id="why"></p></div>
+      <div class="sliders" id="sliders">
+        <small>Quick what-ifs <span class="busy" id="busy" hidden>· updating…</span></small>
+        <label class="sl"><div><span>Spending a month</span><b id="slSpendV"></b></div><input type="range" id="slSpend" step="50" aria-label="Spending a month"></label>
+        <label class="sl"><div><span>Extra invested a month</span><b id="slExtraV"></b></div><input type="range" id="slExtra" min="0" max="4000" step="50" aria-label="Extra invested a month"></label>
+        <label class="sl"><div><span>Goal age</span><b id="slGoalV"></b></div><input type="range" id="slGoal" step="1" aria-label="Goal age"></label>
+        <label class="sl"><div><span>Growth after inflation</span><b id="slRetV"></b></div><input type="range" id="slRet" min="0" max="8" step="0.1" aria-label="Growth after inflation"></label>
+      </div>
+      <div class="next" aria-live="polite"><small>Your next move</small><p id="move"></p><p class="why" id="why"></p><p class="pay" id="payoff" hidden></p></div>
+      <div class="yr" id="yr" aria-live="polite">
+        <small id="yrHead">Your plan for the next 12 months</small>
+        <p class="goal" id="yrGoal"></p>
+        <div class="cps" id="yrCps"></div>
+        <ol class="steps" id="yrSteps"></ol>
+        <div class="yrfoot"><span id="yrDone"></span><button type="button" id="yrClear">Clear ticks</button></div>
+      </div>
+      <div class="odds" aria-live="polite">
+        <small id="oHead">Stopping at your goal age</small><span class="pill" id="oPill"></span>
+        <div class="big" id="oBig" style="grid-column:1/-1"></div>
+        <div class="dots" id="oDots" role="img"></div>
+        <p class="act" id="oAct"></p>
+        <p id="oNote"></p>
+      </div>
       <div class="earn" aria-live="polite">
         <small id="eHead">Income you need for your goal</small>
         <div class="erow"><div><b id="eMonth"></b><span>take-home a month</span></div><div><b id="eYear"></b><span>a year before tax (approx.)</span></div></div>
@@ -131,26 +309,62 @@ button.primary{background:var(--sky);color:#062038;border-color:var(--sky);font-
       <div class="stats">
         <div class="stat"><b id="sScore"></b><span>rules on track</span></div>
         <div class="stat"><b id="sRate"></b><span>of pay saved</span></div>
-        <div class="stat"><b id="sFree"></b><span>earliest age you can stop and last to 100</span></div>
+        <div class="stat"><b id="sFree"></b><span id="sFreeL">earliest age you can stop</span></div>
       </div>
       <div>
-        <div class="fig"><svg id="chart" role="img" aria-label="Projected wealth by age"></svg></div>
-        <div class="legend"><span><i style="background:var(--sky)"></i>Outside super + super</span><span><i style="background:#5b8db8"></i>Super only</span><span><i style="background:var(--pink)"></i>Pot needed at your goal age to last to 100</span></div>
+        <div class="fig" id="fig"><svg id="chart" role="img" aria-label="Projected wealth by age: 10th, 50th and 90th percentile futures"></svg><div class="tip" id="tip" hidden></div></div>
+        <div class="legend"><span><i class="area"></i>8 in 10 futures (10th–90th)</span><span><i style="border-color:var(--sky)"></i>Median future</span><span><i style="border-color:var(--steel);border-top-width:2px"></i>Super only (median)</span><span><i style="border-color:var(--pink);border-top-style:dashed"></i>Pot needed at goal age</span><span id="lgStress" hidden><i style="border-color:var(--amber);border-top-style:dotted"></i>Stress test</span></div>
+        <p class="keyline" id="apLine"></p>
+        <div class="stressbar" role="group" aria-label="Historical stress tests"><span>Stress test, retire into:</span><button type="button" data-yr="1929" aria-pressed="false">1929</button><button type="button" data-yr="1973" aria-pressed="false">1973</button><button type="button" data-yr="2000" aria-pressed="false">2000</button><button type="button" data-yr="2008" aria-pressed="false">2008</button></div>
+        <p class="keyline" id="stressLine" hidden></p>
       </div>
     </div>
   </div>
 </div></section>
 
 <section class="band" style="padding-top:0"><div class="wrap">
+  <h2>The projection, in detail</h2>
+  <p class="sub" style="margin-bottom:0">How sure the plan is, what changes it, and the milestones on the way. <span class="real">Today's dollars</span></p>
+  <div class="panel" style="margin-top:18px">
+    <h3>Milestones</h3>
+    <p id="msNote">Ticked when reached; otherwise the age the median future gets there if you keep working and saving. FI is the earliest age you could stop and meet your success target.</p>
+    <div class="track" id="track"></div>
+    <ol class="mlist" id="mlist"></ol>
+    <p class="foot" style="margin-top:10px" id="asfaNote"></p>
+  </div>
+  <div class="duo">
+    <div class="panel">
+      <h3>Withdrawal rules compared</h3>
+      <p>Same 2,000 futures, stopping at <span id="wrGoal"></span>. Flexible rules spend less after bad years and never drop below your floor.</p>
+      <div class="tw"><table id="wrTable"></table></div>
+    </div>
+    <div class="panel">
+      <h3>Savings rate vs years to freedom</h3>
+      <p id="srNote"></p>
+      <div class="fig sm"><svg id="srChart" role="img" aria-label="Years to financial freedom by savings rate"></svg></div>
+    </div>
+  </div>
+  <div class="panel" style="margin-top:16px">
+    <h3>Scenarios</h3>
+    <p>Save up to three versions of your plan and compare them side by side.</p>
+    <div class="btns" style="margin-bottom:10px"><button type="button" data-save="A">Save as A</button><button type="button" data-save="B">Save as B</button><button type="button" data-save="C">Save as C</button></div>
+    <div class="tw"><table id="scTable"></table></div>
+  </div>
+</div></section>
+
+<section class="band" style="padding-top:0"><div class="wrap">
   <h2>The rulebook</h2>
-  <p class="sub" style="margin-bottom:0">Each rule with where you stand and what a mentor would tell you. Ordered the way most people tackle them.</p>
+  <p class="sub" style="margin-bottom:0">Each rule with where you stand vs a common guideline. Ordered the way most people tackle them.</p>
   <div class="rules" id="rules"></div>
-  <p class="foot" style="margin-top:24px">Rules of thumb for thinking about your money, not personal financial advice. All figures are in today's dollars, using the growth rate you set after inflation. Projections assume your leftover pays off debt first, then gets invested; from your goal age you stop work and live on your current spending until age 100, drawing outside-super money first. Super is generally locked until your preservation age (60 for most people now), so early freedom needs money outside super too. The before-tax income is a rough estimate using 2026–27 Australian resident tax rates, the 2% Medicare levy and the low income tax offset; it ignores HELP debt and other offsets.</p>
+
+  <div class="legal"><b>General information only, not personal financial advice.</b> This calculator doesn't consider your objectives, financial situation or needs. Results are estimates in today's dollars based on the assumptions below. They are not a guarantee and actual outcomes will differ. Consider getting advice from a licensed financial adviser before making financial decisions.</div>
+
+  <details class="assume" id="assume"><summary>Assumptions &amp; limitations</summary><div id="assumeBody"></div></details>
 </div></section>
 
 <dialog id="jd" aria-labelledby="jdTitle">
   <div class="jhead"><h2 id="jdTitle">Save or load your numbers</h2><button type="button" id="jClose" aria-label="Close">✕</button></div>
-  <p class="jsub">To save: copy the text below and keep it somewhere safe. To load: drop a .json file here, choose one, or paste the text, then press Load.</p>
+  <p class="jsub">To save: copy the text below and keep it somewhere safe. To load: drop a .json file here, choose one, or paste the text, then press Load. Version 1 files still load.</p>
   <div id="drop" class="drop" tabindex="0">
     <textarea id="jText" spellcheck="false" aria-label="JSON for your inputs"></textarea>
     <div class="dropHint">Drop a .json file anywhere in this box</div>
@@ -162,185 +376,866 @@ button.primary{background:var(--sky);color:#062038;border-color:var(--sky);font-
     <button type="button" id="jLoad" class="primary">Load into form</button>
   </div>
 </dialog>
-<script>
-{
-const SAMPLE={age:30,target:55,pay:5200,house:1800,needs:1100,wants:900,supmo:650,ret:5,ef:4000,inv:8000,sup:45000,debt:2500,drate:20};
-const KEYS=Object.keys(SAMPLE);
-const $=id=>document.getElementById(id);
-const fmt=n=>(n<0?'-':'')+'$'+Math.round(Math.abs(n)).toLocaleString('en-AU');
-const short=n=>{const a=Math.abs(n);return a>=1e6?'$'+(n/1e6).toFixed(a>=1e7?0:1)+'m':a>=1e3?'$'+Math.round(n/1e3)+'k':fmt(n)};
-const pct=x=>Math.round(x*100)+'%';
-let saved=null;
-try{saved=JSON.parse(localStorage.getItem('moneyMentor')||'null')}catch(e){}
-function fill(o){KEYS.forEach(k=>{$(k).value=o[k]})}
-fill(saved||SAMPLE);
-function read(){const v={};KEYS.forEach(k=>{const n=parseFloat($(k).value);v[k]=isFinite(n)?n:0});return v}
 
-const LIFE=100,SUPER_AGE=60;
-// Work and invest until retireAt, then live off the pot until 100. Super can only be drawn from age 60.
-function run(v,extra,retireAt){
-  const r=(1+v.ret/100)**(1/12)-1,dr=v.drate/100/12,save=v.pay-v.house-v.needs-v.wants+extra,spendMo=v.house+v.needs+v.wants;
-  let inv=v.inv,sup=v.sup,debt=v.debt,debtMonths=v.debt>0?null:0,runsOut=null,atRetire=null;const pts=[];
-  const months=Math.max((LIFE-v.age)*12,0);
-  for(let m=0;m<=months;m++){
-    const a=v.age+m/12;
-    if(m%12===0)pts.push({age:a,inv,sup});
-    if(m===months)break;
-    if(a<retireAt){
-      let pay=Math.max(save,0);
-      if(debt>0){debt*=1+dr;const p=Math.min(debt,pay);debt-=p;pay-=p;if(debt<=0.5&&debtMonths===null){debt=0;debtMonths=m+1}}
-      inv=inv*(1+r)+pay;sup=sup*(1+r)+v.supmo;
-    }else{
-      if(!atRetire)atRetire={inv,sup};
-      inv*=1+r;sup*=1+r;let need=spendMo;
-      const fromInv=Math.min(inv,need);inv-=fromInv;need-=fromInv;
-      if(need>0&&a>=SUPER_AGE){const fromSup=Math.min(sup,need);sup-=fromSup;need-=fromSup}
-      if(need>0.5&&runsOut===null)runsOut=a;
-    }
+<!-- The engine: pure functions, no DOM. Runs here and, unchanged, inside a Web Worker. -->
+<script id="engine">
+/* ==========================================================================
+   RULES: every statutory threshold in one dated object. Update each year.
+   Dollar figures are nominal at their as-at date and treated as constant in
+   real terms (today's dollars) for the whole projection.
+   ========================================================================== */
+const RULES={
+  asAt:'2026-11',
+  tax:{
+    year:'2026-27', source:'ato.gov.au, resident individual rates 2026-27',
+    brackets:[[18200,0],[45000,.15],[135000,.30],[190000,.37],[Infinity,.45]],
+    brackets2027:[[18200,0],[45000,.14],[135000,.30],[190000,.37],[Infinity,.45]], // legislated 14% second bracket from 1 July 2027
+    // Low income tax offset. Taper: 5c per $1 from $37,500 to $45,000, then 1.5c per $1 to $66,667. Verify on ato.gov.au
+    lito:{max:700,full:37500,mid:45000,midValue:325,zero:66667},
+    medicare:{rate:.02,lower:28011,upper:35013,shade:.10},   // levy nil at or below lower, 10c per $1 shade-in to upper
+    mls:{rate:.01,single:105000},                            // surcharge base tier, singles, no private hospital cover
+    // HELP compulsory repayment, marginal system 2026-27. Verify on ato.gov.au
+    help:{min:69528,t1:129717,r1:.15,base2:9028,t2:186050,r2:.17,top:.10}
+  },
+  super:{
+    source:'ato.gov.au, 2026-27',
+    sg:.12, contribTax:.15, concCap:32500,
+    div293:{threshold:250000,rate:.15},
+    maxContribBaseQ:62500,            // SG maximum contribution base per quarter. Verify on ato.gov.au
+    earningsTaxAcc:.15, preservationAge:60, unrestrictedAge:65, tbc:2100000,
+    // Account-based pension minimum drawdown: [age below, rate]
+    minDrawdown:[[65,.04],[75,.05],[80,.06],[85,.07],[90,.09],[95,.11],[Infinity,.14]]
+  },
+  agePension:{
+    source:'servicesaustralia.gov.au, rates from 20 Sept 2026', from:'2026-09-20',
+    age:67, fortnights:26,
+    maxRate:{single:1237.70,couple:1866.00},                                   // per fortnight, couple combined
+    assetsLimit:{single:{home:333000,renter:600000},couple:{home:499000,renter:766000}},
+    assetsTaper:3/1000,                                                        // $3 a fortnight per $1,000 over (couple combined)
+    incomeFree:{single:226,couple:396}, incomeTaper:.5,                        // 50c per $1 (25c each for a couple)
+    deeming:{lower:.0175,upper:.0375,threshold:{single:66800,couple:110600}},
+    workBonus:300                                                              // per fortnight of employment income. Verify
+  },
+  asfa:{ // ASFA Retirement Standard, homeowners, June quarter 2026 (benchmark, not law)
+    asAt:'June qtr 2026', source:'superannuation.asn.au',
+    modest:{single:36548,couple:52690}, comfortable:{single:56166,couple:78998}
   }
-  return{pts,debtMonths,runsOut,atRetire:atRetire||{inv,sup}};
+};
+
+/* Non-statutory constants that are not user inputs */
+const PRESETS={high:{label:'High Growth',ret:4.0,vol:15},balanced:{label:'Balanced',ret:3.5,vol:11},custom:{label:'Custom'}};
+
+/* ===== Tax engine ===== */
+function helpRepay(g){
+  const H=RULES.tax.help;
+  if(g<=H.min)return 0;
+  if(g<=H.t1)return (g-H.min)*H.r1;
+  if(g<=H.t2)return H.base2+(g-H.t1)*H.r2;
+  return g*H.top;
 }
-const lasts=(v,extra,A)=>run(v,extra,A).runsOut===null;
-function sim(v,extra){
-  const spendMo=v.house+v.needs+v.wants,r=(1+v.ret/100)**(1/12)-1,N=Math.max((LIFE-v.target)*12,0);
-  // Pot needed at your goal age to pay your spending every month until 100 (ignores the super lock)
-  const fi=r>0?spendMo*(1-(1+r)**-N)/r*(1+r):spendMo*N;
-  let fiAge=null;for(let A=v.age;A<LIFE;A++){if(lasts(v,extra,A)){fiAge=A;break}}
-  const plan=run(v,extra,v.target);
-  return{pts:plan.pts,fi,fiAge,debtMonths:run(v,extra,LIFE).debtMonths,runsOut:plan.runsOut,atRetire:plan.atRetire,years:LIFE-v.target};
+function litoOf(g){
+  const L=RULES.tax.lito;
+  if(g<=L.full)return L.max;
+  if(g<=L.mid)return L.max-(g-L.full)*(L.max-L.midValue)/(L.mid-L.full);
+  if(g<L.zero)return L.midValue-(g-L.mid)*L.midValue/(L.zero-L.mid);
+  return 0;
+}
+// o: {y2027, help, mls, single}
+function taxOf(g,o){
+  o=o||{};const T=RULES.tax,B=o.y2027?T.brackets2027:T.brackets;
+  g=Math.max(g,0);
+  let base=0,prev=0;for(const[cap,r] of B){if(g>prev)base+=(Math.min(g,cap)-prev)*r;prev=cap}
+  const lito=litoOf(g),income=Math.max(base-lito,0);
+  const M=T.medicare,medicare=g<=M.lower?0:Math.min(g*M.rate,(g-M.lower)*M.shade);
+  const mls=o.mls&&o.single!==false&&g>T.mls.single?g*T.mls.rate:0;
+  const help=o.help?helpRepay(g):0;
+  const total=income+medicare+mls+help;
+  return{base,lito,income,medicare,mls,help,total,net:g-total};
+}
+const netOf=(g,o)=>taxOf(g,o).net;
+function grossFor(net,o){if(net<=0)return 0;let lo=0,hi=net*2.2+60000;for(let i=0;i<60;i++){const m=(lo+hi)/2;netOf(m,o)<net?lo=m:hi=m}return hi}
+// Marginal rate of income tax + Medicare (+ MLS), excluding HELP (HELP is on repayment income, which adds super deductions back)
+function marginalOf(g,o){const q={...o,help:false};return(taxOf(g+100,q).total-taxOf(g,q).total)/100}
+
+/* ===== Super contributions (annual) ===== */
+function contribsOf(v,gross,taxOpts){
+  const S=RULES.super,emp=v.emp!=='self';
+  const sgAutoMo=emp?S.sg*Math.min(gross,S.maxContribBaseQ*4)/12:0;
+  const sgMo=emp?(v.sgAuto?sgAutoMo:Math.max(v.supmo,0)):0;
+  const extraMo=Math.max(v.concMo,0);
+  const concY=(sgMo+extraMo)*12;
+  const contribTax=concY*S.contribTax;
+  // Div 293 income: taxable income (gross less deductions/sacrifice) + low-tax contributions = gross + SG
+  const d293inc=gross+sgMo*12,d293=d293inc>S.div293.threshold?S.div293.rate*Math.min(concY,d293inc-S.div293.threshold):0;
+  // Cash cost of extra concessional: the take-home you give up after the tax deduction
+  const cashCostMo=extraMo>0?(netOf(gross,taxOpts)-netOf(Math.max(gross-extraMo*12,0),taxOpts))/12:0;
+  return{sgMo,sgAutoMo,extraMo,concY,contribTax,div293:d293,div293Income:d293inc,netY:concY-contribTax-d293,overCap:Math.max(concY-S.concCap,0),cashCostMo};
 }
 
-function neededExtra(v){
-  const ok=x=>lasts(v,x,v.target);
+/* ===== Age Pension (annual, today's dollars) ===== */
+function agePensionOf(a,assets,empIncomeY,v){
+  const A=RULES.agePension;
+  if(!v.apOn||a<A.age)return 0;
+  const hh=v.household==='couple'?'couple':'single';
+  const max=A.maxRate[hh];
+  const limit=A.assetsLimit[hh][v.home?'home':'renter'];
+  const byAssets=max-A.assetsTaper*Math.max(assets-limit,0);
+  const thr=A.deeming.threshold[hh];
+  const deemedY=A.deeming.lower*Math.min(assets,thr)+A.deeming.upper*Math.max(assets-thr,0);
+  const incFn=deemedY/A.fortnights+Math.max(empIncomeY/A.fortnights-A.workBonus,0);
+  const byIncome=max-A.incomeTaper*Math.max(incFn-A.incomeFree[hh],0);
+  const fn=Math.min(Math.max(Math.min(byAssets,byIncome),0),max);
+  return fn*A.fortnights*(1-Math.min(Math.max(v.haircut,0),100)/100);
+}
+function minDrawRate(a){for(const[lim,r] of RULES.super.minDrawdown)if(a<lim)return r;return .14}
+
+/* ===== Cash plan (monthly, deterministic): leftover -> debt minimums -> starter fund -> high-rate debt -> full fund -> invest ===== */
+function cashPlan(v,spendMo,concCostMo,strat){
+  const core=v.house+v.needs,L=v.pay-spendMo-concCostMo;
+  const Y=Math.max(v.life-v.age,1),hi=v.highRate;
+  const debts=(v.debts||[]).filter(d=>d.bal>0).map((d,i)=>({i,name:d.name||('Debt '+(i+1)),bal:d.bal,start:d.bal,apr:d.rate,mr:d.rate/100/12,min:Math.max(d.min,0),paidM:null,interest:0}));
+  let ef=Math.max(v.ef,0);
+  const starter=Math.max(v.efStarter,core),full=Math.max(v.efMonths*core,starter);
+  const cashY=new Float64Array(Y),efY=new Float64Array(Y+1);
+  let starterM=ef>=starter?0:null,fullM=ef>=full?0:null,debtFreeM=debts.length?null:0;
+  const order=()=>debts.filter(d=>d.bal>0).sort(strat==='snowball'?(a,b)=>a.bal-b.bal:(a,b)=>b.apr-a.apr);
+  const months=Math.min(Y*12,600); // debts and fund are settled long before 50 years; later years repeat the steady state
+  let steady=null;const m12=[];
+  for(let m=0;m<Y*12;m++){
+    const y=(m/12)|0;
+    if(m%12===0)efY[y]=ef;
+    if(m>=months&&steady!==null){cashY[y]+=steady;continue}
+    let open=0;for(const d of debts)if(d.bal>0){const it=d.bal*d.mr;d.bal+=it;d.interest+=it;open++}
+    let av=L,mc=0;
+    if(av<=0){cashY[y]+=av;mc=av}
+    else{
+      for(const d of order()){const p=Math.min(d.bal,d.min,av);d.bal-=p;av-=p}
+      let p=Math.min(av,Math.max(starter-ef,0));ef+=p;av-=p;
+      for(const d of order())if(d.apr>=hi){p=Math.min(av,d.bal);d.bal-=p;av-=p}
+      p=Math.min(av,Math.max(full-ef,0));ef+=p;av-=p;
+      cashY[y]+=av;mc=av;
+      if(open===0&&ef>=full)steady=av;
+    }
+    for(const d of debts)if(d.bal<=.005&&d.paidM===null){d.bal=0;d.paidM=m+1}
+    if(starterM===null&&ef>=starter-.005)starterM=m+1;
+    if(fullM===null&&ef>=full-.005)fullM=m+1;
+    if(debtFreeM===null&&debts.every(d=>d.bal<=0))debtFreeM=m+1;
+    if(m<12)m12.push({ef,debt:debts.reduce((s,d)=>s+d.bal,0),inv:mc});   // first-year detail for the action plan
+  }
+  efY[Y]=ef;
+  return{L,cashY,efY,debts:debts.map(d=>({name:d.name,start:d.start,apr:d.apr,min:d.min,paidM:d.paidM,interest:d.interest})),
+    interest:debts.reduce((s,d)=>s+d.interest,0),m12,starter,full,starterM,fullM,debtFreeM,minsMo:debts.reduce((s,d)=>s+d.min,0)};
+}
+
+/* ===== Prepare: derive everything the year-by-year engine needs from raw inputs ===== */
+function prepare(v,mod){
+  v={...v,...(mod||{})};
+  const taxOpts={y2027:!!v.y2027,help:!!v.help,mls:!!v.mls,single:v.household!=='couple'};
+  const spendMo=v.house+v.needs+v.wants;
+  const gross=grossFor(Math.max(v.pay,0)*12,taxOpts);
+  const c=contribsOf(v,gross,taxOpts);
+  const plan=cashPlan(v,spendMo,c.cashCostMo,v.debtStrat);
+  const preset=PRESETS[v.preset]&&v.preset!=='custom'?PRESETS[v.preset]:{ret:v.ret,vol:v.vol};
+  return{v,taxOpts,gross,c,plan,spendMo,spendY:spendMo*12,
+    age0:v.age,life:v.life,Y:Math.max(v.life-v.age,1),
+    r:preset.ret/100,vol:preset.vol/100,
+    fee:v.fees/100,drag:v.drag/100,accTax:RULES.super.earningsTaxAcc,
+    supNetY:c.netY,empIncY:gross,out0:Math.max(v.inv,0),acc0:Math.max(v.sup,0)};
+}
+
+/* ===== Year-by-year engine. R: annual real returns (array), off: index of this path's first year.
+   o: {stopAge, extraMo, rule, startY, out0, acc0, rec}
+   Working years: cash flows land mid-year. Retirement: withdraw at the start of each year, then grow. ===== */
+function simulate(P,R,off,o){
+  const v=P.v,Y=P.Y,age0=P.age0,stop=o.stopAge,rule=o.rule||v.rule;
+  const S0=P.spendY*(o.spendScale||1),flo=rule==='fixed'?S0:S0*v.floor/100,infl=v.infl/100,wrPct=v.wrPct/100;
+  const extraY=(o.extraMo||0)*12,sy=o.startY||0;
+  let out=o.out0!=null?o.out0:P.out0,acc=o.acc0!=null?o.acc0:P.acc0,pen=0,tbcRoom=RULES.super.tbc,penOn=false;
+  let S=S0,wr0=0,retY=-1,fail=null,low=1,sumS=0,nS=0;
+  const rec=o.rec?{out:new Float64Array(Y+1),acc:new Float64Array(Y+1),pen:new Float64Array(Y+1),ap:new Float64Array(Y),spend:new Float64Array(Y),draw:new Float64Array(Y)}:null;
+  const preAge=RULES.super.preservationAge,apAge=RULES.agePension.age;
+  for(let y=sy;y<Y;y++){
+    const a=age0+y,Ry=R[off+y];
+    const gOut=Math.max(1+Ry-P.drag-P.fee,0),gAcc=Math.max(1+Ry*(1-P.accTax)-P.fee,0),gPen=Math.max(1+Ry-P.fee,0);
+    if(rec){rec.out[y]=out;rec.acc[y]=acc;rec.pen[y]=pen}
+    const ef=P.plan.efY[y];
+    if(a<stop){
+      const ap=a>=apAge?agePensionOf(a,out+acc+pen+ef,P.empIncY,v):0;
+      out=out*gOut+(P.plan.cashY[y]+extraY+ap)*Math.sqrt(gOut);if(out<0)out=0;
+      acc=acc*gAcc+P.supNetY*Math.sqrt(gAcc);
+      pen*=gPen;
+      if(rec){rec.ap[y]=ap;rec.spend[y]=P.spendY}
+      continue;
+    }
+    if(retY<0)retY=y;
+    if(a>=preAge&&!penOn){penOn=true;const mv=Math.min(acc,tbcRoom);pen+=mv;acc-=mv;tbcRoom-=mv}
+    const ap=agePensionOf(a,out+acc+pen+ef,0,v);
+    const port=out+acc+pen;
+    if(rule==='gk'){
+      if(y===retY)wr0=port>0?Math.max(S-ap,0)/port:0;
+      else{
+        // Skip the inflation rise after a negative-return year (real spending falls by inflation). As in
+        // Guyton-Klinger's original rule, only while the withdrawal rate is above where it started.
+        let wr=port>0?(S-ap)/port:Infinity;
+        if(R[off+y-1]<0&&wr>wr0){S=Math.max(S/(1+infl),flo);wr=port>0?(S-ap)/port:Infinity}
+        if(wr0>0){if(wr>wr0*1.2&&v.life-a>15)S=Math.max(S*.9,flo);else if(wr<wr0*.8)S=Math.min(S*1.1,S0)}   // raises restore cuts, capped at planned spending
+      }
+    }else if(rule==='pct')S=Math.max(wrPct*port+ap,flo);   // never below the floor
+    let need=S-ap;if(need<0){out+=-need;need=0}
+    let cash=0;if(penOn&&pen>0){cash=Math.min(pen,minDrawRate(a)*pen);pen-=cash}
+    let rem=need-cash;if(rem<0){out+=-rem;rem=0}
+    let t=Math.min(out,rem);out-=t;rem-=t;
+    if(a>=preAge){t=Math.min(acc,rem);acc-=t;rem-=t;t=Math.min(pen,rem);pen-=t;rem-=t}
+    const actual=S-rem;
+    if(rec){rec.ap[y]=ap;rec.spend[y]=actual;rec.draw[y]=need-rem}
+    if(S/S0<low)low=S/S0;sumS+=Math.min(actual,S)/S0;nS++;
+    // Fails when this year's spending (as set by the rule, never below the floor) can't be paid
+    if(fail===null&&rem>1){fail=a;if(!rec&&!o.keepGoing)break}
+    out*=gOut;acc*=gAcc;pen*=gPen;
+  }
+  if(rec){rec.out[Y]=out;rec.acc[Y]=acc;rec.pen[Y]=pen}
+  return{fail,rec,low,avg:nS?sumS/nS:1};
+}
+
+/* ===== Deterministic helpers (constant expected return) ===== */
+function flatR(P){const a=new Float64Array(P.Y);a.fill(P.r);return a}
+function detLasts(P,stopAge,extraMo,rule){return simulate(P,flatR(P),0,{stopAge,extraMo,rule}).fail===null}
+function detEarliest(P,extraMo,rule){for(let A=P.age0;A<P.life;A++)if(detLasts(P,A,extraMo,rule))return A;return null}
+
+
+/* ==========================================================================
+   PHASE 2: Monte Carlo. Lognormal annual real returns: ln(1+R) ~ N(mu, sigma),
+   mu = ln(1+r) - sigma^2/2, so the expected (arithmetic) return is r.
+   Seeded mulberry32 + Box-Muller: draws are cached and reused, so results don't
+   flicker and binary searches compare like with like.
+   ========================================================================== */
+const MC={paths:2000,stride:96,seed:20261120};
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+let _Z=null,_R=null;
+function normals(){
+  if(_Z)return _Z;
+  const n=MC.paths*MC.stride,z=new Float64Array(n),rnd=mulberry32(MC.seed);
+  for(let i=0;i<n;i+=2){const u=1-rnd(),w=rnd(),m=Math.sqrt(-2*Math.log(u));z[i]=m*Math.cos(2*Math.PI*w);if(i+1<n)z[i+1]=m*Math.sin(2*Math.PI*w)}
+  return _Z=z;
+}
+function returnsFor(r,vol){
+  const key=r+'|'+vol;if(_R&&_R.key===key)return _R.R;
+  const z=normals(),R=new Float64Array(z.length),mu=Math.log(1+r)-vol*vol/2;
+  for(let i=0;i<z.length;i++)R[i]=Math.exp(mu+vol*z[i])-1;
+  _R={key,R};return R;
+}
+const medianReturn=(r,vol)=>Math.exp(Math.log(1+r)-vol*vol/2)-1;
+
+function successRate(P,R,o){let ok=0;for(let p=0;p<MC.paths;p++)if(simulate(P,R,p*MC.stride,o).fail===null)ok++;return ok/MC.paths}
+
+// Earliest stop age meeting the target, plus a fractional age interpolated between whole years
+function earliestStop(P,R,o,target){
+  const s=A=>successRate(P,R,{...o,stopAge:A});
+  let lo=P.age0,hi=P.life-1;const sHi=s(hi);if(sHi<target)return{age:null,frac:null,s:sHi};
+  const sLo=s(lo);if(sLo>=target)return{age:lo,frac:lo,s:sLo};
+  const memo={};memo[lo]=sLo;memo[hi]=sHi;
+  while(hi-lo>1){const m=(lo+hi)>>1;memo[m]=s(m);memo[m]>=target?hi=m:lo=m}
+  const a=memo[lo],b=memo[hi],frac=lo+(b>a?Math.min(Math.max((target-a)/(b-a),0),1):1);
+  return{age:hi,frac,s:b};
+}
+// Extra monthly investment needed to meet the target at the goal age
+function extraNeeded(P,R,o,target){
+  const ok=x=>successRate(P,R,{...o,extraMo:x})>=target;
   if(ok(0))return 0;if(!ok(30000))return null;
-  let lo=0,hi=30000;for(let i=0;i<30;i++){const mid=(lo+hi)/2;ok(mid)?hi=mid:lo=mid}
+  let lo=0,hi=30000;while(hi-lo>10){const m=(lo+hi)/2;ok(m)?hi=m:lo=m}
   return Math.ceil(hi/10)*10;
 }
-
-// Rough Australian resident tax for 2026–27: brackets, 2% Medicare levy, low income tax offset. No HELP or other offsets.
-function netOf(g){
-  let t=0;const B=[[18200,0],[45000,.15],[135000,.30],[190000,.37],[Infinity,.45]];let prev=0;
-  for(const [cap,r] of B){if(g>prev)t+=(Math.min(g,cap)-prev)*r;prev=cap}
-  let lito=g<=37500?700:g<=45000?700-(g-37500)*.05:g<=66667?325-(g-45000)*.015:0;
-  t=Math.max(t-Math.max(lito,0),0)+(g>27000?g*.02:0);
-  return g-t;
+// Pot needed at the goal age (held in the projected outside/super mix) to meet the target
+function fiPot(P,R,o,target,share){
+  const startY=Math.max(o.stopAge-P.age0,0);
+  const ok=W=>successRate(P,R,{...o,startY,out0:W*share,acc0:W*(1-share)})>=target;
+  let hi=Math.max(P.spendY*10,100000);while(!ok(hi)){hi*=2;if(hi>4e7)return null}
+  let lo=0;while(hi-lo>Math.max(hi*.002,500)){const m=(lo+hi)/2;ok(m)?hi=m:lo=m}
+  return hi;
 }
-function grossFor(net){let lo=0,hi=net*2+50000;for(let i=0;i<50;i++){const m=(lo+hi)/2;netOf(m)<net?lo=m:hi=m}return Math.round(hi/100)*100}
+// Spending tweak: annual cut applied to wants first, then other needs
+function spendCut(v,cutY){const c=cutY/12,w=Math.min(c,v.wants);return{wants:v.wants-w,needs:Math.max(v.needs-(c-w),0)}}
 
-let last=null;
-function draw(){
-  const s=$('chart');if(!last)return;const {pts,fi,fiAge}=last;
-  const W=s.clientWidth,H=s.clientHeight;if(!W||!H)return;
-  const narrow=W<520,pl=narrow?44:58,pr=14,pt=16,pb=30;
-  const maxY=Math.max(fi*1.1,...pts.map(p=>p.inv+p.sup))||1;
-  const a0=pts[0].age,a1=pts[pts.length-1].age;
-  const x=a=>pl+(a-a0)/(a1-a0||1)*(W-pl-pr),y=n=>pt+(1-n/maxY)*(H-pt-pb);
-  const line=f=>pts.map((p,i)=>(i?'L':'M')+x(p.age).toFixed(1)+','+y(f(p)).toFixed(1)).join('');
-  const area=line(p=>p.inv+p.sup)+`L${x(a1)},${y(0)}L${x(a0)},${y(0)}Z`;
-  let g='';
-  const ticks=narrow?3:5;
-  for(let i=0;i<=ticks;i++){const v=maxY*i/ticks;g+=`<line x1="${pl}" x2="${W-pr}" y1="${y(v)}" y2="${y(v)}" stroke="rgba(143,211,255,.12)"/><text x="${pl-8}" y="${y(v)+4}" text-anchor="end" font-size="12" fill="#b9cde0">${short(v)}</text>`}
-  const step=(a1-a0)>30?10:5;
-  for(let a=Math.ceil(a0/step)*step;a<=a1;a+=step)g+=`<text x="${x(a)}" y="${H-8}" text-anchor="middle" font-size="12" fill="#b9cde0">${a}</text>`;
-  g+=`<path d="${area}" fill="rgba(143,211,255,.14)"/><path d="${line(p=>p.sup)}" fill="none" stroke="#5b8db8" stroke-width="2"/><path d="${line(p=>p.inv+p.sup)}" fill="none" stroke="#8fd3ff" stroke-width="3"/>`;
-  const tx=x(last.target),fy=y(fi);
-  g+=`<line x1="${pl}" x2="${tx}" y1="${fy}" y2="${fy}" stroke="#ff5c8a" stroke-width="2" stroke-dasharray="6 5"/><circle cx="${tx}" cy="${fy}" r="7" fill="#ff5c8a" stroke="#0a2540" stroke-width="3"/>`;
-  g+=`<text x="${pl+8}" y="${fy-8}" font-size="13" font-weight="600" fill="#ff5c8a">Need ${short(fi)}</text>`;
-  if(last.runsOut!==null){const rx=x(last.runsOut),ry=y(0);g+=`<circle cx="${rx}" cy="${ry}" r="7" fill="#ff5c8a" stroke="#0a2540" stroke-width="3"/><text x="${Math.min(Math.max(rx,pl+50),W-pr-50)}" y="${ry-14}" font-size="13" font-weight="600" fill="#fff" text-anchor="middle">runs out at ${Math.floor(last.runsOut)}</text>`}
-  else g+=`<text x="${W-pr-4}" y="${y(pts[pts.length-1].inv+pts[pts.length-1].sup)-10}" font-size="13" font-weight="600" fill="#fff" text-anchor="end">lasts to ${LIFE}</text>`;if(last.target<=a1)g+=`<line x1="${tx}" x2="${tx}" y1="${pt}" y2="${H-pb}" stroke="rgba(255,255,255,.35)" stroke-dasharray="2 4"/><text x="${tx-6}" y="${pt+12}" text-anchor="end" font-size="12" fill="#fff">goal ${last.target}</text>`;
-  s.innerHTML=g;
-}
-const ro=new ResizeObserver(draw);ro.observe($('chart'));
-
-function card(c){
-  const extra=c.bar||'';
-  return `<article class="card"><header><h3>${c.t}</h3><span class="pill ${c.s}">${{good:'On track',ok:'Getting there',work:'Work on this',info:'Know this'}[c.s]}</span></header><p class="what">${c.what}</p><div class="big">${c.big}</div>${extra}<p class="tip">${c.tip}</p></article>`;
+/* Historical stress test: APPROXIMATE annual real (CPI-deflated) returns for a 70/30 diversified
+   portfolio (70% US large-cap shares, 30% long-term government bonds), rounded, from public long-run
+   data. Illustrative only; Australian/global mixes differ. Continues at the median assumption after. */
+const HISTORY={
+  1929:[-5.5,-10.3,-24.0,8.0,37.3,-0.1,30.8,23.5,-26.2,26.6,1.5,-6.2,-16.8,5.1],
+  1973:[-17.8,-26.3,20.5,16.0,-11.2,-4.4,-0.7,8.0,-10.8,22.5,11.7],
+  2000:[-3.2,-8.7,-12.3,18.3,6.7,2.2,8.8,2.7,-18.2,11.1,11.9,6.4,10.3],
+  2008:[-18.2,11.1,11.9,6.4,10.3,17.1,16.1,0.1,6.7,15.5]
+};
+function stressRun(P,year,o){
+  const med=medianReturn(P.r,P.vol),R=new Float64Array(P.Y).fill(med),seq=HISTORY[year],s0=Math.max(o.stopAge-P.age0,0);
+  for(let i=0;i<seq.length&&s0+i<P.Y;i++)R[s0+i]=seq[i]/100;
+  const res=simulate(P,R,0,{...o,rec:true}),rec=res.rec;
+  return{year,fail:res.fail,tot:Array.from(rec.out,(x,i)=>x+rec.acc[i]+rec.pen[i])};
 }
 
+/* Everything the page shows from the simulation */
+function analyse(v){
+  const t0=Date.now();
+  const P=prepare(v),R=returnsFor(P.r,P.vol),target=v.succ/100,goal=Math.min(Math.max(v.target,v.age),v.life-1);
+  const base={stopAge:goal,rule:v.rule,extraMo:v.extraMo};
+  // 1. Plan run: percentile bands of total wealth, super-only median
+  const Y=P.Y,N=MC.paths,tot=new Float64Array(N*(Y+1)),sup=new Float64Array(N*(Y+1)),outA=new Float64Array(N*(Y+1)),apA=new Float64Array(N*Y),spA=new Float64Array(N*Y);
+  let ok=0;const failAges=[],lows=new Float64Array(N);
+  for(let p=0;p<N;p++){
+    const {fail,rec,low}=simulate(P,R,p*MC.stride,{...base,rec:true});lows[p]=low;
+    if(fail===null)ok++;else failAges.push(fail);
+    for(let y=0;y<=Y;y++){const s=rec.acc[y]+rec.pen[y];sup[y*N+p]=s;outA[y*N+p]=rec.out[y];tot[y*N+p]=s+rec.out[y]}
+    for(let y=0;y<Y;y++){apA[y*N+p]=rec.ap[y];spA[y*N+p]=rec.spend[y]}
+  }
+  // Keep-working path (never stop): medians used for milestones
+  const wk=new Float64Array(N*(Y+1)),wkOut=new Float64Array(N*(Y+1)),wkSup=new Float64Array(N*(Y+1));
+  for(let p=0;p<N;p++){const {rec}=simulate(P,R,p*MC.stride,{...base,stopAge:P.life+1,rec:true});for(let y=0;y<=Y;y++){const s=rec.acc[y]+rec.pen[y];wk[y*N+p]=s+rec.out[y];wkOut[y*N+p]=rec.out[y];wkSup[y*N+p]=s}}
+  const q=(arr,y,n,ps)=>{const s=arr.slice(y*n,y*n+n).sort();return ps.map(pp=>s[Math.min(n-1,Math.floor(pp*n))])};
+  const bands=[];for(let y=0;y<=Y;y++){const [p10,p50,p90]=q(tot,y,N,[.1,.5,.9]);bands.push({age:P.age0+y,p10,p50,p90,sup:q(sup,y,N,[.5])[0],out:q(outA,y,N,[.5])[0],wk:q(wk,y,N,[.5])[0],wkOut:q(wkOut,y,N,[.5])[0],wkSup:q(wkSup,y,N,[.5])[0]})}
+  const success=ok/N;lows.sort();const low10=lows[Math.floor(N*.1)];
+  const gy=goal-P.age0,atGoal=bands[gy],share=atGoal.p50>1000?Math.min(Math.max(atGoal.out/(atGoal.out+atGoal.sup),0),1):(goal<60?1:.5);
+  const y67=RULES.agePension.age-P.age0;
+  const ap67=y67>=0&&y67<Y?q(apA,y67,N,[.5])[0]:null;
+  // 2. Searches at the success target
+  const early=earliestStop(P,R,{rule:v.rule,extraMo:v.extraMo},target);
+  const extra=extraNeeded(P,R,base,target);
+  // 3. Withdrawal rules compared
+  const rules={};
+  for(const rule of ['fixed','gk','pct']){
+    const o={...base,rule};
+    let k=0;const lw=[],av=[];for(let p=0;p<N;p++){const r=simulate(P,R,p*MC.stride,{...o,keepGoing:true});if(r.fail===null)k++;lw.push(r.low);av.push(r.avg)}lw.sort((a,b)=>a-b);av.sort((a,b)=>a-b);
+    rules[rule]={success:k/N,low10:lw[Math.floor(N*.1)],avg:av[N>>1],pot:fiPot(P,R,o,target,share)};
+  }
+  // 4. The action that would raise the success rate
+  let action=null;
+  const aim=success<target?target:success<.95?.95:null;
+  if(aim){
+    const spendY=P.spendY,okCut=cut=>successRate(prepare(v,spendCut(v,cut)),R,base)>=aim;
+    let cut=null;if(okCut(spendY*.6)){let lo=0,hi=spendY*.6;while(hi-lo>250){const m=(lo+hi)/2;okCut(m)?hi=m:lo=m}cut=Math.ceil(hi/500)*500}
+    const s1=goal+1<v.life?successRate(P,R,{...base,stopAge:goal+1}):null;
+    action={aim,cut,cutSuccess:cut!==null?successRate(prepare(v,spendCut(v,cut)),R,base):null,workMore:s1};
+  }
+  // 5. Lever for the next-move ladder: move $X/month from wants to investing (or invest $X more)
+  const lev=Math.max(Math.min(300,Math.round(v.wants/2/50)*50),0),levP=lev>=50?prepare(v,{wants:v.wants-lev}):P;
+  const lever={amount:lev>=50?lev:300,fromWants:lev>=50,early:earliestStop(levP,R,{rule:v.rule,extraMo:v.extraMo+(lev>=50?0:300)},target)};
+  // 6. Historical stress tests
+  const stress={};for(const yr of Object.keys(HISTORY))stress[yr]=stressRun(P,yr,base);
+  // 7. Debt strategies compared
+  const other=cashPlan(P.v,P.spendMo,P.c.cashCostMo,v.debtStrat==='snowball'?'avalanche':'snowball');
+  return{ms:Date.now()-t0,target,goal,success,low10,bands,share,ap67,early,extra,rules,action,lever,stress,
+    failAge10:failAges.length?failAges.sort((a,b)=>a-b)[Math.floor(failAges.length/2)]:null,
+    gross:P.gross,c:P.c,plan:{...P.plan,cashY:undefined,efY:Array.from(P.plan.efY)},otherPlan:{interest:other.interest,debtFreeM:other.debtFreeM},
+    r:P.r,vol:P.vol,medR:medianReturn(P.r,P.vol),spendY:P.spendY,netOut:P.r-P.drag-P.fee,netSup:P.r*(1-P.accTax)-P.fee,netPen:P.r-P.fee};
+}
+</script>
+<script>
+{
+const SAMPLE={age:30,target:55,household:'single',home:'no',emp:'employee',pay:5200,house:1800,needs:1100,wants:900,mortBal:0,mortRate:6,
+  sgAuto:true,supmo:650,concMo:0,ef:4000,inv:8000,sup:45000,extraMo:0,
+  debts:[{name:'Credit card',bal:2500,rate:20,min:75}],debtStrat:'avalanche',
+  preset:'high',ret:4,vol:15,fees:.5,drag:.75,succ:'90',rule:'fixed',wrPct:4,floor:75,apOn:true,haircut:0,
+  help:false,mls:false,y2027:false,life:100,infl:2.5,highRate:8,efStarter:2000,efMonthsEmp:3,efMonthsSelf:6};
+const NUM=['age','target','pay','house','needs','wants','mortBal','mortRate','supmo','concMo','ef','inv','sup','extraMo','ret','vol','fees','drag','wrPct','floor','haircut','life','infl','highRate','efStarter','efMonthsEmp','efMonthsSelf'];
+const SEL={household:['single','couple'],home:['no','yes'],emp:['employee','self'],debtStrat:['avalanche','snowball'],preset:['high','balanced','custom'],succ:['85','90','95'],rule:['fixed','gk','pct']};
+const CHK=['sgAuto','apOn','help','mls','y2027'];
+const RULE_NAME={fixed:'Fixed real spending',gk:'Guardrails',pct:'% of portfolio'};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=n=>(n<0?'-':'')+'$'+Math.round(Math.abs(n)).toLocaleString('en-AU');
+const short=n=>{const a=Math.abs(n);return a>=1e6?(n<0?'-':'')+'$'+(a/1e6).toFixed(a>=1e7?0:a>=1e6*9.95?1:2).replace(/\.?0+$/,'')+'m':a>=1e3?'$'+Math.round(n/1e3)+'k':fmt(n)};
+const pct=x=>Math.round(x*100)+'%';
+const yrs=x=>x.toFixed(1).replace(/\.0$/,'')+' year'+(Math.abs(x-1)<.05?'':'s');
+const mo=m=>m<1?'now':m<24?m+' month'+(m===1?'':'s'):(m/12).toFixed(1).replace(/\.0$/,'')+' years';
+const annuity=(S,n,r)=>n<=0?0:r>1e-9?S*(1-(1+r)**-n)/r*(1+r):S*n;
+const NOW_Y=new Date().getFullYear();
+
+/* ---------- form <-> object ---------- */
+function debtRow(d){
+  const el=document.createElement('div');el.className='debt';
+  el.innerHTML=`<div class="in dn"><input type="text" class="dName" aria-label="Debt name" placeholder="Name" maxlength="40"></div>
+  <div class="in db"><span>$</span><input type="number" class="dBal" inputmode="decimal" min="0" aria-label="Balance"></div>
+  <div class="in dr"><input type="number" class="dRate" inputmode="decimal" step="0.5" min="0" max="60" aria-label="Interest rate, % a year"><span class="u">%</span></div>
+  <div class="in dm"><span>$</span><input type="number" class="dMin" inputmode="decimal" min="0" aria-label="Minimum payment a month"><span class="u">/mo</span></div>
+  <button type="button" aria-label="Remove this debt">✕</button>`;
+  el.querySelector('.dName').value=d.name||'';el.querySelector('.dBal').value=d.bal;el.querySelector('.dRate').value=d.rate;el.querySelector('.dMin').value=d.min;
+  el.querySelector('button').addEventListener('click',()=>{el.remove();update()});
+  return el;
+}
+function fill(o){
+  NUM.forEach(k=>{if(k in o)$(k).value=o[k]});
+  Object.keys(SEL).forEach(k=>{if(k in o)$(k).value=String(o[k])});
+  CHK.forEach(k=>{if(k in o)$(k).checked=!!o[k]});
+  if(o.debts){const L=$('debtList');L.innerHTML='';o.debts.forEach(d=>L.appendChild(debtRow(d)))}
+  syncPreset();
+}
+const num=id=>{const n=parseFloat($(id).value);return isFinite(n)?n:0};
+function readForm(){
+  const o={};NUM.forEach(k=>o[k]=num(k));Object.keys(SEL).forEach(k=>o[k]=$(k).value);CHK.forEach(k=>o[k]=$(k).checked);
+  o.debts=[...document.querySelectorAll('#debtList .debt')].map(r=>{const n=c=>{const x=parseFloat(r.querySelector(c).value);return isFinite(x)?x:0};return{name:r.querySelector('.dName').value.trim(),bal:n('.dBal'),rate:n('.dRate'),min:n('.dMin')}});
+  return o;
+}
+// Engine view of the form: booleans, numbers, preset values, derived fund months
+function toEngine(o){
+  const v={...o,home:o.home==='yes',succ:+o.succ};
+  if(o.preset!=='custom'){v.ret=PRESETS[o.preset].ret;v.vol=PRESETS[o.preset].vol}
+  v.life=Math.min(Math.max(Math.round(v.life)||100,v.age+2,60),110);
+  v.age=Math.min(Math.max(Math.round(v.age),16),v.life-2);
+  v.target=Math.round(v.target);
+  v.efMonths=v.emp==='self'?v.efMonthsSelf:v.efMonthsEmp;
+  if(v.home===false){v.mortBal=0}
+  return v;
+}
+function syncPreset(){
+  const p=$('preset').value,c=p==='custom';
+  if(!c){$('ret').value=PRESETS[p].ret;$('vol').value=PRESETS[p].vol}
+  $('ret').disabled=!c;$('vol').disabled=!c;
+}
+
+/* ---------- storage ---------- */
+const LS='moneyMentor.v2',LS1='moneyMentor',LSS='moneyMentor.scenarios';
+const store={get(k){try{return JSON.parse(localStorage.getItem(k)||'null')}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let scenarios=store.get(LSS)||{};
+
+// Accepts v2 files, v1 files ({version:1, inputs:{...}}) and bare v1 objects. Returns {o, got, bad} or {err}.
+function fromAny(raw,baseO){
+  const src=raw&&typeof raw==='object'&&raw.inputs&&typeof raw.inputs==='object'?raw.inputs:raw;
+  if(!src||typeof src!=='object'||Array.isArray(src))return{err:'Expected an object of inputs, like {"age": 30, "pay": 5200}.'};
+  const v1=!(raw&&raw.version>=2)&&!('emp' in src)&&!('debts' in src);
+  const o={...baseO},got=[],bad=[];
+  NUM.forEach(k=>{if(k in src){const n=parseFloat(src[k]);if(isFinite(n)){o[k]=n;got.push(k)}else bad.push(k)}});
+  Object.keys(SEL).forEach(k=>{if(k in src){const s=String(src[k]);if(SEL[k].includes(s)){o[k]=s;got.push(k)}else if(k==='home'&&typeof src[k]==='boolean'){o.home=src[k]?'yes':'no';got.push(k)}else bad.push(k)}});
+  CHK.forEach(k=>{if(k in src){o[k]=!!src[k];got.push(k)}});
+  if(Array.isArray(src.debts)){o.debts=src.debts.filter(d=>d&&typeof d==='object').slice(0,12).map(d=>({name:String(d.name||'').slice(0,40),bal:+d.bal||0,rate:+d.rate||0,min:+d.min||0}));got.push('debts')}
+  if(v1){
+    if('debt' in src){const b=parseFloat(src.debt)||0,r=parseFloat(src.drate)||0;o.debts=b>0?[{name:'Debt',bal:b,rate:r,min:Math.max(25,Math.round(b*.03))}]:[];got.push('debt');if('drate' in src)got.push('drate')}
+    if('supmo' in src)o.sgAuto=false;               // a v1 file states employer super directly: keep it as an override
+    if('ret' in src){o.preset='custom';o.vol=15}    // v1 used a single growth rate; treat it as Custom
+  }
+  return{o,got,bad,v1};
+}
+
+/* ---------- worker ---------- */
+let worker=null,reqId=0;const pending={};
+try{
+  const src=$('engine').textContent+'\nonmessage=e=>{const {id,v}=e.data;let A=null,err=null;try{A=analyse(v)}catch(x){err=String(x)}postMessage({id,A,err})};';
+  worker=new Worker(URL.createObjectURL(new Blob([src],{type:'text/javascript'})));
+  worker.onmessage=e=>{const {id,A,err}=e.data,v=pending[id];delete pending[id];if(err){console.error(err);return}if(id===reqId)done(v,A)};
+  worker.onerror=e=>{console.warn('Worker unavailable, computing on the page instead.',e.message);worker=null;compute(lastV)};
+}catch(e){worker=null}
+function compute(v){
+  const id=++reqId;pending[id]=v;$('busy').hidden=false;
+  if(worker)worker.postMessage({id,v});
+  else setTimeout(()=>{if(id!==reqId)return;delete pending[id];done(v,analyse(v))},0);
+}
+
+/* ---------- update cycle ---------- */
+let SAMPLE_JSON='',lastV=null,latest=null,timer=null,stressYr=null;
 function update(){
-  const v=read();
-  try{localStorage.setItem('moneyMentor',JSON.stringify(v))}catch(e){}
-  const isSample=KEYS.every(k=>v[k]===SAMPLE[k]);$('samplenote').textContent=isSample?'These are sample numbers. Swap in your own; the page remembers them on this device.':'Saved on this device as you type.';
-  const save=v.pay-v.house-v.needs-v.wants,pay=v.pay||1,core=v.house+v.needs,spend=core+v.wants;
-  $('leftover').textContent=fmt(save);$('leftover').style.color=save<0?'var(--pink)':'';
-  const rate=save/pay,s=sim(v,0);last={...s,target:v.target};
+  const o=readForm();store.set(LS,o);
+  $('samplenote').textContent=JSON.stringify(o)===SAMPLE_JSON?'These are sample numbers. Swap in your own; the page remembers them on this device.':'Saved on this device as you type.';
+  const v=toEngine(o);lastV=v;
+  quick(v,o);
+  clearTimeout(timer);timer=setTimeout(()=>compute(v),120);
+}
+function done(v,A){$('busy').hidden=true;latest={v,A,P:prepare(v)};try{render(latest)}catch(e){console.error('Render failed: '+e.message+'\n'+e.stack)}}
+
+// Instant feedback that doesn't need the simulation
+function quick(v,o){
+  const P=prepare(v),c=P.c,S=RULES.super,emp=v.emp!=='self';
+  const L=P.plan.L;$('leftover').textContent=fmt(L);$('leftover').style.color=L<0?'var(--pink)':'';
+  $('sgAutoL').hidden=!emp;$('supmoL').hidden=!emp;$('supmo').disabled=v.sgAuto;
+  if(v.sgAuto&&emp)$('supmo').value=Math.round(c.sgAutoMo);
+  $('concLabel').textContent=emp?'Extra salary sacrifice':'Personal deductible contributions';
+  $('mortBalL').hidden=!v.home;$('mortRateL').hidden=!v.home;
+  $('wrPctL').hidden=v.rule!=='pct';$('floorL').hidden=v.rule==='fixed';
+  $('haircutL').hidden=!v.apOn;$('haircutV').textContent=v.haircut+'%';
+  $('mlsL').hidden=v.household==='couple';
+  let h=emp?(v.sgAuto?`Super guarantee: <b>${fmt(c.sgMo)}/mo</b>, 12% of about ${fmt(P.gross)} a year before tax (worked back from your take-home pay).`:`Using your figure of <b>${fmt(c.sgMo)}/mo</b> employer super. Worked out from your pay it would be about ${fmt(c.sgAutoMo)}/mo.`)
+    :`<span class="amb">Freelancers don't get super guarantee paid for them.</span> Personal deductible contributions are how self-employed people usually build super. You give your fund a notice of intent to claim before you lodge your tax return.`;
+  h+=`<br>Concessional (before-tax) contributions: <b>${fmt(c.concY)}</b> of the ${fmt(S.concCap)} yearly cap. After 15% contributions tax${c.div293?' and Division 293':''}, ${fmt(c.netY)} a year lands in super.`;
+  if(c.extraMo>0)h+=` The extra ${fmt(c.extraMo)}/mo costs you about <b>${fmt(c.cashCostMo)}/mo</b> in take-home after the tax saving.`;
+  if(c.overCap>0)h+=`<br><span class="warn">Over the cap by ${fmt(c.overCap)}.</span> Excess concessional contributions are taxed at your marginal rate (less a 15% offset). Unused cap from the past five years can sometimes be carried forward if your super balance is under $500k.`;
+  if(c.div293)h+=`<br><span class="amb">Division 293:</span> income plus concessional contributions of about ${fmt(c.div293Income)} is over $250,000, so an extra 15% (about ${fmt(c.div293)}) applies.`;
+  else if(c.div293Income>RULES.super.div293.threshold*.9)h+=`<br>Division 293 note: an extra 15% applies if income plus concessional contributions exceed $250,000.`;
+  $('superNote').innerHTML=h;
+  // sliders
+  const spend=v.house+v.needs+v.wants,sp=$('slSpend');
+  sp.min=Math.floor((v.house+v.needs)/50)*50;sp.max=Math.max(Math.ceil(Math.max(v.pay*1.1,spend*1.3)/50)*50,+sp.min+500);sp.value=spend;$('slSpendV').textContent=fmt(spend);
+  $('slExtra').value=v.extraMo;$('slExtraV').textContent=fmt(v.extraMo);
+  const sg=$('slGoal');sg.min=v.age+1;sg.max=Math.min(85,v.life-1);sg.value=v.target;$('slGoalV').textContent=v.target;
+  $('slRet').value=v.ret;$('slRetV').textContent=v.ret.toFixed(1)+'%';
+}
+
+/* ---------- milestones ---------- */
+function milestones(v,A,P){
+  const B=A.bands,age=v.age,goal=A.goal,hh=v.household==='couple'?'couple':'single';
+  const firstAge=test=>{for(const b of B)if(test(b))return b.age;return null};
+  const pot=A.rules[v.rule].pot,spendY=P.spendY;
+  const lean=RULES.asfa.modest[hh],fat=Math.max(1.5*spendY,RULES.asfa.comfortable[hh]);
+  // Coast FI: two tests on the median future. Outside super must grow (with no more saving) into the bridge to 60;
+  // super must grow into the post-60 need. C = target / (1+r)^(years to goal)
+  const sAge=Math.max(60,goal),netOut=A.netOut,netSup=A.netSup,netPen=A.netPen;
+  const bridge=goal<60?annuity(spendY,60-goal,netOut):0;
+  const apPV=A.ap67?annuity(A.ap67,v.life-Math.max(67,sAge),netPen)/(1+netPen)**Math.max(67-sAge,0):0;
+  const post=Math.max(annuity(spendY,v.life-sAge,netPen)-apPV,0);
+  const coast=firstAge(b=>b.age<=goal&&b.wkOut*(1+netOut)**(goal-b.age)>=bridge&&b.wkSup*(1+netSup)**(sAge-b.age)>=post);
+  const at=(m)=>m===null?null:m===0?age:age+m/12;
+  const L=[
+    {k:'Emergency fund full',a:at(P.plan.fullM),d:`${v.efMonths} months of essentials (${fmt(P.plan.full)})`},
+    {k:'Debt-free',a:P.plan.debts.length?at(P.plan.debtFreeM):age,d:P.plan.debts.length?'all listed debts cleared':'no debts listed'},
+    {k:'First $100k',a:firstAge(b=>b.wk>=1e5),d:'invested, outside super + super'},
+    {k:'Coast FI',a:coast,d:`could stop saving and still reach the bridge (${short(bridge)}) and post-60 (${short(post)}) pots`},
+    {k:'Lean FI',a:pot?firstAge(b=>b.wk>=pot*lean/spendY):null,d:`ASFA modest: ${fmt(lean)}/yr`},
+    {k:'FI',a:A.early.age,d:`your spending: ${fmt(spendY)}/yr, at ${pct(A.target)} of futures`},
+    {k:'Fat FI',a:pot?firstAge(b=>b.wk>=pot*fat/spendY):null,d:`${fmt(fat)}/yr (1.5× spending or ASFA comfortable)`},
+    {k:'Super unlocks',a:Math.max(60,age),d:'age 60, if retired (65 regardless)'},
+    {k:'Age Pension age',a:Math.max(67,age),d:v.apOn?'67, means-tested':'67 (not included in this plan)'}
+  ];
+  L.forEach(m=>m.done=m.a!==null&&m.a<=age+1e-9&&!(m.k==='Super unlocks'&&age<60)&&!(m.k==='Age Pension age'&&age<67));
+  return{L,bridge,post};
+}
+
+/* ---------- next move ladder ---------- */
+function ladder(v,A,P){
+  const c=P.c,core=v.house+v.needs,pay=v.pay||1,save=P.plan.L,rate=save/pay,plan=P.plan,emp=v.emp!=='self';
+  const high=plan.debts.filter(d=>d.apr>=v.highRate),fullTarget=plan.full,goal=A.goal;
+  const gap=(have,need)=>`Here's where you are vs a common guideline: ${have}, against ${need}.`;
+  const lv=A.lever,fwd=A.early.frac!=null&&lv.early.frac!=null?A.early.frac-lv.early.frac:null;
+  const leverTxt=fwd!=null&&fwd>.05?`${lv.fromWants?'Moving':'Investing an extra'} ${fmt(lv.amount)}/month ${lv.fromWants?'from wants to investing':''} brings freedom forward about ${yrs(fwd)}.`
+    :A.early.frac==null&&lv.early.frac!=null?`${lv.fromWants?'Moving':'Investing an extra'} ${fmt(lv.amount)}/month ${lv.fromWants?'from wants to investing':''} would make freedom reachable at about ${Math.ceil(lv.early.frac)}.`:'';
+  const B=A.bands[goal-v.age],bridge=goal<60?annuity(P.spendY,60-goal,A.netOut):0;
+  const marg=marginalOf(P.gross,P.taxOpts),room=RULES.super.concCap-c.concY;
+  if(save<0)return{m:`Stop the leak: you're spending ${fmt(-save)} a month more than you take home.`,w:'Nothing else works until money is left over. Start with wants, then subscriptions, then the big bills.',p:''};
+  if(v.ef<plan.starter)return{m:`Build a starter emergency fund of ${fmt(plan.starter)}.`,w:gap(fmt(v.ef)+' saved','a starter buffer of $2,000 or one month of essentials'),p:plan.starterM?`At your current leftover you'd have it in about ${mo(plan.starterM)}.`:''};
+  if(high.length){const tot=high.reduce((s,d)=>s+d.start,0),last=Math.max(...high.map(d=>d.paidM||Infinity));
+    const diff=A.otherPlan.interest-plan.interest;
+    return{m:`Clear your ${fmt(tot)} of debt above ${v.highRate}%${high.length>1?(v.debtStrat==='snowball'?', smallest balance first':', highest rate first'):''}.`,
+      w:isFinite(last)?`Every spare dollar at it clears it in about ${mo(last)}. Paying ${high[0].apr}% interest is the surest negative return there is.`:'At current numbers the minimums barely cover the interest. Free up money in the budget so you can attack the highest rate.',
+      p:v.debtStrat==='snowball'&&diff<-1?`Snowball costs about ${fmt(-diff)} more interest than avalanche, in exchange for quicker early wins.`:diff>1?`Avalanche saves about ${fmt(diff)} interest vs snowball.`:''}}
+  if(v.ef<fullTarget-1){const left=fullTarget-v.ef;return{m:`Grow your emergency fund to ${v.efMonths} months: ${fmt(fullTarget)}.`,w:gap((core>0?(v.ef/core).toFixed(1):'0')+' months covered',`${v.efMonths} months${emp?'':' (6 is common for self-employed income)'}`)+' Keep it in a separate high-interest savings account.',p:save>0?`About ${mo(Math.ceil(left/save))} at your current leftover.`:''}}
+  if(emp&&c.sgMo<=0)return{m:'Check your super guarantee is being paid.',w:'Employers must pay 12% of ordinary earnings into your super. Your fund statement or online account shows each payment.',p:''};
+  if(!emp&&c.extraMo<=0){const x=500,cost=(netOf(P.gross,P.taxOpts)-netOf(Math.max(P.gross-x*12,0),P.taxOpts))/12;
+    return{m:'Set up personal deductible super contributions.',w:`Freelancers don't get super guarantee paid for them. Here's where you are vs a common guideline: $0 a month into super, against 12% of income for employees (${fmt(.12*P.gross/12)}/mo for you).`,p:`${fmt(x)}/month into super costs about ${fmt(cost)}/month after the tax deduction.`}}
+  if(v.home&&v.mortBal>0&&v.mortRate/100>A.netOut&&v.inv>0)return{m:`Compare your mortgage offset with investing outside super.`,
+    w:`Money in an offset "earns" your ${v.mortRate}% mortgage rate, tax-free and risk-free. Investing outside super is expected to return about ${(A.netOut*100+(+v.infl||0)).toFixed(1)}% nominal after fees and tax drag, with ups and downs. See the comparison in the rulebook.`,p:''};
+  if(rate<.2)return{m:`Lift your saving to 20%: ${fmt(pay*.2-save)} more a month.`,w:gap(pct(Math.max(rate,0))+' of take-home saved','20%')+' Automate it on payday.',p:leverTxt};
+  if(goal<60&&B&&B.out<bridge*.98)return{m:`Build the bridge to 60 outside super: about ${short(bridge)} by ${goal}.`,w:`Super stays locked until 60, so stopping at ${goal} needs ${60-goal} years of spending outside it. The median future has ${short(B.out)} there. Direct new investing outside super until the bridge is covered.`,p:leverTxt};
+  if(A.extra>0&&room>1000&&marg>=.3&&!(goal<60&&B.out<bridge)){const x=Math.min(500,Math.floor(room/12/50)*50);
+    return{m:`Consider extra concessional (before-tax) super contributions.`,w:`Each $1 you add saves about ${Math.round((marg-.15)*100)}c tax at your ${Math.round(marg*100)}% marginal rate, but it's locked until 60. You have ${fmt(room)} of cap room this year.`,p:x>0?`${fmt(x)}/month would cost about ${fmt(x*(1-marg))} in take-home.`:''}}
+  if(A.extra===null)return{m:`Freedom by ${goal} isn't reachable at ${pct(A.target)} on these numbers.`,w:'Try a later goal age, more income, lower spending, or a flexible withdrawal rule.',p:leverTxt};
+  if(A.extra>0)return{m:`Invest about ${fmt(A.extra)} more a month to be free by ${goal}.`,w:`Or push your goal back: at ${pct(A.target)} confidence it's around ${A.early.age??'—'} on your current path.`,p:leverTxt};
+  return{m:"You're on track. Now it's about optimising.",w:`Keep automating your ${fmt(save)} a month, review fees and investment mix once a year, and send half of every future pay rise to investing.`,p:leverTxt};
+}
+
+/* ---------- render ---------- */
+function card(c){
+  return `<article class="card"><header><h3>${c.t}</h3><span class="pill ${c.s}">${{good:'On track',ok:'Getting there',work:'Work on this',info:'Know this'}[c.s]}</span></header><p class="what">${c.what}</p><div class="big">${c.big}</div>${c.bar||''}<p class="tip2">${c.tip}</p></article>`;
+}
+function render({v,A,P}){
+  const c=P.c,save=P.plan.L,pay=v.pay||1,core=v.house+v.needs,spend=P.spendMo,rate=save/pay,life=v.life,goal=A.goal;
   const efM=core>0?v.ef/core:0,needR=core/pay,wantR=v.wants/pay,houseR=v.house/pay;
-  const gotTo=s.pts.find(p=>p.age>=v.target)||s.pts[s.pts.length-1];
-  const extraNeed=neededExtra(v);
+  const RR=A.rules[v.rule],pot=RR.pot,B=A.bands,atGoal=B[goal-v.age],nowTot=v.inv+v.sup;
+  const nominal=(x,a)=>x*(1+v.infl/100)**(a-v.age),yearAt=a=>NOW_Y+(a-v.age);
+  const tgt=pct(A.target);
+
+  /* odds card */
+  const s=A.success,tens=Math.floor(s*10+1e-9);
+  const lab=s>=.9?['Robust','good']:s>=.75?['Needs flexibility','ok']:['Fragile','work'];
+  $('oHead').textContent=`Stopping at ${goal}, with ${RULE_NAME[v.rule].toLowerCase()}`;
+  $('oPill').textContent=lab[0];$('oPill').className='pill '+lab[1];
+  $('oBig').textContent=s>=.995?`Nearly all futures last to ${life}`:`${tens} in 10 futures last to ${life}`;
+  $('oDots').innerHTML=Array.from({length:10},(_,i)=>`<i class="${i<tens?'on':''}"></i>`).join('');
+  $('oDots').setAttribute('aria-label',`${pct(s)} of 2,000 simulated futures last to ${life}`);
+  const a=A.action;let act='';
+  if(a){const bits=[];if(a.cut)bits.push(`Spend ${fmt(a.cut)}/yr less → ${pct(a.cutSuccess)}`);if(a.workMore!=null)bits.push(`stop at ${goal+1} instead → ${pct(a.workMore)}`);act=bits.join(' · or ')}
+  $('oAct').textContent=act;$('oAct').hidden=!act;
+  $('oNote').textContent=(s>=.995?`${pct(s)} of simulated futures. Planning for certainty usually means working longer than you need to; your ${tgt} target already allows for bad luck.`
+    :`${pct(s)} of 2,000 simulated futures. Your target is ${tgt}: no plan is certain, so a flexible plan with a margin beats chasing 100%.`)+(v.rule!=='fixed'?` In a bad 1-in-10 future, spending dips to about ${pct(A.low10)} of plan.`:'');
+
+  /* earnings card */
+  $('eHead').textContent=`Income you need to be free by ${goal} (${tgt} of futures)`;
+  if(A.extra===null){$('eMonth').textContent='—';$('eYear').textContent='—';$('eNote').textContent=`Even a much bigger pay packet won't get there by ${goal} on these numbers. Try a later goal age, lower spending or a flexible withdrawal rule.`}
+  else{const need=v.pay+A.extra,g=grossFor(need*12,P.taxOpts);
+    $('eMonth').textContent=fmt(need);$('eYear').textContent=fmt(Math.round(g/100)*100);
+    $('eNote').textContent=A.extra>0?`That's ${fmt(A.extra)} a month more than now (about ${fmt(Math.round((g-P.gross)/100)*100)} a year more before tax), keeping spending where it is and investing every extra dollar.`
+      :`You already earn enough. Keep spending at ${fmt(spend)} a month and invest the rest, and you could stop as early as ${A.early.age}.`}
+
+  /* rules */
   const rules=[];
-
   rules.push({t:'Golden egg: pay yourself first',what:'From <em>The Richest Man in Babylon</em>: keep at least one tenth of all you earn, and move it out the day you are paid, before you spend.',
-    big:pct(Math.max(rate,0))+' kept',s:rate>=0.1?'good':rate>0?'ok':'work',
-    bar:`<div class="mark"><div style="width:${Math.min(Math.max(rate,0)/0.2,1)*100}%"></div></div>`,
-    tip:rate>=0.1?`You keep ${fmt(save)} a month. Set up an automatic transfer on payday so it never sits in your spending account.`:rate>0?`You're keeping ${fmt(save)}. Getting to 10% means ${fmt(pay*0.1-save)} more a month.`:`Nothing is left to keep yet. Start with 1% on autopilot and raise it each pay rise.`});
-
-  const r5=needR<=0.5&&wantR<=0.3&&rate>=0.2;
+    big:pct(Math.max(rate,0))+' kept',s:rate>=.1?'good':rate>0?'ok':'work',bar:`<div class="mark"><div style="width:${Math.min(Math.max(rate,0)/.2,1)*100}%"></div></div>`,
+    tip:rate>=.1?`You keep ${fmt(save)} a month. Set up an automatic transfer on payday so it never sits in your spending account.`:rate>0?`Here's where you are vs the guideline: ${pct(rate)} against 10%. That's ${fmt(pay*.1-save)} more a month.`:'Nothing is left over yet. Starting with 1% on autopilot and raising it each pay rise is a common way in.'});
+  const r5=needR<=.5&&wantR<=.3&&rate>=.2;
   rules.push({t:'50/30/20 budget',what:'About 50% of take-home on needs, 30% on wants, 20% to savings and debt.',
-    big:`${pct(needR)} / ${pct(wantR)} / ${pct(Math.max(rate,0))}`,s:r5?'good':rate>=0.1?'ok':'work',
-    bar:`<div class="bar"><div style="width:${Math.min(needR,1)*100}%;background:#5b8db8"></div><div style="width:${Math.min(wantR,1)*100}%;background:#ffd27a"></div><div style="width:${Math.min(Math.max(rate,0),1)*100}%;background:#8fd3ff"></div></div>`,
-    tip:r5?'Balanced. If you want to speed up, push savings past 20% before letting wants grow.':needR>0.5?`Needs are ${pct(needR)} of pay. Housing is usually the lever; ${fmt(core-pay*0.5)} a month over the 50% mark.`:wantR>0.3?`Wants are ${pct(wantR)}. Trimming ${fmt(v.wants-pay*0.3)} a month brings them to 30%.`:`To hit 20% saved you need ${fmt(pay*0.2-save)} more a month.`});
-
+    big:`${pct(needR)} / ${pct(wantR)} / ${pct(Math.max(rate,0))}`,s:r5?'good':rate>=.1?'ok':'work',
+    bar:`<div class="bar"><div style="width:${Math.min(needR,1)*100}%;background:var(--steel)"></div><div style="width:${Math.min(wantR,1)*100}%;background:var(--amber)"></div><div style="width:${Math.min(Math.max(rate,0),1)*100}%;background:var(--sky)"></div></div>`,
+    tip:r5?'Balanced. If you want to speed up, push savings past 20% before letting wants grow.':needR>.5?`Needs are ${pct(needR)} of pay. Housing is usually the lever; ${fmt(core-pay*.5)} a month over the 50% mark.`:wantR>.3?`Wants are ${pct(wantR)}. Trimming ${fmt(v.wants-pay*.3)} a month brings them to 30%.`:`To reach 20% saved, ${fmt(pay*.2-save)} more a month.`});
   rules.push({t:'30% housing rule',what:'Keep rent or mortgage under 30% of income. Banks measure this on pre-tax pay; this checks the stricter take-home version.',
-    big:pct(houseR)+' of pay',s:houseR<=0.3?'good':houseR<=0.4?'ok':'work',
-    bar:`<div class="mark"><div style="width:${Math.min(houseR/0.5,1)*100}%;background:${houseR<=0.3?'var(--sky)':'var(--pink)'}"></div></div>`,
-    tip:houseR<=0.3?'Comfortable. This headroom is what makes every other rule easier.':`30% would be ${fmt(pay*0.3)} a month. A housemate, cheaper suburb or renegotiated rent are the big wins here.`});
-
-  rules.push({t:'Emergency fund',what:'Hold 3 to 6 months of essential costs in cash, in a separate high-interest account, for job loss, car or health shocks.',
-    big:efM.toFixed(1)+' months',s:efM>=3?'good':efM>=1?'ok':'work',
-    bar:`<div class="mark"><div style="width:${Math.min(efM/6,1)*100}%"></div></div>`,
-    tip:efM>=6?'Fully stocked. Anything above 6 months is better put to work investing.':efM>=3?`Solid. Six months would be ${fmt(core*6)}.`:`Three months for you is ${fmt(core*3)}, so ${fmt(core*3-v.ef)} to go. Get one month (${fmt(core)}) first.`});
-
-  rules.push({t:'Kill high-interest debt',what:'Pay debts from the highest interest rate down (avalanche). Clearing a 20% card is a guaranteed 20% return.',
-    big:v.debt>0?fmt(v.debt):'Debt free',s:v.debt<=0?'good':v.drate>=10?'work':'ok',
-    tip:v.debt<=0?'No consumer debt. Keep cards paid in full each month and avoid buy-now-pay-later creep.':s.debtMonths!==null?`Putting your whole leftover at it clears it in about ${s.debtMonths} month${s.debtMonths===1?'':'s'}. Cut up the card once it's done.`:`At your current numbers it won't clear. Free up cash in the budget first, then attack the highest-rate debt.`});
-
+    big:pct(houseR)+' of pay',s:houseR<=.3?'good':houseR<=.4?'ok':'work',bar:`<div class="mark"><div style="width:${Math.min(houseR/.5,1)*100}%;background:${houseR<=.3?'var(--sky)':'var(--pink)'}"></div></div>`,
+    tip:houseR<=.3?'Comfortable. This headroom is what makes every other rule easier.':`30% would be ${fmt(pay*.3)} a month. A housemate, cheaper suburb or renegotiated rent are the big wins here.`});
+  const efT=v.efMonths;
+  rules.push({t:'Emergency fund',what:`Hold 3 to 6 months of essential costs in cash, in a separate high-interest account${v.emp==='self'?'. With irregular freelance income, 6 months is a common target':''}.`,
+    big:efM.toFixed(1)+' months',s:efM>=efT?'good':efM>=1?'ok':'work',bar:`<div class="mark"><div style="width:${Math.min(efM/6,1)*100}%"></div></div>`,
+    tip:efM>=6?'Fully stocked. Anything above 6 months is usually better put to work investing.':efM>=efT?`Solid. Six months would be ${fmt(core*6)}.`:`${efT} months for you is ${fmt(core*efT)}, so ${fmt(core*efT-v.ef)} to go.${P.plan.fullM?` At your leftover, about ${mo(P.plan.fullM)}.`:''}`});
+  const D=P.plan.debts,dTot=D.reduce((x,d)=>x+d.start,0),dHigh=D.some(d=>d.apr>=v.highRate),idiff=A.otherPlan.interest-P.plan.interest;
+  rules.push({t:'Kill high-interest debt',what:`Pay minimums on everything, then throw every spare dollar at debts over ${v.highRate}%. ${v.debtStrat==='avalanche'?'Avalanche: highest rate first, the cheapest way out.':'Snowball: smallest balance first, for quicker wins.'}`,
+    big:dTot>0?fmt(dTot):'Debt free',s:dTot<=0?'good':dHigh?'work':'ok',
+    bar:D.length?`<ul>${D.map(d=>`<li>${esc(d.name)}: ${fmt(d.start)} at ${d.apr}%: ${d.paidM?'paid off in '+mo(d.paidM)+' ('+new Date(new Date().getFullYear(),new Date().getMonth()+d.paidM).toLocaleDateString('en-AU',{month:'short',year:'numeric'})+')':'not cleared at these numbers'}${d.interest>1?', '+fmt(d.interest)+' interest':''}</li>`).join('')}</ul>`:'',
+    tip:dTot<=0?'No consumer debt. Keep cards paid in full each month and watch for buy-now-pay-later creep.':(v.debtStrat==='snowball'&&idiff<-1?`Snowball costs about ${fmt(-idiff)} more interest than avalanche. `:idiff>1?`Avalanche saves ${fmt(idiff)} interest over snowball. `:'')+(P.plan.minsMo>save&&save>=0?`Minimums (${fmt(P.plan.minsMo)}/mo) are more than your leftover.`:'Lower-rate debts get their minimums while you invest the rest.')});
+  const netR=(A.share*A.netOut+(1-A.share)*A.netSup)*100;
   rules.push({t:'Rule of 72',what:'Divide 72 by your yearly growth rate to see how many years money takes to double.',
-    big:v.ret>0?(72/v.ret).toFixed(1)+' years':'Set a growth rate',s:'info',
-    tip:v.ret>0?`At ${v.ret}% your ${short(v.inv+v.sup)} doubles to ${short((v.inv+v.sup)*2)} by about age ${Math.round(v.age+72/v.ret)}, without adding a cent. Starting early is the whole trick.`:'Enter an expected growth rate to see doubling time.'});
-
-  const mult=spend>0?s.fi/(spend*12):0;
-  rules.push({t:`Make it last to ${LIFE}`,what:`The classic 4% rule (save 25× a year of spending) is built for about 30 years. Stopping at ${v.target} and living to ${LIFE} is ${s.years} years, so this works out the pot that pays your spending every month until then.`,
-    big:short(s.fi),s:s.runsOut===null?'good':s.fiAge!==null?'ok':'work',
-    bar:`<div class="mark"><div style="width:${s.fi?Math.min((v.inv+v.sup)/s.fi,1)*100:0}%"></div></div>`,
-    tip:`That's ${mult.toFixed(1)}× your yearly spending, and you're ${s.fi?pct((v.inv+v.sup)/s.fi):'0%'} of the way. `+(s.runsOut===null?`Stopping at ${v.target}, your money lasts to ${LIFE}.`:`Stopping at ${v.target}, it runs out at about ${Math.floor(s.runsOut)}.`)+` At ${v.target} you'd have ${short(s.atRetire.inv)} outside super and ${short(s.atRetire.sup)} in super`+(v.target<SUPER_AGE?`; only the outside-super part can carry you to ${SUPER_AGE}.`:'.')});
-
+    big:netR>0?(72/netR).toFixed(1)+' years':'Set a growth rate',s:'info',
+    tip:netR>0?`After fees and tax your mix grows about ${netR.toFixed(1)}% a year in today's dollars, so ${short(nowTot)} doubles to ${short(nowTot*2)} by about age ${Math.round(v.age+72/netR)}, without adding a cent. Starting early is the whole trick.`:'Enter an expected growth rate to see doubling time.'});
+  rules.push({t:`Make it last to ${life}`,what:`The classic 4% rule (25× a year of spending) is built for about 30 years. Stopping at ${goal} and living to ${life} is ${life-goal} years, so this finds the pot that lasts to ${life} in ${tgt} of 2,000 simulated futures, after the Age Pension${v.apOn?'':' (switched off)'}.`,
+    big:pot?short(pot):'Out of reach',s:s>=A.target?'good':A.early.age!==null?'ok':'work',
+    bar:`<div class="mark"><div style="width:${pot?Math.min(nowTot/pot,1)*100:0}%"></div></div>`,
+    tip:(pot?`That's ${(pot/P.spendY).toFixed(1)}× your yearly spending (about ${short(nominal(pot,goal))} in ${yearAt(goal)} dollars at ${v.infl}% inflation), and you're ${pct(nowTot/pot)} of the way. `:'')+`In the median future you'd have ${short(atGoal.out)} outside super and ${short(atGoal.sup)} in super at ${goal}`+(goal<60?`; only the outside part can carry you to 60.`:'.')});
+  // super contributions
+  const room=RULES.super.concCap-c.concY;
+  rules.push({t:'Super contributions',what:v.emp==='self'?"Self-employed people don't get the 12% super guarantee. Personal contributions you claim as a deduction are taxed 15% in the fund instead of at your marginal rate.":'Your employer pays 12% of ordinary earnings. You can add before-tax contributions up to the yearly cap.',
+    big:fmt(c.concY)+'/yr',s:c.overCap>0?'work':c.concY<=0?'work':v.emp==='self'&&c.concY<.1*P.gross?'ok':'good',
+    bar:`<div class="mark"><div style="width:${Math.min(c.concY/RULES.super.concCap,1)*100}%;background:${c.overCap>0?'var(--pink)':'var(--sky)'}"></div></div>`,
+    tip:c.overCap>0?`Over the ${fmt(RULES.super.concCap)} cap by ${fmt(c.overCap)}; the excess is taxed at your marginal rate.`:`${fmt(Math.max(room,0))} of cap room left this year. ${fmt(c.netY)} a year reaches super after contributions tax${c.div293?' and Division 293':''}.`});
+  // Age Pension
+  const apShare=A.ap67!=null?A.ap67/P.spendY:0;
+  rules.push({t:'Age Pension',what:`From 67, means-tested on assets (home exempt) and on deemed income. Shown for a ${v.household} ${v.home?'homeowner':'renter'}${v.haircut?`, with a ${v.haircut}% policy-risk haircut`:''}.`,
+    big:v.apOn&&A.ap67?fmt(A.ap67)+'/yr':v.apOn?'$0':'Not included',s:'info',
+    tip:!v.apOn?'Switch it on under Retirement to see how much it could cover.':A.ap67?`In the median future it covers about ${pct(apShare)} of your spending from 67. Thresholds are held at today's values in real terms; in practice they're indexed, and policy can change.`:'In the median future your assets are above the cut-off at 67, so no pension is paid then. It may start later as assets are drawn down.'});
+  // Comparators
+  const marg=marginalOf(P.gross,P.taxOpts),d293=c.div293>0,per=marg-(d293?.30:.15);
+  rules.push({t:'Comparison: salary sacrifice',what:'General comparison, not advice. Money put into super before tax is taxed at 15% (30% under Division 293) instead of your marginal rate.',
+    big:`${Math.round(per*100)}c per $1`,s:'info',
+    tip:`At about ${fmt(P.gross)} a year your marginal rate is ${Math.round(marg*100)}% including Medicare, so each $1 saves about ${Math.max(Math.round(per*100),0)}c of tax. The trade-off: it's locked until 60${v.age<60?`, ${60-v.age} years away`:''}${goal<60?`, after your goal age of ${goal}`:''}.`});
+  if(v.home&&v.mortBal>0){const inv=A.netOut*100,mr=v.mortRate-v.infl;
+    rules.push({t:'Comparison: offset vs invest',what:'General comparison, not advice. Each dollar in an offset saves mortgage interest, which is tax-free and certain.',
+      big:`${v.mortRate}% vs ${(inv+v.infl).toFixed(1)}%`,s:'info',
+      tip:`Offset: ${v.mortRate}% nominal (about ${mr.toFixed(1)}% after inflation), guaranteed. Investing outside super: about ${inv.toFixed(1)}% real expected after fees and tax drag, but in a bad year it can fall ${Math.round(A.vol*100*1.3)}% or more. ${mr>inv?'On these numbers the offset wins without the risk.':'Investing is expected to come out ahead, with risk; the offset keeps money accessible either way.'}`});
+  }
   $('rules').innerHTML=rules.map(card).join('');
   const scored=rules.filter(r=>r.s!=='info'),good=scored.filter(r=>r.s==='good').length;
-  $('sScore').textContent=`${good} of ${scored.length}`;
-  $('sRate').textContent=pct(Math.max(rate,0));
-  $('sFree').textContent=s.fiAge!==null?Math.ceil(s.fiAge):'—';
+  $('sScore').textContent=`${good} of ${scored.length}`;$('sRate').textContent=pct(Math.max(rate,0));
+  $('sFree').textContent=A.early.age!==null?A.early.age:'—';$('sFreeL').textContent=`earliest age you can stop and last to ${life} (${tgt} of futures)`;
 
-  let m,w;
-  if(save<0){m=`Stop the leak: you're spending ${fmt(-save)} a month more than you earn.`;w='Nothing else works until money is left over. Start with wants, then subscriptions, then the big bills.'}
-  else if(efM<1){m=`Build a starter emergency fund of ${fmt(core)}.`;w=`That's one month of essentials. At ${fmt(save)} a month you'd have it in about ${save>0?Math.ceil((core-v.ef)/save):'∞'} months.`}
-  else if(v.debt>0&&v.drate>=7){m=`Wipe out your ${fmt(v.debt)} debt.`;w=s.debtMonths!==null?`Every spare dollar at it clears it in about ${s.debtMonths} months and saves ${v.drate}% a year in interest.`:'Free up money in the budget so you can start paying it down.'}
-  else if(efM<3){m=`Grow your emergency fund to 3 months: ${fmt(core*3)}.`;w=`You have ${efM.toFixed(1)} months covered. Park it in a separate high-interest savings account.`}
-  else if(rate<0.2){m=`Lift your saving to 20%: ${fmt(pay*0.2-save)} more a month.`;w='Take it from wants first. Automate it on payday so you never see it.'}
-  else if(extraNeed===null||extraNeed>0){m=extraNeed?`Invest about ${fmt(extraNeed)} more a month to be free by ${v.target}.`:`Freedom by ${v.target} isn't reachable on these numbers.`;w=extraNeed?`Or push your goal back: on your current path it's around age ${s.fiAge!==null?Math.ceil(s.fiAge):'—'}.`:'Try a later goal age, more income, or lower spending.'}
-  else{m='You\'re on track. Keep feeding the golden goose.';w=`Automate your ${fmt(save)} a month into investments, and send half of every future pay rise there too.`}
-  $('move').textContent=m;$('why').textContent=w;
+  /* next move */
+  const L=ladder(v,A,P);$('move').textContent=L.m;$('why').textContent=L.w;$('payoff').textContent=L.p;$('payoff').hidden=!L.p;
 
-  $('eHead').textContent=`Income you need to be free by ${v.target}`;
-  if(extraNeed===null){
-    $('eMonth').textContent='—';$('eYear').textContent='—';
-    $('eNote').textContent=`Even a much bigger pay packet won't get there by ${v.target} on these numbers. Try a later goal age or lower spending.`;
-  }else{
-    const need=v.pay+extraNeed,diff=extraNeed;
-    $('eMonth').textContent=fmt(need);$('eYear').textContent=fmt(grossFor(need*12));
-    $('eNote').textContent=diff>0
-      ?`That's ${fmt(diff)} a month more than now (about ${fmt(grossFor(need*12)-grossFor(v.pay*12))} a year more before tax), keeping your spending where it is and investing every extra dollar.`
-      :`You already earn enough. Keep spending at ${fmt(spend)} a month and invest the rest, and you could stop as early as ${s.fiAge}.`;
-  }
-  draw();
+  yearPlan(v,A,P);
+  /* Age Pension line */
+  $('apLine').innerHTML=v.apOn&&A.ap67?`Age Pension covers <b>${fmt(A.ap67)}</b> a year of your spending from 67 (about ${pct(apShare)}, median future).`:v.apOn?'In the median future, assets at 67 are above the Age Pension cut-off.':'Age Pension is switched off.';
+
+  /* withdrawal rules table */
+  $('wrGoal').textContent=goal;
+  $('wrTable').innerHTML=`<thead><tr><th>Rule</th><th class="n">Last to ${life}</th><th class="n">Pot needed for ${tgt}</th><th class="n">Typical spend</th><th class="n">Bad 1-in-10</th></tr></thead><tbody>`+
+    ['fixed','gk','pct'].map(k=>{const r=A.rules[k];return`<tr class="${k===v.rule?'cur':''}"><td>${RULE_NAME[k]}${k===v.rule?' (yours)':''}</td><td class="n">${pct(r.success)}</td><td class="n">${r.pot?short(r.pot):'—'}</td><td class="n">${pct(r.avg)}</td><td class="n">${pct(r.low10)}</td></tr>`}).join('')+'</tbody>';
+
+  /* milestones */
+  const M=milestones(v,A,P),span=life-v.age,pos=a=>Math.min(Math.max((a-v.age)/span,0),1)*100;
+  let tr='';const step=span>50?10:5;
+  for(let x=Math.ceil(v.age/step)*step;x<=life;x+=step)tr+=`<span class="ax" style="left:${pos(x)}%">${x}</span>`;
+  tr+=`<div class="fill" style="width:${pos(Math.max(v.age,...M.L.filter(m=>m.done).map(m=>m.a)))}%"></div>`;
+  M.L.forEach((m,i)=>{if(m.a!==null&&m.a<=life)tr+=`<span class="dot ${m.done?'done':''}" style="left:${pos(m.a)}%" title="${m.k}">${m.done?'✓':i+1}</span>`});
+  $('track').innerHTML=tr;
+  $('mlist').innerHTML=M.L.map((m,i)=>`<li class="${m.done?'done':''}"><span class="k">${m.done?'✓':i+1}</span><span><b>${m.k}</b>${m.d}</span><span class="a">${m.done?'done':m.a===null||m.a>life?'not on this plan':'age '+Math.ceil(m.a-1e-9)}</span></li>`).join('');
+  $('asfaNote').textContent=`Lean and Fat FI use the ASFA Retirement Standard (${RULES.asfa.asAt}, homeowners): modest ${fmt(RULES.asfa.modest.single)} single / ${fmt(RULES.asfa.modest.couple)} couple, comfortable ${fmt(RULES.asfa.comfortable.single)} / ${fmt(RULES.asfa.comfortable.couple)} a year. ASFA assumes life to about 85 and a part Age Pension; this plan runs to ${life}. Pots for Lean and Fat FI scale your FI pot by spending.`;
+
+  /* scenarios */
+  renderScenarios();
+  drawSR();draw();assumptions(v);
 }
-$('f').addEventListener('input',update);
-$('f').addEventListener('submit',e=>e.preventDefault());
-$('reset').addEventListener('click',()=>{fill(SAMPLE);update()});
 
-// JSON save / load
+
+/* ---------- 12-month action plan ---------- */
+const LSP='moneyMentor.plan';let ticks=store.get(LSP)||{};
+function yearPlan(v,A,P){
+  const plan=P.plan,L=plan.L,c=P.c,m12=plan.m12,emp=v.emp!=='self',goal=A.goal,tgt=pct(A.target);
+  const d0=new Date(),when=m=>new Date(d0.getFullYear(),d0.getMonth()+m,1).toLocaleDateString('en-AU',{month:'short',year:'numeric'});
+  const spend=v.house+v.needs+v.wants,steps=[];
+  // 1. Automate the saving (or close the gap)
+  if(L<=0)steps.push({id:'gap',t:`Close the ${fmt(-L)} a month gap`,e:`Spending is above take-home. Get spending under ${fmt(v.pay-Math.max(c.cashCostMo,0))} a month, starting with wants.`,w:when(3)});
+  else steps.push({id:'auto',t:`Automate ${fmt(L)} a month on payday`,e:'A transfer to a separate account the day you are paid, before you spend.',w:when(1)});
+  // 2. High-interest debt
+  const hd=plan.debts.filter(d=>d.apr>=v.highRate);
+  if(hd.length){const tot=hd.reduce((x,d)=>x+d.start,0),last=Math.max(...hd.map(d=>d.paidM||Infinity));
+    if(isFinite(last)&&last<=12)steps.push({id:'debt',t:`Clear ${fmt(tot)} of debt over ${v.highRate}%`,e:hd.length>1?'In this order: '+hd.slice().sort(v.debtStrat==='snowball'?(a,b)=>a.start-b.start:(a,b)=>b.apr-a.apr).map(d=>esc(d.name)).join(', ')+'.':`${esc(hd[0].name)}: every spare dollar after minimums.`,w:when(last)});
+    else steps.push({id:'debt',t:`Get high-interest debt down to ${fmt(m12[11].debt)}`,e:isFinite(last)?`From ${fmt(tot)} now; it's fully cleared by ${when(last)}.`:'Minimums barely cover interest at these numbers, so free up cash for it first.',w:when(12)});
+  }
+  // 3. Emergency fund
+  if(plan.fullM>0){const m=plan.fullM;
+    steps.push(m<=12?{id:'ef',t:`Build the emergency fund to ${fmt(plan.full)}`,e:`${v.efMonths} months of essentials, in a separate high-interest savings account.`,w:when(m)}
+      :{id:'ef',t:`Grow the emergency fund to ${fmt(m12[11].ef)}`,e:`On the way to ${fmt(plan.full)} (${v.efMonths} months), reached around ${plan.fullM?when(m):'later'}.`,w:when(12)});
+  }
+  // 4. Invest
+  const firstInv=m12.findIndex(r=>r.inv>0),perMo=Math.max(m12[11].inv,0)+v.extraMo,totInv=m12.reduce((x,r)=>x+Math.max(r.inv,0),0)+v.extraMo*12;
+  if(perMo>0)steps.push({id:'inv',t:`Invest ${fmt(perMo)} a month${firstInv>0?' from '+when(firstInv+1):''}`,e:`${fmt(totInv)} over the year${goal<60?', outside super first: it funds the years before 60':''}.`,w:firstInv>0?when(firstInv+1):when(1)});
+  // 5. Close the gap to the goal
+  if(A.extra>0){const a=A.action;steps.push({id:'extra',t:`Find ${fmt(A.extra)} a month more to invest`,e:`That's what puts stopping at ${goal} at ${tgt} of futures, through a pay rise, side income or spending less${a&&a.cut?` (spending ${fmt(a.cut)} a year less gets to ${pct(a.cutSuccess)})`:''}.`,w:when(12)})}
+  else if(A.extra===null)steps.push({id:'extra',t:`Rethink the goal age`,e:`${goal} isn't reachable at ${tgt} on these numbers${A.early.age?`; the earliest is about ${A.early.age}`:''}. Try a later age or a flexible withdrawal rule.`,w:when(3)});
+  // 6. Super
+  if(emp)steps.push({id:'super',t:`Check about ${fmt(c.sgMo)} a month lands in super`,e:c.extraMo>0?`Plus your ${fmt(c.extraMo)} a month salary sacrifice. Your fund's online account shows each payment.`:"Your fund's online account shows each payment. Missing super is worth chasing early.",w:when(3)});
+  else steps.push(c.extraMo>0?{id:'super',t:`Contribute ${fmt(c.extraMo)} a month to super`,e:'Send your fund a notice of intent to claim before you lodge your tax return, so you get the deduction.',w:'by June 30'}
+    :{id:'super',t:'Start personal super contributions',e:`Even ${fmt(Math.round(.12*P.gross/12/50)*50)} a month (12% of income) puts freelancers level with employees.`,w:when(2)});
+  // 7. Spending guardrail + review
+  steps.push({id:'spend',t:`Keep spending at or under ${fmt(spend)} a month`,e:`Wants ${fmt(v.wants)}. Pay rises go to investing, not lifestyle.`,w:'monthly'});
+  steps.push({id:'review',t:'Re-run this plan with fresh numbers',e:'Update balances, pay and spending. Tax and pension rules update each July and September.',w:when(12)});
+  // Headline target and quarterly checkpoints: invested balance (outside super + super), median growth after fees and tax
+  const gO=(1+A.medR-P.drag-P.fee)**(1/12)-1,gS=(1+A.medR*(1-P.accTax)-P.fee)**(1/12)-1;
+  const path=add=>{let o=v.inv,su=v.sup;const out=[];for(let m=0;m<12;m++){o=Math.max(o*(1+gO)+m12[m].inv+v.extraMo+add,0);su=su*(1+gS)+c.netY/12;if(m%3===2)out.push(o+su)}return out};
+  const base=path(0),goalP=A.extra>0?path(A.extra):null;
+  $('yrGoal').innerHTML=`<b>${short(goalP?goalP[3]:base[3])} invested by ${when(12)}</b>Outside super + super, today's dollars${goalP?`. That's ${short(goalP[3]-base[3])} more than your current path (${short(base[3])}), the amount that keeps ${goal} on track.`:`. Hit this and you're on track for ${goal}.`}`;
+  $('yrCps').innerHTML=base.map((x,i)=>`<div class="cp">${when(3*i+3)}<b>${short(goalP?goalP[i]:x)}</b>${goalP?`<i>current path ${short(x)}</i>`:''}</div>`).join('');
+  $('yrSteps').innerHTML=steps.map(st=>`<li class="${ticks[st.id]?'done':''}"><label><input type="checkbox" data-step="${st.id}" ${ticks[st.id]?'checked':''}><span><b>${st.t}</b><em>${st.e}</em></span><span class="when">${st.w}</span></label></li>`).join('');
+  const n=steps.filter(st=>ticks[st.id]).length;$('yrDone').textContent=`${n} of ${steps.length} done. Checkpoints assume typical (median) growth; markets will wobble around them.`;
+}
+$('yrSteps').addEventListener('change',e=>{const id=e.target.dataset.step;if(!id)return;if(e.target.checked)ticks[id]=true;else delete ticks[id];store.set(LSP,ticks);e.target.closest('li').classList.toggle('done',e.target.checked);if(latest)yearPlan(latest.v,latest.A,latest.P)});
+$('yrClear').addEventListener('click',()=>{ticks={};store.set(LSP,ticks);if(latest)yearPlan(latest.v,latest.A,latest.P)});
+
+/* ---------- fan chart ---------- */
+function draw(){
+  const s=$('chart');if(!latest)return;const {v,A}=latest,B=A.bands,pot=A.rules[v.rule].pot,goal=A.goal;
+  const W=s.clientWidth,H=s.clientHeight;if(!W||!H)return;
+  const narrow=W<520,pl=narrow?46:58,pr=14,pt=16,pb=30;
+  const st=stressYr?A.stress[stressYr]:null;
+  const hiY0=Math.max((pot||0)*1.15,...B.map(b=>b.p50),...B.filter(b=>b.age<=goal+5).map(b=>b.p90),st?Math.max(...st.tot.slice(0,goal-v.age+15)):0)||1;
+  const ticks=narrow?3:5,raw=hiY0/ticks,mag=10**Math.floor(Math.log10(raw||1)),stp=[1,1.5,2,2.5,3,4,5,6,8,10].map(m=>m*mag).find(m=>m>=raw),hiY=stp*ticks;
+  const a0=B[0].age,a1=B[B.length-1].age;
+  const x=a=>pl+(a-a0)/(a1-a0||1)*(W-pl-pr),y=n=>pt+(1-Math.min(n,hiY*1.02)/hiY)*(H-pt-pb);
+  const line=f=>B.map((b,i)=>(i?'L':'M')+x(b.age).toFixed(1)+','+y(f(b)).toFixed(1)).join('');
+  let g=`<defs><clipPath id="clp"><rect x="${pl}" y="${pt}" width="${W-pl-pr}" height="${H-pt-pb}"/></clipPath></defs>`;
+  for(let i=0;i<=ticks;i++){const val=hiY*i/ticks;g+=`<line x1="${pl}" x2="${W-pr}" y1="${y(val)}" y2="${y(val)}" stroke="rgba(143,211,255,.12)"/><text x="${pl-8}" y="${y(val)+4}" text-anchor="end" font-size="12" fill="#b9cde0">${short(val)}</text>`}
+  const step=(a1-a0)>30?10:5;
+  for(let a=Math.ceil(a0/step)*step;a<=a1;a+=step)g+=`<text x="${x(a)}" y="${H-8}" text-anchor="middle" font-size="12" fill="#b9cde0">${a}</text>`;
+  const band=B.map((b,i)=>(i?'L':'M')+x(b.age).toFixed(1)+','+y(b.p90).toFixed(1)).join('')+[...B].reverse().map(b=>'L'+x(b.age).toFixed(1)+','+y(b.p10).toFixed(1)).join('')+'Z';
+  g+=`<g clip-path="url(#clp)"><path d="${band}" fill="rgba(143,211,255,.16)"/><path d="${line(b=>b.p90)}" fill="none" stroke="rgba(143,211,255,.45)" stroke-width="1"/><path d="${line(b=>b.p10)}" fill="none" stroke="rgba(143,211,255,.45)" stroke-width="1"/>`;
+  g+=`<path d="${line(b=>b.sup)}" fill="none" stroke="#5b8db8" stroke-width="2"/><path d="${line(b=>b.p50)}" fill="none" stroke="#8fd3ff" stroke-width="3" stroke-linejoin="round"/>`;
+  if(st){const d=st.tot.map((t,i)=>(i?'L':'M')+x(a0+i).toFixed(1)+','+y(t).toFixed(1)).join('');g+=`<path d="${d}" fill="none" stroke="#ffd27a" stroke-width="2.5" stroke-dasharray="1 5" stroke-linecap="round"/>`;
+    if(st.fail!==null)g+=`<circle cx="${x(st.fail)}" cy="${y(0)}" r="6" fill="#ffd27a" stroke="#0f3052" stroke-width="2"/>`}
+  g+='</g>';
+  const tx=x(goal);
+  if(pot){const fy=y(pot);g+=`<line x1="${pl}" x2="${tx}" y1="${fy}" y2="${fy}" stroke="#ff5c8a" stroke-width="2" stroke-dasharray="6 5"/><circle cx="${tx}" cy="${fy}" r="7" fill="#ff5c8a" stroke="#0f3052" stroke-width="3"/><text x="${pl+8}" y="${fy-8}" font-size="13" font-weight="600" fill="#fff">Need ${short(pot)}</text>`}
+  g+=`<line x1="${tx}" x2="${tx}" y1="${pt}" y2="${H-pb}" stroke="rgba(255,255,255,.35)" stroke-dasharray="2 4"/><text x="${tx-6}" y="${pt+12}" text-anchor="end" font-size="12" fill="#fff">goal ${goal}</text>`;
+  g+=`<line id="xh" x1="0" x2="0" y1="${pt}" y2="${H-pb}" stroke="rgba(255,255,255,.5)" visibility="hidden"/><rect x="${pl}" y="${pt}" width="${W-pl-pr}" height="${H-pt-pb}" fill="transparent" id="hit"/>`;
+  s.innerHTML=g;
+  const tip=$('tip'),xh=s.querySelector('#xh');
+  const move=e=>{const r=s.getBoundingClientRect(),cx=(e.touches?e.touches[0].clientX:e.clientX)-r.left;
+    const a=Math.round(a0+(cx-pl)/(W-pl-pr)*(a1-a0)),b=B[Math.min(Math.max(a-a0,0),B.length-1)];
+    xh.setAttribute('x1',x(b.age));xh.setAttribute('x2',x(b.age));xh.setAttribute('visibility','visible');
+    tip.innerHTML=`<b>Age ${b.age}</b> (${NOW_Y+b.age-v.age})<br>Median <b>${short(b.p50)}</b><br>Bad 1-in-10 ${short(b.p10)} · good 1-in-10 ${short(b.p90)}<br>Super (median) ${short(b.sup)}${st?`<br>${stressYr} replay ${short(st.tot[b.age-a0]||0)}`:''}`;
+    tip.hidden=false;const tw=tip.offsetWidth,lx=x(b.age)+12+tw>W?x(b.age)-12-tw:x(b.age)+12;tip.style.left=lx+'px';tip.style.top=pt+8+'px'};
+  const hit=s.querySelector('#hit');hit.addEventListener('mousemove',move);hit.addEventListener('touchmove',move,{passive:true});
+  hit.addEventListener('mouseleave',()=>{tip.hidden=true;xh.setAttribute('visibility','hidden')});
+}
+new ResizeObserver(()=>{draw();drawSR()}).observe($('fig'));
+
+/* ---------- savings-rate chart: n = ln(1 + r(1-s)/(s*w)) / ln(1+r) ---------- */
+function drawSR(){
+  const s=$('srChart');if(!latest)return;const {v,A,P}=latest;
+  const W=s.clientWidth,H=s.clientHeight;if(!W||!H)return;
+  const r=Math.max(A.share*A.netOut+(1-A.share)*A.netSup,.001),pot=A.rules[v.rule].pot,w=pot?Math.min(Math.max(P.spendY/pot,.015),.08):.04;
+  const n=sv=>Math.log(1+r*(1-sv)/(sv*w))/Math.log(1+r);
+  const pl=40,pr=14,pt=14,pb=34,maxN=70;
+  const x=sv=>pl+(sv-.05)/(.9-.05)*(W-pl-pr),y=t=>pt+(1-Math.min(t,maxN)/maxN)*(H-pt-pb);
+  let g='';
+  for(let t=0;t<=maxN;t+=10)g+=`<line x1="${pl}" x2="${W-pr}" y1="${y(t)}" y2="${y(t)}" stroke="rgba(143,211,255,.12)"/><text x="${pl-6}" y="${y(t)+4}" text-anchor="end" font-size="12" fill="#b9cde0">${t}</text>`;
+  for(let t=.1;t<=.9001;t+=.2)g+=`<text x="${x(t)}" y="${H-16}" text-anchor="middle" font-size="12" fill="#b9cde0">${Math.round(t*100)}%</text>`;
+  g+=`<text x="${(pl+W-pr)/2}" y="${H-2}" text-anchor="middle" font-size="12" fill="#b9cde0">savings rate (share of take-home)</text>`;
+  [.2,.3,.5,.7].forEach(t=>{g+=`<line x1="${x(t)}" x2="${x(t)}" y1="${y(n(t))}" y2="${H-pb}" stroke="rgba(255,210,122,.35)" stroke-dasharray="2 4"/><text x="${x(t)+4}" y="${y(n(t))-6}" font-size="12" fill="#fff">${Math.round(n(t))}y</text>`});
+  let d='';for(let sv=.05;sv<=.9;sv+=.005)d+=(d?'L':'M')+x(sv).toFixed(1)+','+y(n(sv)).toFixed(1);
+  g+=`<path d="${d}" fill="none" stroke="#8fd3ff" stroke-width="2"/>`;
+  const me=P.plan.L/(v.pay||1);
+  if(me>=.05&&me<=.9)g+=`<circle cx="${x(me)}" cy="${y(n(me))}" r="7" fill="#ff5c8a" stroke="#0f3052" stroke-width="3"/><text x="${x(me)+(me>.7?-10:10)}" y="${y(n(me))+(n(me)>maxN*.8?18:-10)}" font-size="13" font-weight="600" fill="#fff" text-anchor="${me>.7?'end':'start'}">You: ${Math.round(n(me))} years</text>`;
+  s.innerHTML=g;
+  $('srNote').textContent=`Years from zero to a pot of ${(1/w).toFixed(0)}× spending, at about ${(r*100).toFixed(1)}% a year after fees and tax. Tiers marked at 20, 30, 50 and 70%. `+(me<.05?`You're saving ${pct(Math.max(me,0))}, off the left edge.`:me>.9?`You're saving ${pct(me)}.`:`You're at ${pct(me)}; you already have a head start, so your own path is shorter.`);
+}
+
+/* ---------- stress tests ---------- */
+document.querySelectorAll('[data-yr]').forEach(b=>b.addEventListener('click',()=>{
+  stressYr=stressYr===b.dataset.yr?null:b.dataset.yr;
+  document.querySelectorAll('[data-yr]').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.yr===stressYr)));
+  showStress();draw();
+}));
+function showStress(){
+  $('lgStress').hidden=!stressYr;$('stressLine').hidden=!stressYr;if(!stressYr||!latest)return;
+  const {v,A}=latest,st=A.stress[stressYr],seq=HISTORY[stressYr].length;
+  $('stressLine').innerHTML=`Stopping at ${A.goal} straight into ${stressYr}-style returns for ${seq} years, then the median assumption: `+(st.fail===null?`<b>your money lasts to ${v.life}</b> (${short(st.tot[st.tot.length-1])} left).`:`<b>it runs out at ${st.fail}</b>.`)+' Approximate historical returns for a 70/30 portfolio.';
+}
+
+/* ---------- scenarios ---------- */
+document.querySelectorAll('[data-save]').forEach(b=>b.addEventListener('click',()=>{
+  if(!latest)return;const {v,A}=latest,k=b.dataset.save;
+  scenarios[k]={inputs:readForm(),savedAt:new Date().toISOString().slice(0,10),res:{fiAge:A.early.age,success:A.success,pot:A.rules[v.rule].pot,goal:A.goal,spend:v.house+v.needs+v.wants,succ:v.succ,rule:v.rule}};
+  store.set(LSS,scenarios);renderScenarios();
+}));
+function renderScenarios(){
+  const ks=['A','B','C'].filter(k=>scenarios[k]);
+  if(!ks.length){$('scTable').innerHTML='<tbody><tr><td style="color:var(--soft);white-space:normal">No scenarios saved yet. Adjust the plan, then save it as A, B or C.</td></tr></tbody>';return}
+  $('scTable').innerHTML='<thead><tr><th>Scenario</th><th class="n">Goal</th><th class="n">Spend/mo</th><th class="n">FI age</th><th class="n">Success at goal</th><th class="n">Pot needed</th><th></th></tr></thead><tbody>'+
+    ks.map(k=>{const r=scenarios[k].res;return`<tr><td><b>${k}</b> <span style="color:var(--soft);font-size:13px">${RULE_NAME[r.rule]||''}, ${r.succ}%</span></td><td class="n">${r.goal}</td><td class="n">${fmt(r.spend)}</td><td class="n">${r.fiAge??'—'}</td><td class="n">${pct(r.success)}</td><td class="n">${r.pot?short(r.pot):'—'}</td><td class="n"><button type="button" data-load="${k}">Load</button> <button type="button" data-del="${k}" aria-label="Delete scenario ${k}">✕</button></td></tr>`}).join('')+'</tbody>';
+  $('scTable').querySelectorAll('[data-load]').forEach(b=>b.addEventListener('click',()=>{fill(scenarios[b.dataset.load].inputs);update()}));
+  $('scTable').querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',()=>{delete scenarios[b.dataset.del];store.set(LSS,scenarios);renderScenarios()}));
+}
+
+/* ---------- assumptions & limitations ---------- */
+function assumptions(v){
+  const T=RULES.tax,S=RULES.super,AP=RULES.agePension,row=(a,b,c)=>`<tr><td>${a}</td><td>${b}</td><td>${c}</td></tr>`;
+  const md=S.minDrawdown.map(([l,r],i)=>`${i?S.minDrawdown[i-1][0]:'60'}${isFinite(l)?'–'+(l-1):'+'}: ${Math.round(r*100)}%`).join(', ');
+  $('assumeBody').innerHTML=`
+  <p class="foot">Rules as at ${RULES.asAt}. All results are estimates in today's dollars (after inflation) and are not a guarantee. Statutory thresholds are held constant in real terms. Every assumption that isn't set by law can be changed in the form.</p>
+  <h4>Set by law or government (update each year)</h4><div class="tw"><table><thead><tr><th>Item</th><th>Value used</th><th>Source, as at</th></tr></thead><tbody>
+  ${row('Income tax brackets',`0% to $18,200; ${v.y2027?'14%':'15%'} to $45,000; 30% to $135,000; 37% to $190,000; 45% above${v.y2027?' (2027–28 setting on)':''}`,'ato.gov.au, 2026–27 (14% legislated from 1 July 2027)')}
+  ${row('Low income tax offset','$700, reducing 5c per $1 over $37,500 and 1.5c per $1 over $45,000; nil from $66,667','ato.gov.au, 2026–27. Verify')}
+  ${row('Medicare levy','2%; nil at or below $28,011; 10c per $1 shade-in to $35,013','ato.gov.au, 2026–27')}
+  ${row('Medicare levy surcharge','1% above $105,000, singles without private hospital cover (base tier only)','ato.gov.au, 2026–27')}
+  ${row('HELP repayment','Nil to $69,528; 15c per $1 to $129,717; $9,028 + 17c per $1 to $186,050; 10% of income above','ato.gov.au, 2026–27. Verify')}
+  ${row('Super guarantee','12% of ordinary earnings, up to $'+S.maxContribBaseQ.toLocaleString('en-AU')+' a quarter','ato.gov.au, 2026–27. Verify base')}
+  ${row('Concessional contributions','$32,500 cap; 15% contributions tax; Division 293 extra 15% over $250,000','ato.gov.au, 2026–27')}
+  ${row('Super earnings tax','15% in accumulation; 0% in retirement phase up to the $2.1m transfer balance cap','ato.gov.au, 2026–27')}
+  ${row('Super access','From 60 if retired; from 65 regardless','ato.gov.au')}
+  ${row('Account-based pension minimums',md,'ato.gov.au')}
+  ${row('Age Pension','From 67. Maximum $1,237.70 a fortnight single, $1,866.00 couple combined','servicesaustralia.gov.au, from 20 Sept 2026')}
+  ${row('Assets test','Full pension up to $333,000 single homeowner, $600,000 single non-homeowner, $499,000 couple homeowner, $766,000 couple non-homeowner; then $3 a fortnight less per $1,000. Home exempt','servicesaustralia.gov.au, from 20 Sept 2026')}
+  ${row('Income test and deeming','Free area $226 a fortnight single, $396 couple; then 50c per $1 (25c each for a couple). Deeming 1.75% on the first $66,800 single / $110,600 couple, 3.75% above. Work Bonus $300 a fortnight','servicesaustralia.gov.au, from 20 Sept 2026. Verify Work Bonus')}
+  </tbody></table></div>
+  <h4>Assumptions (change these in the form)</h4><div class="tw"><table><thead><tr><th>Item</th><th>Value used</th><th>Source</th></tr></thead><tbody>
+  ${row('Portfolio',`${PRESETS[v.preset]?.label||'Custom'}: ${v.ret}% a year after inflation, ${v.vol}% volatility. Presets: High Growth 4.0% / 15%, Balanced 3.5% / 11%`,'Money Mentor default; long-run estimates, not forecasts')}
+  ${row('Fees',v.fees+'% a year on all investments (default 0.5%)','Money Mentor default')}
+  ${row('Tax drag outside super',v.drag+'% a year (default 0.75%)','Money Mentor default')}
+  ${row('Inflation',v.infl+'% (default 2.5%). Used only for nominal equivalents and the guardrails inflation skip','Middle of the RBA 2–3% target band')}
+  ${row('Plan to age',v.life+' (default 100)','Money Mentor default')}
+  ${row('Success target',v.succ+'% of simulated futures (default 90%)','Your choice')}
+  ${row('Withdrawal rule',RULE_NAME[v.rule]+(v.rule==='pct'?`, ${v.wrPct}% a year`:'')+(v.rule!=='fixed'?`; never below ${v.floor}% of planned spending`:''),'Guardrails: cut 10% if the withdrawal rate is 20%+ above its start (not in the last 15 years); raise 10% if 20%+ below, capped at planned spending; skip the inflation rise after a negative year while above the starting rate')}
+  ${row('Age Pension haircut',v.haircut+'% (default 0%)','Your choice, for policy risk')}
+  ${row('Emergency fund',`Starter ${fmt(v.efStarter)} or one month of essentials, whichever is more; full ${v.efMonthsEmp} months (employee) / ${v.efMonthsSelf} months (self-employed)`,'Common guidelines')}
+  ${row('High-interest debt',v.highRate+'% a year or more','Common guideline')}
+  ${row('Simulation','2,000 futures, lognormal yearly real returns, ln(1+R) ~ N(ln(1+r) − σ²/2, σ), seeded so results are repeatable','Money Mentor method')}
+  ${row('Historical stress tests','Approximate yearly real returns for a 70/30 portfolio (US shares / long-term government bonds), rounded','Public long-run market data; illustrative only')}
+  ${row('ASFA Retirement Standard','Modest $36,548 single / $52,690 couple; comfortable $56,166 / $78,998 a year, homeowners','superannuation.asn.au, June qtr 2026')}
+  </tbody></table></div>
+  <h4>Limitations</h4><ul>
+  <li>A couple is modelled as one household with one set of balances and one take-home figure. Tax on take-home is estimated as a single income, and both partners are assumed to be the same age.</li>
+  <li>Take-home pay is the starting point. Before-tax income is worked back from it and is approximate. Other offsets, deductions, fringe benefits and Medicare levy family thresholds are ignored. Only the base tier of the Medicare levy surcharge is modelled.</li>
+  <li>Super: contributions over the cap aren't charged excess tax in the projection. Carry-forward contributions, non-concessional contributions, insurance premiums and the transfer balance cap's indexation aren't modelled.</li>
+  <li>Retirement: outside-super earnings are taxed via the tax-drag figure only. Capital gains timing, franking credits and the seniors offset aren't modelled. Super withdrawals from 60 are tax-free.</li>
+  <li>Age Pension: only investments, super and cash are counted. Cars, contents and other assets, Rent Assistance, the Pension Supplement detail and the Energy Supplement aren't modelled separately. Thresholds are held at today's values in real terms (in practice they're indexed), and rules can change. Use the haircut to test that.</li>
+  <li>Spending stays at today's level for life, including rent or mortgage repayments. Debts still owing when you stop work are ignored.</li>
+  <li>Returns are independent from year to year and follow a lognormal shape. Real markets can have longer and deeper slumps than the model shows.</li>
+  <li>The projection steps one year at a time. Debt payoff and emergency-fund timing are worked out month by month.</li>
+  <li>No product names, funds or affiliate links are used or endorsed.</li></ul>`;
+}
+
+/* ---------- events ---------- */
+$('f').addEventListener('input',e=>{if(e.target.id==='preset')syncPreset();update()});
+$('f').addEventListener('change',e=>{if(e.target.id==='preset'){syncPreset();update()}if(e.target.id==='emp'&&e.target.value==='self'){/* nothing to reset: fund months switch automatically */}});
+$('f').addEventListener('submit',e=>e.preventDefault());
+$('addDebt').addEventListener('click',()=>{$('debtList').appendChild(debtRow({name:'',bal:0,rate:0,min:0}));$('debtList').lastElementChild.querySelector('input').focus();update()});
+$('reset').addEventListener('click',()=>{fill(SAMPLE);update()});
+$('slSpend').addEventListener('input',e=>{const v=+e.target.value;$('wants').value=Math.max(v-num('house')-num('needs'),0);update()});
+$('slExtra').addEventListener('input',e=>{$('extraMo').value=e.target.value;update()});
+$('slGoal').addEventListener('input',e=>{$('target').value=e.target.value;update()});
+$('slRet').addEventListener('input',e=>{$('preset').value='custom';syncPreset();$('ret').value=e.target.value;update()});
+
+/* ---------- JSON save / load ---------- */
 const jd=$('jd'),jText=$('jText'),jMsg=$('jMsg'),drop=$('drop');
 const say=(t,bad)=>{jMsg.textContent=t;jMsg.className='jmsg '+(bad?'err':'okm')};
-const current=()=>JSON.stringify({app:'money-mentor',version:1,savedAt:new Date().toISOString().slice(0,10),inputs:read()},null,2);
+const current=()=>JSON.stringify({app:'money-mentor',version:2,rulesAsAt:RULES.asAt,savedAt:new Date().toISOString().slice(0,10),inputs:readForm(),scenarios},null,2);
 $('jsonBtn').addEventListener('click',()=>{jText.value=current();say('');try{jd.showModal()}catch(e){jd.setAttribute('open','')}});
 $('jClose').addEventListener('click',()=>jd.close());
 jd.addEventListener('click',e=>{if(e.target===jd)jd.close()});
@@ -349,32 +1244,44 @@ $('jCopy').addEventListener('click',async()=>{
   catch(e){jText.focus();jText.select();say('Copy was blocked here. The text is selected, so press Ctrl+C (or Cmd+C).',true)}
 });
 function loadText(txt){
-  let o;
-  try{o=JSON.parse(txt)}catch(e){say('That isn\'t valid JSON. Check for a missing bracket or comma.',true);return false}
-  const src=o&&typeof o==='object'&&o.inputs&&typeof o.inputs==='object'?o.inputs:o;
-  if(!src||typeof src!=='object'||Array.isArray(src)){say('Expected an object of inputs, like {"age": 30, "pay": 5200}.',true);return false}
-  const got=[],bad=[];
-  KEYS.forEach(k=>{if(k in src){const n=parseFloat(src[k]);if(isFinite(n)){$(k).value=n;got.push(k)}else bad.push(k)}});
-  if(!got.length){say('No matching fields found. Use keys like '+KEYS.slice(0,4).join(', ')+'.',true);return false}
+  let raw;try{raw=JSON.parse(txt)}catch(e){say('That isn\'t valid JSON. Check for a missing bracket or comma.',true);return false}
+  const r=fromAny(raw,readForm());if(r.err){say(r.err,true);return false}
+  if(!r.got.length){say('No matching fields found. Use keys like age, pay, house, needs.',true);return false}
+  fill(r.o);
+  if(raw&&raw.scenarios&&typeof raw.scenarios==='object'){['A','B','C'].forEach(k=>{const s=raw.scenarios[k];if(s&&s.inputs&&s.res)scenarios[k]=s});store.set(LSS,scenarios)}
   update();
-  const missing=KEYS.length-got.length-bad.length;
-  say(`Loaded ${got.length} field${got.length===1?'':'s'}`+(missing?`; ${missing} not in the file kept their current values`:'')+(bad.length?`; skipped ${bad.join(', ')} (not numbers)`:'')+'.',false);
+  say(`Loaded ${r.got.length} field${r.got.length===1?'':'s'}${r.v1?' from a version 1 file (converted)':''}`+(r.bad.length?`; skipped ${r.bad.join(', ')} (not valid)`:'')+'. Anything not in the file kept its current value.',false);
   return true;
 }
-$('jLoad').addEventListener('click',()=>{if(loadText(jText.value))setTimeout(()=>jd.close(),900)});
+$('jLoad').addEventListener('click',()=>{if(loadText(jText.value))setTimeout(()=>jd.close(),1100)});
 function readFile(file){
   if(!file)return;
   if(file.size>200000){say('That file is too big to be a Money Mentor save.',true);return}
-  const fr=new FileReader();
-  fr.onload=()=>{jText.value=String(fr.result);loadText(jText.value)};
-  fr.onerror=()=>say('Couldn\'t read that file.',true);
-  fr.readAsText(file);
+  const fr=new FileReader();fr.onload=()=>{jText.value=String(fr.result);loadText(jText.value)};fr.onerror=()=>say('Couldn\'t read that file.',true);fr.readAsText(file);
 }
 $('jFile').addEventListener('change',e=>{readFile(e.target.files[0]);e.target.value=''});
 ['dragenter','dragover'].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.add('over')}));
 ['dragleave','dragend'].forEach(t=>drop.addEventListener(t,()=>drop.classList.remove('over')));
 drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('over');const f=e.dataTransfer.files[0];if(f)readFile(f);else{const t=e.dataTransfer.getData('text');if(t){jText.value=t;loadText(t)}}});
-update();
+
+/* ---------- console: worked examples ---------- */
+window.MM={RULES,taxOf,grossFor,marginalOf,contribsOf,agePensionOf,prepare,analyse,
+  get latest(){return latest},
+  examples(){
+    const T=[50000,90000,150000,200000].map(g=>{const t=taxOf(g,{help:true});return{gross:g,incomeTax:Math.round(t.income),lito:Math.round(t.lito),medicare:Math.round(t.medicare),help:Math.round(t.help),net:Math.round(t.net)}});
+    console.log('Tax 2026-27 with HELP');console.table(T);
+    const ap=(a,o)=>Math.round(agePensionOf(67,a,0,{apOn:true,haircut:0,household:'single',home:true,...o})/26*100)/100;
+    console.log('Age Pension per fortnight');console.table([{case:'single homeowner $400k',fn:ap(4e5),check:1036.70},{case:'single renter $250k',fn:ap(25e4,{home:false}),check:1196.10},{case:'couple homeowner $700k',fn:ap(7e5,{household:'couple'}),check:1263}]);
+    if(latest){const {A}=latest;console.log('Current plan:',{success:A.success,earliestStop:A.early.age,extraNeeded:A.extra,potByRule:Object.fromEntries(Object.entries(A.rules).map(([k,r])=>[k,Math.round(r.pot||0)])),ap67:Math.round(A.ap67||0),ms:A.ms})}
+  }};
+
+/* ---------- start ---------- */
+fill(SAMPLE);SAMPLE_JSON=JSON.stringify(readForm());
+let saved=store.get(LS);
+if(!saved){const old=store.get(LS1);if(old){const r=fromAny(old,readForm());if(!r.err)saved=r.o}}
+if(saved){const r=fromAny({version:2,inputs:saved},readForm());if(!r.err)fill(r.o)}
+renderScenarios();update();
+console.info('Money Mentor v2 (rules as at '+RULES.asAt+'). Run MM.examples() for worked examples.');
 }
 </script>
 </body>
